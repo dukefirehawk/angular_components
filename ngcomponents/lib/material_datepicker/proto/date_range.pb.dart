@@ -197,8 +197,8 @@ class DatepickerDateRange extends $pb.GeneratedMessage {
   @$core.pragma('dart2js:noInline')
   static DatepickerDateRange create() => DatepickerDateRange._();
   DatepickerDateRange createEmptyInstance() => create();
-  static $pb.PbList<DatepickerDateRange> createRepeated() =>
-      $pb.PbList<DatepickerDateRange>();
+  //static $pb.PbList<DatepickerDateRange> createRepeated() =>
+  //    $pb.PbList<DatepickerDateRange>();
   @$core.pragma('dart2js:noInline')
   static DatepickerDateRange getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<DatepickerDateRange>(create);
@@ -413,7 +413,7 @@ class DateRange extends $pb.GeneratedMessage {
   @$core.pragma('dart2js:noInline')
   static DateRange create() => DateRange._();
   DateRange createEmptyInstance() => create();
-  static $pb.PbList<DateRange> createRepeated() => $pb.PbList<DateRange>();
+  //static $pb.PbList<DateRange> createRepeated() => $pb.PbList<DateRange>();
   @$core.pragma('dart2js:noInline')
   static DateRange getDefault() =>
       _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<DateRange>(create);

@@ -27,7 +27,7 @@ const materialInputDirectives = [
   MaterialInputBlurValueAccessor,
   MaterialInputChangeValueAccessor,
   MaterialMultilineInputComponent,
-  NgModel
+  NgModel,
 ];
 
 /// Key used in the Control's error map, when there is an error.
@@ -52,7 +52,7 @@ const String materialInputErrorKey = 'material-input-error';
   changeDetection: ChangeDetectionStrategy.onPush,
   providers: [
     DeferredValidator,
-    ExistingProvider.forToken(NG_VALIDATORS, DeferredValidator),
+    //ExistingProvider.forToken(NG_VALIDATORS, DeferredValidator),
     ExistingProvider(ReferenceDirective, MaterialInputComponent),
     ExistingProvider(Focusable, MaterialInputComponent),
     ExistingProvider(HasDisabled, MaterialInputComponent),
@@ -82,11 +82,12 @@ class MaterialInputComponent extends BaseSingleLineInputComponent
   static const hostTabIndex = -1;
 
   MaterialInputComponent(
-      @Attribute('type') super.type,
-      @Attribute('multiple') super.multiple,
-      @Self() @Optional() super.cd,
-      super.changeDetector,
-      super.validator);
+    @Attribute('type') super.type,
+    @Attribute('multiple') super.multiple,
+    @Self() @Optional() super.cd,
+    super.changeDetector,
+    super.validator,
+  );
 
   String? attributeToString(Object? value) {
     if (value != null) {

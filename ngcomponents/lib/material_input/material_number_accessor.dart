@@ -28,7 +28,7 @@ const List<Type> materialNumberInputDirectives = [
   MaterialNumberValidator,
   PositiveNumValidator,
   CheckNonNegativeValidator,
-  UpperBoundValidator
+  UpperBoundValidator,
 ];
 
 /// Base accessor to handle various numerical types with MaterialInput.
@@ -41,20 +41,22 @@ abstract class BaseMaterialNumberValueAccessor<T>
   late Stream _updateStream;
 
   BaseMaterialNumberValueAccessor(
-      MaterialInputComponent input,
-      NgControl control,
-      bool changeUpdate,
-      bool keypressUpdate,
-      bool blurFormat,
-      [this._numberFormat])
-      : super(input, control) {
+    MaterialInputComponent input,
+    NgControl control,
+    bool changeUpdate,
+    bool keypressUpdate,
+    bool blurFormat, [
+    this._numberFormat,
+  ]) : super(input, control) {
     // The type values set via number directives are invalid values for the
     // 'type' attribute on the underlying 'input' element, so set the value
     // back to 'text' instead.
     input.type = 'text';
 
-    assert(!(changeUpdate && keypressUpdate),
-        'Cannot update both on keypress and change.');
+    assert(
+      !(changeUpdate && keypressUpdate),
+      'Cannot update both on keypress and change.',
+    );
     if (changeUpdate) {
       _updateStream = input.onChange;
     } else if (keypressUpdate) {
@@ -63,14 +65,16 @@ abstract class BaseMaterialNumberValueAccessor<T>
       _updateStream = input.onBlur;
     }
     if (blurFormat) {
-      disposer.addStreamSubscription(input.onBlur.listen((_) {
-        //if (input == null) return; // Input is no longer valid
-        final parsedNumber = parseNumber(input.inputText);
-        // If the value parses, it's a number so format it as such.
-        if (parsedNumber != null) {
-          super.writeValue(parsedNumber);
-        }
-      }));
+      disposer.addStreamSubscription(
+        input.onBlur.listen((_) {
+          //if (input == null) return; // Input is no longer valid
+          final parsedNumber = parseNumber(input.inputText);
+          // If the value parses, it's a number so format it as such.
+          if (parsedNumber != null) {
+            super.writeValue(parsedNumber);
+          }
+        }),
+      );
     }
   }
 
@@ -89,14 +93,16 @@ abstract class BaseMaterialNumberValueAccessor<T>
 
   @override
   void registerOnChange(callback) {
-    disposer.addStreamSubscription(_updateStream.listen((_) {
-      //if (input == null) return; // Input is no longer valid
-      final rawValue = input.inputText;
-      final value = parseNumber(rawValue);
-      // Pass the rawValue and the num value. This allows validators to process
-      // whichever one they would like.
-      callback(value, rawValue: rawValue);
-    }));
+    disposer.addStreamSubscription(
+      _updateStream.listen((_) {
+        //if (input == null) return; // Input is no longer valid
+        final rawValue = input.inputText;
+        final value = parseNumber(rawValue);
+        // Pass the rawValue and the num value. This allows validators to process
+        // whichever one they would like.
+        callback(value, rawValue: rawValue);
+      }),
+    );
   }
 
   /// Coerces the [String] value of the [MaterialInput] into type of [T].
@@ -124,37 +130,41 @@ abstract class BaseMaterialNumberValueAccessor<T>
 /// `keypressUpdate` attribute has the value update on every keypress while
 /// the default is the value only updating on a blur event.
 /// `blurFormat` attribute causes the input to be formatted on blur events.
-@Directive(
-  selector: 'material-input[type=int64]',
-)
+@Directive(selector: 'material-input[type=int64]')
 class MaterialInt64ValueAccessor
     extends BaseMaterialNumberValueAccessor<Int64?> {
   MaterialInt64ValueAccessor(
-      BaseMaterialInput input,
-      @Self() NgControl control,
-      @Attribute('changeUpdate') String? changeUpdateAttr,
-      @Attribute('keypressUpdate') String? keypressUpdateAttr,
-      @Attribute('checkInteger') String? checkInteger,
-      @Attribute('blurFormat') String? blurFormat,
-      @Optional() NumberFormat? numberFormat)
-      : super(
-            input as MaterialInputComponent,
-            control,
-            attributeToBool(changeUpdateAttr, defaultValue: false),
-            attributeToBool(keypressUpdateAttr, defaultValue: false),
-            attributeToBool(blurFormat, defaultValue: false),
-            numberFormat) {
+    BaseMaterialInput input,
+    @Self() NgControl control,
+    @Attribute('changeUpdate') String? changeUpdateAttr,
+    @Attribute('keypressUpdate') String? keypressUpdateAttr,
+    @Attribute('checkInteger') String? checkInteger,
+    @Attribute('blurFormat') String? blurFormat,
+    @Optional() NumberFormat? numberFormat,
+  ) : super(
+        input as MaterialInputComponent,
+        control,
+        attributeToBool(changeUpdateAttr, defaultValue: false),
+        attributeToBool(keypressUpdateAttr, defaultValue: false),
+        attributeToBool(blurFormat, defaultValue: false),
+        numberFormat,
+      ) {
     assert(
-        _checkValues(
-            numberFormat, attributeToBool(blurFormat, defaultValue: false)),
-        'You must supply a NumberFormat if using blurFormat');
+      _checkValues(
+        numberFormat,
+        attributeToBool(blurFormat, defaultValue: false),
+      ),
+      'You must supply a NumberFormat if using blurFormat',
+    );
   }
 
   bool _checkValues(NumberFormat? numberFormat, bool blurFormat) {
     if (numberFormat != null) {
-      print('Warning: numberFormat only works with num and will overflow '
-          'if the number is larger than a native int, even when using '
-          'material-input[type=int64].');
+      print(
+        'Warning: numberFormat only works with num and will overflow '
+        'if the number is larger than a native int, even when using '
+        'material-input[type=int64].',
+      );
       return blurFormat;
     }
     return true;
@@ -190,29 +200,28 @@ class MaterialInt64ValueAccessor
 /// `keypressUpdate` attribute has the value update on every keypress while
 /// the default is the value only updating on a blur event.
 /// `blurFormat` attribute causes the input to be formatted on blur events.
-@Directive(
-  selector: 'material-input[type=number],material-input[type=percent]',
-)
+@Directive(selector: 'material-input[type=number],material-input[type=percent]')
 class MaterialNumberValueAccessor
     extends BaseMaterialNumberValueAccessor<num?> {
   final bool _checkInteger;
 
   MaterialNumberValueAccessor(
-      BaseMaterialInput input,
-      @Self() NgControl control,
-      @Attribute('changeUpdate') String? changeUpdateAttr,
-      @Attribute('keypressUpdate') String? keypressUpdateAttr,
-      @Attribute('checkInteger') String? checkInteger,
-      @Attribute('blurFormat') String? blurFormat,
-      @Optional() NumberFormat? numberFormat)
-      : this._checkInteger = attributeToBool(checkInteger, defaultValue: false),
-        super(
-            input as MaterialInputComponent,
-            control,
-            attributeToBool(changeUpdateAttr, defaultValue: false),
-            attributeToBool(keypressUpdateAttr, defaultValue: false),
-            attributeToBool(blurFormat, defaultValue: false),
-            numberFormat ?? NumberFormat.decimalPattern());
+    BaseMaterialInput input,
+    @Self() NgControl control,
+    @Attribute('changeUpdate') String? changeUpdateAttr,
+    @Attribute('keypressUpdate') String? keypressUpdateAttr,
+    @Attribute('checkInteger') String? checkInteger,
+    @Attribute('blurFormat') String? blurFormat,
+    @Optional() NumberFormat? numberFormat,
+  ) : this._checkInteger = attributeToBool(checkInteger, defaultValue: false),
+      super(
+        input as MaterialInputComponent,
+        control,
+        attributeToBool(changeUpdateAttr, defaultValue: false),
+        attributeToBool(keypressUpdateAttr, defaultValue: false),
+        attributeToBool(blurFormat, defaultValue: false),
+        numberFormat ?? NumberFormat.decimalPattern(),
+      );
 
   @override
   num? parseNumber(String? input) {
@@ -234,10 +243,11 @@ class MaterialNumberValueAccessor
 }
 
 @Directive(
-  selector: 'material-input[type=number]:not([checkInteger]),'
+  selector:
+      'material-input[type=number]:not([checkInteger]),'
       'material-input[type=percent]:not([checkInteger])',
   providers: [
-    ExistingProvider.forToken(NG_VALIDATORS, MaterialNumberValidator)
+    //ExistingProvider.forToken(NG_VALIDATORS, MaterialNumberValidator)
   ],
 )
 class MaterialNumberValidator implements Validator {
@@ -254,17 +264,22 @@ class MaterialNumberValidator implements Validator {
     return null;
   }
 
-  static String inputIsNotNumberMsg() => Intl.message('Enter a number',
-      desc: 'Error message when input is not a number.',
-      meaning: 'Error message when input is not a number.');
+  static String inputIsNotNumberMsg() => Intl.message(
+    'Enter a number',
+    desc: 'Error message when input is not a number.',
+    meaning: 'Error message when input is not a number.',
+  );
 }
 
 /// [Validator] which will validate a number input is an integer.
 @Directive(
-  selector: 'material-input[type=number][checkInteger],'
+  selector:
+      'material-input[type=number][checkInteger],'
       'material-input[type=percent][checkInteger],'
       'material-input[type=int64]',
-  providers: [ExistingProvider.forToken(NG_VALIDATORS, CheckIntegerValidator)],
+  providers: [
+    //ExistingProvider.forToken(NG_VALIDATORS, CheckIntegerValidator)
+  ],
 )
 class CheckIntegerValidator implements Validator {
   /// Validation that works in concert with the number accessor.
@@ -279,9 +294,11 @@ class CheckIntegerValidator implements Validator {
     return null;
   }
 
-  static String numberIsNotIntegerMsg() => Intl.message('Enter a whole number',
-      desc: 'Error message when input number is not an integer.',
-      meaning: 'Error message when input number is not an integer.');
+  static String numberIsNotIntegerMsg() => Intl.message(
+    'Enter a whole number',
+    desc: 'Error message when input number is not an integer.',
+    meaning: 'Error message when input number is not an integer.',
+  );
 }
 
 NumberFormat decimalNumberFormat() => NumberFormat.decimalPattern();

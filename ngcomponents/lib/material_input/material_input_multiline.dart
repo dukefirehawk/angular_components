@@ -26,7 +26,7 @@ export 'base_material_input.dart' show ValidityCheck, CharacterCounter;
   providers: [
     DeferredValidator,
     ExistingProvider(HasDisabled, MaterialMultilineInputComponent),
-    ExistingProvider.forToken(NG_VALIDATORS, DeferredValidator),
+    //ExistingProvider.forToken(NG_VALIDATORS, DeferredValidator),
     ExistingProvider(ReferenceDirective, MaterialMultilineInputComponent),
     ExistingProvider(Focusable, MaterialMultilineInputComponent),
     ExistingProvider(BaseMaterialInput, MaterialMultilineInputComponent),
@@ -82,11 +82,11 @@ class MaterialMultilineInputComponent extends BaseMaterialInput
   int _inputLineHeight = 16;
 
   MaterialMultilineInputComponent(
-      @Self() @Optional() super.cd,
-      super.changeDetector,
-      super.validator,
-      this._domService)
-      : _changeDetector = changeDetector;
+    @Self() @Optional() super.cd,
+    super.changeDetector,
+    super.validator,
+    this._domService,
+  ) : _changeDetector = changeDetector;
 
   // Overridden to add a HostListener event.
   @HostListener('focus')

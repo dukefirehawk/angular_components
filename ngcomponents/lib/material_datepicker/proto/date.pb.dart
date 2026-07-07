@@ -77,7 +77,7 @@ class Date extends $pb.GeneratedMessage {
   @$core.pragma('dart2js:noInline')
   static Date create() => Date._();
   Date createEmptyInstance() => create();
-  static $pb.PbList<Date> createRepeated() => $pb.PbList<Date>();
+  //static $pb.PbList<Date> createRepeated() => $pb.PbList<Date>();
   @$core.pragma('dart2js:noInline')
   static Date getDefault() =>
       _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Date>(create);

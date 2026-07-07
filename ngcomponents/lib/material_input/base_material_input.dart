@@ -29,11 +29,7 @@ typedef ValidityCheck = String Function(String? inputText);
 typedef CharacterCounter = int Function(String? inputText);
 
 /// Represents which label should be shown in the BottomPanel
-enum BottomPanelState {
-  empty,
-  error,
-  hint,
-}
+enum BottomPanelState { empty, error, hint }
 
 /// Base class for behavior that is shared between material input components.
 class BaseMaterialInput extends FocusableMixin
@@ -226,8 +222,11 @@ class BaseMaterialInput extends FocusableMixin
   @Input()
   bool showCharacterCount = false;
 
-  BaseMaterialInput(@Self() @Optional() this._cd, this._changeDetector,
-      DeferredValidator validator) {
+  BaseMaterialInput(
+    @Self() @Optional() this._cd,
+    this._changeDetector,
+    DeferredValidator validator,
+  ) {
     var call = this.call;
     validator.add(call);
     _disposer.addFunction(() {
@@ -240,13 +239,17 @@ class BaseMaterialInput extends FocusableMixin
   void ngAfterViewInit() {
     var ctrl = _cd?.control;
     if (ctrl != null) {
-      _disposer.addStreamSubscription(ctrl.valueChanges.listen((value) {
-        _changeDetector.markForCheck();
-      }));
-      _disposer.addStreamSubscription(ctrl.statusChanges.listen((status) {
-        _changeDetector.markForCheck();
-        updateBottomPanelState();
-      }));
+      _disposer.addStreamSubscription(
+        ctrl.valueChanges.listen((value) {
+          _changeDetector.markForCheck();
+        }),
+      );
+      _disposer.addStreamSubscription(
+        ctrl.statusChanges.listen((status) {
+          _changeDetector.markForCheck();
+          updateBottomPanelState();
+        }),
+      );
     }
   }
 
@@ -371,11 +374,11 @@ class BaseMaterialInput extends FocusableMixin
     // If there is a Control, then it is already using this as a Validator, and
     // possibly others.
 
-    if (_cd != null && _cd?.control != null) {
+    if (_cd != null && _cd.control != null) {
       // Show errors only when a control is invalid, and a user has interacted
       // with it. This conforms to the material spec:
       // https://material.google.com/patterns/errors.html
-      return !_cd!.valid! && (_cd!.touched! || _cd!.dirty!);
+      return !_cd.valid! && (_cd.touched! || _cd.dirty!);
     }
     // otherwise, just do our local validation
     return _isLocallyValid(false) != null;
@@ -395,8 +398,9 @@ class BaseMaterialInput extends FocusableMixin
       Map<String, dynamic>? errorMap = _cd?.control?.errors;
       if (errorRenderer != null) errorMap = errorRenderer!(errorMap);
       var stringValue = errorMap!.values.firstWhere(
-          ((v) => (v is String) && v.isNotEmpty),
-          orElse: () => null);
+        ((v) => (v is String) && v.isNotEmpty),
+        orElse: () => null,
+      );
       if (stringValue != null) {
         return stringValue as String;
       }
@@ -513,8 +517,8 @@ class BaseMaterialInput extends FocusableMixin
   /// `12 / 25`, when [maxCount] is non-null; otherwise simply "[currentCount]".
   String msgCharacterCounter(int currentCount, int? maxCount) =>
       maxCount == null
-          ? '$currentCount'
-          : _msgCharacterCounter(currentCount, maxCount);
+      ? '$currentCount'
+      : _msgCharacterCounter(currentCount, maxCount);
 
   /// The aria label to use for the character limit label.
   ///
@@ -523,37 +527,44 @@ class BaseMaterialInput extends FocusableMixin
   /// non-null; otherwise simply "Text is [currentCount] characters".
   String msgCharacterCounterAriaLabel(int currentCount, int? maxCount) =>
       maxCount == null
-          ? _msgCharacterCounterAriaLabelNoLimitation(currentCount)
-          : _msgCharacterCounterAriaLabelNoLimitation(currentCount) +
-              _msgCharacterCounterAriaLabelWithLimitation(maxCount);
+      ? _msgCharacterCounterAriaLabelNoLimitation(currentCount)
+      : _msgCharacterCounterAriaLabelNoLimitation(currentCount) +
+            _msgCharacterCounterAriaLabelWithLimitation(maxCount);
 
   static String _msgCharacterCounterAriaLabelNoLimitation(int currentCount) =>
-      Intl.plural(currentCount,
-          args: [currentCount],
-          desc: 'aria label for the character limit label',
-          one: 'Text is 1 character',
-          other: 'Text is $currentCount characters',
-          examples: const {'currentCount': 5},
-          name: 'BaseMaterialInput__msgCharacterCounterAriaLabelNoLimitation');
+      Intl.plural(
+        currentCount,
+        args: [currentCount],
+        desc: 'aria label for the character limit label',
+        one: 'Text is 1 character',
+        other: 'Text is $currentCount characters',
+        examples: const {'currentCount': 5},
+        name: 'BaseMaterialInput__msgCharacterCounterAriaLabelNoLimitation',
+      );
 
   static String _msgCharacterCounterAriaLabelWithLimitation(int maxCount) =>
-      Intl.message(' out of $maxCount',
-          args: [maxCount],
-          desc: 'Suffix for aria label for text limitation label',
-          examples: const {'maxCount': 25},
-          name:
-              'BaseMaterialInput__msgCharacterCounterAriaLabelWithLimitation');
+      Intl.message(
+        ' out of $maxCount',
+        args: [maxCount],
+        desc: 'Suffix for aria label for text limitation label',
+        examples: const {'maxCount': 25},
+        name: 'BaseMaterialInput__msgCharacterCounterAriaLabelWithLimitation',
+      );
 
   static String _msgCharacterCounter(int currentCount, int maxCount) =>
-      Intl.message('$currentCount / $maxCount',
-          name: 'BaseMaterialInput__msgCharacterCounter',
-          args: [currentCount, maxCount],
-          desc:
-              'Character counter shown below a text box in the format "12 / 25"',
-          examples: const {'currentCount': 12, 'maxCount': 25});
+      Intl.message(
+        '$currentCount / $maxCount',
+        name: 'BaseMaterialInput__msgCharacterCounter',
+        args: [currentCount, maxCount],
+        desc:
+            'Character counter shown below a text box in the format "12 / 25"',
+        examples: const {'currentCount': 12, 'maxCount': 25},
+      );
 
-  static final defaultEmptyMessage = Intl.message('Enter a value',
-      desc: 'Error message when the input is empty and required.');
+  static final defaultEmptyMessage = Intl.message(
+    'Enter a value',
+    desc: 'Error message when the input is empty and required.',
+  );
 }
 
 /// Base single line component.
@@ -711,9 +722,13 @@ class BaseSingleLineInputComponent extends BaseMaterialInput
   @Input()
   String? inputAriaControls;
 
-  BaseSingleLineInputComponent(String? type, String? multiple, NgControl? cd,
-      this._changeDetector, DeferredValidator validator)
-      : super(cd, _changeDetector, validator) {
+  BaseSingleLineInputComponent(
+    String? type,
+    String? multiple,
+    NgControl? cd,
+    this._changeDetector,
+    DeferredValidator validator,
+  ) : super(cd, _changeDetector, validator) {
     if (type == null) {
       this.type = 'text';
     } else if (const ['number', 'tel'].contains(type)) {
