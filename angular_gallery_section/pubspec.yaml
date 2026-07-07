@@ -2,7 +2,7 @@ name: angular_gallery_section
 publish_to: none
 
 environment:
-  sdk: '>=3.0.0 <4.0.0'
+  sdk: '>=3.12.0 <4.0.0'
 
 dependencies:
   analyzer: ^5.10.0
