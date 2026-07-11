@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:ngforms/ngforms.dart';
@@ -96,7 +96,9 @@ class MaterialToggleComponent
   }
 
   MaterialToggleComponent(
-      this._changeDetector, @Self() @Optional() NgControl? cd) {
+    this._changeDetector,
+    @Self() @Optional() NgControl? cd,
+  ) {
     cd?.valueAccessor = this;
   }
 
@@ -106,8 +108,8 @@ class MaterialToggleComponent
     shadow_z = isHovered
         ? 3
         : hasFocus
-            ? 2
-            : 1;
+        ? 2
+        : 1;
   }
 
   @visibleForTesting

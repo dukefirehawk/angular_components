@@ -2,7 +2,7 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 
@@ -14,10 +14,13 @@ import 'package:ngdart/angular.dart';
 /// of the application as a whole.
 const rtlToken = OpaqueToken('isRtl');
 
-const rtlProvider =
-    FactoryProvider.forToken(rtlToken, determineRtl, deps: [Document]);
+const rtlProvider = FactoryProvider.forToken(
+  rtlToken,
+  determineRtl,
+  deps: [Document],
+);
 
 @Injectable()
 bool determineRtl(Document document) =>
-    document.documentElement?.dir == 'rtl' ||
-    (document as HtmlDocument).body?.dir == 'rtl';
+    document.documentElement?.getAttribute('dir') == 'rtl' ||
+    document.body?.dir == 'rtl';

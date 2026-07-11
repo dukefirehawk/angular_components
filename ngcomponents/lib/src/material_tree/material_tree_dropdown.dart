@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:ngcomponents/content/deferred_content.dart';
@@ -37,14 +37,14 @@ import 'material_tree_impl.dart';
     MaterialTreeComponent,
     MaterialTreeFilterComponent,
     NgIf,
-    PopupSourceDirective
+    PopupSourceDirective,
   ],
   directiveTypes: [
     Typed<MaterialTreeComponent>.of([#T]),
   ],
   providers: [
     ExistingProvider(Focusable, MaterialTreeDropdownComponent),
-    ExistingProvider(MaterialTreeRoot, MaterialTreeDropdownComponent)
+    ExistingProvider(MaterialTreeRoot, MaterialTreeDropdownComponent),
   ],
   templateUrl: 'material_tree_dropdown.html',
   styleUrls: ['material_tree_dropdown.scss.css'],
@@ -55,12 +55,13 @@ class MaterialTreeDropdownComponent<T>
     implements OnInit, Focusable {
   // Popup positioning to use when filtering is enabled.
   static const List<
-          List<RelativePosition> /*RelativePosition | List<RelativePosition>*/ >
-      _popupPositionsOffset = [
+    List<RelativePosition> /*RelativePosition | List<RelativePosition>*/
+  >
+  _popupPositionsOffset = [
     [RelativePosition.AdjacentBottomLeft],
     RelativePosition.AdjacentBottomEdge,
     [RelativePosition.AdjacentTopLeft],
-    RelativePosition.AdjacentTopEdge
+    RelativePosition.AdjacentTopEdge,
   ];
 
   // Popup positioning to use when filtering is disabled.
@@ -129,7 +130,8 @@ class MaterialTreeDropdownComponent<T>
   Filterable? get filterableOptions => options is Filterable
       ? options as Filterable?
       : throw StateError(
-          'The SelectionOptions provided should implement Filterable');
+          'The SelectionOptions provided should implement Filterable',
+        );
 
   bool get expandAll =>
       _expandAll || (isFiltered && shouldExpandAllWhenFiltered);
@@ -143,8 +145,9 @@ class MaterialTreeDropdownComponent<T>
   String? get placeholder {
     if (selection is! MultiSelectionModel && selection.isNotEmpty) {
       return (labelRenderer ??
-          (itemRenderer as String? Function(dynamic)? ??
-              defaultItemRenderer))(selection.selectedValues.first);
+          (itemRenderer as String? Function(dynamic)? ?? defaultItemRenderer))(
+        selection.selectedValues.first,
+      );
     }
 
     return _placeholder;
@@ -153,9 +156,11 @@ class MaterialTreeDropdownComponent<T>
   @override
   final bool optimizeForDropdown = true;
 
-  MaterialTreeDropdownComponent(this._domService,
-      @Attribute('popupClass') String? popupClass, HtmlElement element)
-      : popupClassName = constructEncapsulatedCss(popupClass, element.classes) {
+  MaterialTreeDropdownComponent(
+    this._domService,
+    @Attribute('popupClass') String? popupClass,
+    HtmlElement element,
+  ) : popupClassName = constructEncapsulatedCss(popupClass, element.classes) {
     selection = SelectionModel<T>.empty();
   }
 
@@ -211,9 +216,9 @@ class MaterialTreeDropdownComponent<T>
   }
 
   List<RelativePosition> /*RelativePosition | List<RelativePosition>*/
-      get popupPositions => _customPopupPositions.isEmpty
-          ? _defaultPopupPositions
-          : _customPopupPositions;
+  get popupPositions => _customPopupPositions.isEmpty
+      ? _defaultPopupPositions
+      : _customPopupPositions;
   //_customPopupPositions ?? _defaultPopupPositions;
 
   /// Default positions to uses when [_customPopupPositions] is null.
@@ -222,9 +227,9 @@ class MaterialTreeDropdownComponent<T>
   /// positioning when the filter is disabled.
   // TODO: To eb relooked at later
   List<RelativePosition> /*RelativePosition | List<RelativePosition>*/
-      get _defaultPopupPositions => showFilterInsideButton
-          ? [RelativePosition.AdjacentTopLeft] //_popupPositionsOffset
-          : _popupPositionsInline;
+  get _defaultPopupPositions => showFilterInsideButton
+      ? [RelativePosition.AdjacentTopLeft] //_popupPositionsOffset
+      : _popupPositionsInline;
 
   bool get visible => _visible;
 

@@ -2,7 +2,7 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 
@@ -91,14 +91,16 @@ class OverlayStyleConfig {
   Document _document;
 
   OverlayStyleConfig(Document document)
-      : _styleHost = document.querySelector('head') as HeadElement?,
-        _document = document;
+    : _styleHost = document.querySelector('head') as HeadElement?,
+      _document = document;
 
   void registerStyles() {
     if (stylesRegistered) return;
-    _styleHost?.append(StyleElement()
-      ..id = _styleId
-      ..text = inlinedStyles);
+    _styleHost?.append(
+      StyleElement()
+        ..id = _styleId
+        ..text = inlinedStyles,
+    );
     _stylesRegistered = true;
   }
 

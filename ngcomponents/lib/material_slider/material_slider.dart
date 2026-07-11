@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 import 'dart:math' as math;
 
 import 'package:ngdart/angular.dart';
@@ -29,9 +29,7 @@ import 'package:ngcomponents/utils/browser/dom_service/dom_service.dart';
   templateUrl: 'material_slider.html',
   styleUrls: ['material_slider.scss.css'],
   changeDetection: ChangeDetectionStrategy.onPush,
-  directives: [
-    NgIf,
-  ],
+  directives: [NgIf],
   // TODO(google): Change to `Visibility.local` to reduce code size.
   visibility: Visibility.all,
 )
@@ -144,26 +142,41 @@ class MaterialSliderComponent implements AfterChanges, HasDisabled {
     assert(() {
       checkArgument(min < max, message: 'Failed assertion: ${min} < ${max}');
       checkArgument(step > 0, message: 'Failed assertion: ${step} > 0');
-      checkArgument(_divisible(max - min, step),
-          message: 'Failed assertion: (${max} - ${min}) % ${step} ~ 0.');
-      checkArgument(value >= min,
-          message: 'Failed assertion: ${value} >= ${min}');
-      checkArgument(value <= max,
-          message: 'Failed assertion: ${value} <= ${max}');
-      checkArgument(_divisible(value - min, step),
-          message: 'Failed assertion: (${value} - ${min}) % ${step} ~ 0.');
+      checkArgument(
+        _divisible(max - min, step),
+        message: 'Failed assertion: (${max} - ${min}) % ${step} ~ 0.',
+      );
+      checkArgument(
+        value >= min,
+        message: 'Failed assertion: ${value} >= ${min}',
+      );
+      checkArgument(
+        value <= max,
+        message: 'Failed assertion: ${value} <= ${max}',
+      );
+      checkArgument(
+        _divisible(value - min, step),
+        message: 'Failed assertion: (${value} - ${min}) % ${step} ~ 0.',
+      );
 
       if (isTwoSided) {
-        checkArgument(leftValue <= value,
-            message: 'Failed assertion: ${leftValue} <= ${value}');
-        checkArgument(leftValue >= min,
-            message: 'Failed assertion: ${leftValue} >= ${min}');
+        checkArgument(
+          leftValue <= value,
+          message: 'Failed assertion: ${leftValue} <= ${value}',
+        );
+        checkArgument(
+          leftValue >= min,
+          message: 'Failed assertion: ${leftValue} >= ${min}',
+        );
         // Redundant check but done for consistency.
-        checkArgument(leftValue <= max,
-            message: 'Failed assertion: ${leftValue} <= ${max}');
-        checkArgument(_divisible(leftValue - min, step),
-            message:
-                'Failed assertion: (${leftValue} - ${min}) % ${step} ~ 0.');
+        checkArgument(
+          leftValue <= max,
+          message: 'Failed assertion: ${leftValue} <= ${max}',
+        );
+        checkArgument(
+          _divisible(leftValue - min, step),
+          message: 'Failed assertion: (${leftValue} - ${min}) % ${step} ~ 0.',
+        );
       }
       return true;
     }());
@@ -204,12 +217,14 @@ class MaterialSliderComponent implements AfterChanges, HasDisabled {
       final containerLeft =
           container!.getBoundingClientRect().left + window.scrollX;
       final fractionOfTrackLtr = (position - containerLeft) / containerWidth;
-      final fractionOfTrack =
-          isRtl ? 1.0 - fractionOfTrackLtr : fractionOfTrackLtr;
+      final fractionOfTrack = isRtl
+          ? 1.0 - fractionOfTrackLtr
+          : fractionOfTrackLtr;
       final scaledValue = (fractionOfTrack * (max - min));
       final halfStep = step / 2;
       // Clamp to the closest step value.
-      final unboundedValue = min +
+      final unboundedValue =
+          min +
           (scaledValue ~/ step) * step +
           (scaledValue.remainder(step) > halfStep ? step : 0);
       final newValue = math.max(min, math.min(max, unboundedValue));

@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:ngcomponents/utils/browser/events/events.dart';
@@ -13,9 +13,7 @@ import 'package:ngcomponents/utils/browser/events/events.dart';
 /// Events will trigger on the target component but will be prevented from
 /// bubbling up to parent elements.
 /// https://www.w3.org/TR/DOM-Level-2-Events/events.html#Events-flow-bubbling
-@Directive(
-  selector: '[stopPropagation]',
-)
+@Directive(selector: '[stopPropagation]')
 class StopPropagationDirective implements OnDestroy {
   StreamSubscription? _clickSubscription, _keyPressSubscription;
 

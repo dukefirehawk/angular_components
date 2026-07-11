@@ -2,7 +2,7 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngcomponents/material_datepicker/calendar.dart';
 import 'package:ngcomponents/model/date/date.dart';
@@ -21,9 +21,12 @@ class CalendarListener implements Disposable {
 
   const CalendarListener.noop();
   factory CalendarListener.singleDate(
-      ObservableReference<CalendarState> model) = _DateListener;
-  factory CalendarListener.dateRange(ObservableReference<CalendarState> model,
-      {required bool movingStartMaintainsLength}) = _RangeListener;
+    ObservableReference<CalendarState> model,
+  ) = _DateListener;
+  factory CalendarListener.dateRange(
+    ObservableReference<CalendarState> model, {
+    required bool movingStartMaintainsLength,
+  }) = _RangeListener;
 }
 
 /// Listens for clicks on single dates, and selects those.
@@ -71,17 +74,19 @@ class _RangeListener implements CalendarListener {
 
   _RangeListener(this.model, {required this.movingStartMaintainsLength}) {
     _initSelectionPreview();
-    _disposer.addStreamSubscription(model.stream.listen((s) {
-      if (s!.currentSelection != previewedSelection) {
-        // Reinit preview and reset click count whenever a different range
-        // becomes selected
-        _initSelectionPreview();
-        _consecutiveClicks = 0;
-      } else if (s.cause == CausedBy.external || s.cause == CausedBy.drag) {
-        // Reset click count when the range's value is changed externally
-        _consecutiveClicks = 0;
-      }
-    }));
+    _disposer.addStreamSubscription(
+      model.stream.listen((s) {
+        if (s!.currentSelection != previewedSelection) {
+          // Reinit preview and reset click count whenever a different range
+          // becomes selected
+          _initSelectionPreview();
+          _consecutiveClicks = 0;
+        } else if (s.cause == CausedBy.external || s.cause == CausedBy.drag) {
+          // Reset click count when the range's value is changed externally
+          _consecutiveClicks = 0;
+        }
+      }),
+    );
   }
 
   _DragState state = _DragState.canPreview;
@@ -150,8 +155,9 @@ class _RangeListener implements CalendarListener {
     // Switch to the next range every 2 clicks
     _consecutiveClicks++;
     model.value = model.value!.confirmPreview(
-        confirmRange: _consecutiveClicks >= 2,
-        movingStartMaintainsLength: movingStartMaintainsLength);
+      confirmRange: _consecutiveClicks >= 2,
+      movingStartMaintainsLength: movingStartMaintainsLength,
+    );
   }
 
   // This might be the start of a drag or grab, or the start of a click.
@@ -171,21 +177,24 @@ class _RangeListener implements CalendarListener {
 
     // Terminate drags on mouseup, whether inside the calendar or not
     // TODO(google): Is this webworker-safe?
-    _disposer.addStreamSubscription(document.onMouseUp.take(1).listen((_) {
-      if (state == _DragState.dragging) {
-        // If this was actually a drag, confirm current selection (set
-        // previously by mousemove) and select the next range
-        model.value = CalendarState(
+    _disposer.addStreamSubscription(
+      document.onMouseUp.take(1).listen((_) {
+        if (state == _DragState.dragging) {
+          // If this was actually a drag, confirm current selection (set
+          // previously by mousemove) and select the next range
+          model.value = CalendarState(
             selections: model.value!.selections,
             currentSelection: model.value!.currentSelection,
             cause: CausedBy.rangeConfirm,
-            resolution: model.value!.resolution);
-      }
+            resolution: model.value!.resolution,
+          );
+        }
 
-      // Clear dragging state in any case
-      state = _DragState.canPreview;
-      dragAnchor = null;
-    }));
+        // Clear dragging state in any case
+        state = _DragState.canPreview;
+        dragAnchor = null;
+      }),
+    );
   }
 
   @override
@@ -196,8 +205,12 @@ class _RangeListener implements CalendarListener {
     } else {
       // Selection is null, so create a new selection here and make the
       // end date active.
-      model.value = model.value!.setCurrentSelection(day!, day,
-          cause: CausedBy.endpointConfirm, previewAnchoredAtStart: true);
+      model.value = model.value!.setCurrentSelection(
+        day!,
+        day,
+        cause: CausedBy.endpointConfirm,
+        previewAnchoredAtStart: true,
+      );
       _consecutiveClicks = 1;
     }
 

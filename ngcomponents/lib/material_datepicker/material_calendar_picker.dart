@@ -3,8 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
-import 'dart:js_util';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:collection/collection.dart' show IterableExtension;
@@ -112,8 +111,10 @@ class MaterialCalendarPickerComponent
       (dayOfWeek + numDays).remainder(7);
 
   /// Index of the first day of the week [0 = Sun, 6 = Sat].
-  static final int _firstDayOfWeek =
-      _rotateDayOfWeek(1, DateFormat().dateSymbols.FIRSTDAYOFWEEK);
+  static final int _firstDayOfWeek = _rotateDayOfWeek(
+    1,
+    DateFormat().dateSymbols.FIRSTDAYOFWEEK,
+  );
 
   /// Maps [dayOfWeek] from [0 = Sun, 6 = Sat] to
   /// [0 = first day of week, 6 = last day of week].
@@ -136,18 +137,18 @@ class MaterialCalendarPickerComponent
     template.append(container);
 
     // Create the title element.
-    final title = HeadingElement.h2()
+    final title = HTMLHeadingElement.h2()
       ..className = 'month-title'
       ..appendText('');
     container.append(title);
 
     // Add 6 rows of 7 slots.
-    final slotTemplate = DivElement()
+    final slotTemplate = HTMLDivElement()
       ..className = 'day-slot'
       ..appendText('');
-    DivElement slot;
+    HTMLDivElement slot;
     for (var i = 0; i < WEEK_ROWS_IN_MONTH * 7; i++) {
-      slot = slotTemplate.clone(true) as DivElement;
+      slot = slotTemplate.clone(true) as HTMLDivElement;
       container.append(slot);
     }
 
@@ -163,8 +164,10 @@ class MaterialCalendarPickerComponent
   }
 
   CalendarState? get state => _model.value;
-  final ObservableReference<CalendarState> _model =
-      ObservableReference(CalendarState.empty(), coalesce: true);
+  final ObservableReference<CalendarState> _model = ObservableReference(
+    CalendarState.empty(),
+    coalesce: true,
+  );
 
   /// Fired when the calendar state changes -- e.g. when the user starts
   /// dragging the selected date range.
@@ -293,9 +296,11 @@ class MaterialCalendarPickerComponent
   _Month _monthAtOffset(int offset) {
     _Month month;
     int total = 0;
-    for (month = _minMonth!.copy();
-        total < offset && month < _maxMonth;
-        month.next()) {
+    for (
+      month = _minMonth!.copy();
+      total < offset && month < _maxMonth;
+      month.next()
+    ) {
       total += _monthHeight(month);
     }
     // Use the previous month if it's mostly in view.
@@ -314,7 +319,7 @@ class MaterialCalendarPickerComponent
 
   Date? _extractDate(Event event) {
     final slot = event.target;
-    if (slot is! HtmlElement) return null;
+    if (slot is! HTMLElement) return null;
 
     final dateText = slot.getAttribute(_dateAttribute);
     if (dateText == null) return null;
@@ -351,7 +356,7 @@ class MaterialCalendarPickerComponent
     _scrollToMonth(_Month.fromDate(date));
   }
 
-  void _setText(HtmlElement? slot, String text) {
+  void _setText(HTMLElement? slot, String text) {
     // This is much faster than the obvious slot.text = text. It reuses the
     // existing TextNode instead of creating a new one every time. It's also
     // faster than slot.firstChild.text = text (which also reuses the TextNode),
@@ -366,19 +371,19 @@ class MaterialCalendarPickerComponent
     }
   }
 
-  void _renderMonth(_Month month, HtmlElement container) {
+  void _renderMonth(_Month month, HTMLElement container) {
     int startIndex = _dayOfWeekIndex(month.startDay);
     if (startIndex < _monthTitleWidth) startIndex += 7;
     final daysInMonth = month.days;
 
     // The month container consists of a title element followed by 42 day slots.
-    HtmlElement title = container.firstChild as HtmlElement;
+    HTMLElement title = container.firstChild as HTMLElement;
     _setText(title, month.title);
 
     // Render the days.
     bool isFirstMonth = month == _minMonth;
     bool isLastMonth = month == _maxMonth;
-    HtmlElement? slot = title.nextElementSibling as HtmlElement?;
+    HTMLElement? slot = title.nextElementSibling as HTMLElement?;
     for (var i = 1; i <= 7 * WEEK_ROWS_IN_MONTH; i++) {
       final day = i - startIndex;
       if (day <= 0 || day > daysInMonth) {
@@ -392,7 +397,9 @@ class MaterialCalendarPickerComponent
       } else {
         slot!.className = 'day-slot visible';
         slot.setAttribute(
-            _dateAttribute, _dateAttributeValue(month.year, month.month, day));
+          _dateAttribute,
+          _dateAttributeValue(month.year, month.month, day),
+        );
         // Firefox is much slower than other browsers when using CSS counters
         // (because they trigger layout in Firefox). However, setting the text
         // directly is fast in Firefox (because it doesn't trigger layout in
@@ -401,7 +408,7 @@ class MaterialCalendarPickerComponent
           _setText(slot, day.toString());
         }
       }
-      slot = slot.nextElementSibling as HtmlElement?;
+      slot = slot.nextElementSibling as HTMLElement?;
     }
   }
 
@@ -426,9 +433,11 @@ class MaterialCalendarPickerComponent
       }
 
       // Iterate until we find the middle month.
-      for (baseline ??= _renderedMonths[_overdraw].copy();
-          offset < _scrollTop && baseline < _maxMonth;
-          baseline.next()) {
+      for (
+        baseline ??= _renderedMonths[_overdraw].copy();
+        offset < _scrollTop && baseline < _maxMonth;
+        baseline.next()
+      ) {
         offset += _monthHeight(baseline);
       }
 
@@ -445,18 +454,19 @@ class MaterialCalendarPickerComponent
       offset += _rangeHeight(baseline, baseline.add(-_overdraw));
     }
     final visibleMonths = _monthsSurrounding(baseline);
-    final neededMonths =
-        visibleMonths.where((m) => !_renderedMonths.contains(m));
+    final neededMonths = visibleMonths.where(
+      (m) => !_renderedMonths.contains(m),
+    );
     if (neededMonths.isEmpty) return;
 
     // Render the missing months (reusing existing ones).
     _renderedOffsets.clear();
-    HtmlElement? panel = _container!.firstChild as HtmlElement?;
+    HTMLElement? panel = _container!.firstChild as HTMLElement?;
     for (var month in visibleMonths) {
       _renderMonth(month, panel!);
       panel.style.cssText = 'transform: translateY(${offset}px)';
       _renderedOffsets.add(offset);
-      panel = panel.nextElementSibling as HtmlElement?;
+      panel = panel.nextElementSibling as HTMLElement?;
       offset += _monthHeight(month);
     }
 
@@ -466,9 +476,11 @@ class MaterialCalendarPickerComponent
     // setting textContent for each slot.
     if (isEdge) {
       var fragment = DocumentFragment();
-      for (HtmlElement? month = _container!.firstChild as HtmlElement?;
-          month != null;
-          month = _container!.firstChild as HtmlElement?) {
+      for (
+        HTMLElement? month = _container!.firstChild as HTMLElement?;
+        month != null;
+        month = _container!.firstChild as HTMLElement?
+      ) {
         fragment.append(month);
       }
       _container!.append(fragment);
@@ -498,8 +510,8 @@ class MaterialCalendarPickerComponent
 
     if (startDate > endDate) return;
 
-    HtmlElement? start;
-    HtmlElement? end;
+    HTMLElement? start;
+    HTMLElement? end;
     final startMonth = _Month.fromDate(startDate);
     final endMonth = _Month.fromDate(endDate);
     final highlightClass = 'highlight-${selection.id}';
@@ -508,29 +520,33 @@ class MaterialCalendarPickerComponent
     if (startMonth >= _renderedMonths.first &&
         startMonth <= _renderedMonths.last) {
       start =
-          _container!.querySelector(_slotSelector(startDate)) as HtmlElement?;
+          _container!.querySelector(_slotSelector(startDate)) as HTMLElement?;
       if (start == null) return;
       start.classes.add('boundary');
       start.classes.add(boundaryClass);
       start.classes.add('start');
     } else if (startMonth < _renderedMonths.first &&
         endMonth >= _renderedMonths.first) {
-      start = _container!
-              .querySelector('.month:first-of-type .day-slot:first-of-type')
-          as HtmlElement?;
+      start =
+          _container!.querySelector(
+                '.month:first-of-type .day-slot:first-of-type',
+              )
+              as HTMLElement?;
     }
 
     if (endMonth >= _renderedMonths.first && endMonth <= _renderedMonths.last) {
-      end = _container!.querySelector(_slotSelector(endDate)) as HtmlElement?;
+      end = _container!.querySelector(_slotSelector(endDate)) as HTMLElement?;
       if (end == null) return;
       end.classes.add('boundary');
       end.classes.add(boundaryClass);
       end.classes.add('end');
     } else if (startMonth <= _renderedMonths.last &&
         endMonth > _renderedMonths.last) {
-      end = _container!
-              .querySelector('.month:last-of-type .day-slot:last-of-type')
-          as HtmlElement?;
+      end =
+          _container!.querySelector(
+                '.month:last-of-type .day-slot:last-of-type',
+              )
+              as HTMLElement?;
     }
 
     // If it's out of view, we're done.
@@ -551,29 +567,42 @@ class MaterialCalendarPickerComponent
 
     // Fill in the range in the starting month.
     _highlightElements(
-        start, end.nextElementSibling as HtmlElement?, highlightClass);
+      start,
+      end.nextElementSibling as HTMLElement?,
+      highlightClass,
+    );
 
     // Fill in any remaining months.
-    HtmlElement startContainer = range.startContainer as HtmlElement;
-    HtmlElement endContainer = range.endContainer as HtmlElement;
-    for (HtmlElement? month = startContainer.nextElementSibling as HtmlElement?;
-        month != null && month != endContainer.nextElementSibling;
-        month = month.nextElementSibling as HtmlElement?) {
-      _highlightElements(month.firstChild as HtmlElement?,
-          end.nextElementSibling as HtmlElement?, highlightClass);
+    HTMLElement startContainer = range.startContainer as HTMLElement;
+    HTMLElement endContainer = range.endContainer as HTMLElement;
+    for (
+      HTMLElement? month = startContainer.nextElementSibling as HTMLElement?;
+      month != null && month != endContainer.nextElementSibling;
+      month = month.nextElementSibling as HTMLElement?
+    ) {
+      _highlightElements(
+        month.firstChild as HTMLElement?,
+        end.nextElementSibling as HTMLElement?,
+        highlightClass,
+      );
     }
   }
 
   void _highlightElements(
-      HtmlElement? start, HtmlElement? end, String highlightClass) {
-    for (HtmlElement? current = start;
-        current != null && current != end;
-        current = current.nextElementSibling as HtmlElement?) {
+    HTMLElement? start,
+    HTMLElement? end,
+    String highlightClass,
+  ) {
+    for (
+      HTMLElement? current = start;
+      current != null && current != end;
+      current = current.nextElementSibling as HTMLElement?
+    ) {
       _highlightElement(current, highlightClass);
     }
   }
 
-  void _highlightElement(HtmlElement el, String highlightClass) {
+  void _highlightElement(HTMLElement el, String highlightClass) {
     el.classes.add('highlight');
     el.classes.add(highlightClass);
   }
@@ -583,7 +612,7 @@ class MaterialCalendarPickerComponent
     final classes = ['visible', 'invisible', 'hidden'];
     for (var className in classes) {
       final selector = '.day-slot.$className';
-      for (HtmlElement el in _container!.querySelectorAll(selector)) {
+      for (HTMLElement el in _container!.querySelectorAll(selector)) {
         el.className = 'day-slot $className';
       }
     }
@@ -601,12 +630,14 @@ class MaterialCalendarPickerComponent
       // would be created if it were actually applied. Since [CalendarState] is
       // immutable, this doesn't modify any state.
       var previewState = state!.confirmPreview(
-          movingStartMaintainsLength: _movingStartMaintainsLength);
+        movingStartMaintainsLength: _movingStartMaintainsLength,
+      );
       var previewRange = previewState
           .selection(previewState.currentSelection)
           .clamp(min: minDate, max: maxDate);
       selections.add(
-          CalendarSelection('preview', previewRange.start, previewRange.end));
+        CalendarSelection('preview', previewRange.start, previewRange.end),
+      );
     }
 
     // Add the new highlight classes.
@@ -622,8 +653,9 @@ class MaterialCalendarPickerComponent
         var a = selections[i];
         var b = selections[j];
         if (a.contains(b.start) && a.start! < b.start) {
-          HtmlElement? start = _container!
-              .querySelector(_slotSelector(b.start!)) as HtmlElement?;
+          HTMLElement? start =
+              _container!.querySelector(_slotSelector(b.start!))
+                  as HTMLElement?;
           if (start != null) {
             start.classes.add('left');
             start.classes.add('left-${a.id}');
@@ -642,7 +674,7 @@ class MaterialCalendarPickerComponent
   }
 
   void _renderToday() {
-    HtmlElement? el =
+    HTMLElement? el =
         _container!.querySelector('.day-slot.today') as HtmlElement?;
     if (el != null) el.classes.remove('today');
     el = _container!.querySelector(_slotSelector(_today!)) as HtmlElement?;
@@ -650,12 +682,13 @@ class MaterialCalendarPickerComponent
   }
 
   void _renderHover() {
-    HtmlElement? el =
-        _container!.querySelector('.day-slot.hover') as HtmlElement?;
+    HTMLElement? el =
+        _container!.querySelector('.day-slot.hover') as HTMLElement?;
     if (el != null) el.classes.remove('hover');
     if (_model.value!.preview != null) {
-      el = _container!.querySelector(_slotSelector(_model.value!.preview!))
-          as HtmlElement?;
+      el =
+          _container!.querySelector(_slotSelector(_model.value!.preview!))
+              as HTMLElement?;
       if (el != null) el.classes.add('hover');
     }
   }
@@ -664,8 +697,9 @@ class MaterialCalendarPickerComponent
     if (_renderedMonths.isEmpty) return;
     if (state!.selections.isEmpty) return;
 
-    final currentSelection = state!.selections
-        .firstWhereOrNull((s) => s.id == state!.currentSelection);
+    final currentSelection = state!.selections.firstWhereOrNull(
+      (s) => s.id == state!.currentSelection,
+    );
     if (currentSelection == null) return;
 
     final startMonth = _Month.fromDate(currentSelection.start!);
@@ -716,10 +750,10 @@ class MaterialCalendarPickerComponent
   final List<int> _renderedOffsets = [];
 
   // The .scroll-container element.
-  HtmlElement? _scroller;
+  HTMLElement? _scroller;
 
   // The .calendar-container element.
-  HtmlElement? _container;
+  HTMLElement? _container;
 
   // Cached _scroller.scrollTop (to separate DOM reads from writes).
   int _scrollTop = 0;
@@ -728,9 +762,10 @@ class MaterialCalendarPickerComponent
   StreamSubscription? _calendarStream;
 
   MaterialCalendarPickerComponent(
-      @Optional() @Inject(datepickerClock) Clock? clock,
-      Clock legacyClock,
-      @Attribute('mode') String? mode) {
+    @Optional() @Inject(datepickerClock) Clock? clock,
+    Clock legacyClock,
+    @Attribute('mode') String? mode,
+  ) {
     // TODO(google): Migrate to use only datepickerClock
     clock ??= legacyClock;
 
@@ -747,9 +782,9 @@ class MaterialCalendarPickerComponent
   }
 
   @ViewChild('container')
-  set container(HtmlElement? container) {
+  set container(HTMLElement? container) {
     _container = container;
-    _scroller = container?.parent as HtmlElement?;
+    _scroller = container?.parent as HTMLElement?;
   }
 
   @override
@@ -764,8 +799,10 @@ class MaterialCalendarPickerComponent
       _inputListener = CalendarListener.singleDate(_model);
     }
     if (_mode == CalendarSelectionMode.DATE_RANGE) {
-      _inputListener = CalendarListener.dateRange(_model,
-          movingStartMaintainsLength: _movingStartMaintainsLength);
+      _inputListener = CalendarListener.dateRange(
+        _model,
+        movingStartMaintainsLength: _movingStartMaintainsLength,
+      );
     }
   }
 
@@ -892,18 +929,17 @@ class MaterialCalendarPickerComponent
 class _Month {
   static const _yearPlaceholder = 9999;
   static final _monthFormatter = DateFormat.yMMM();
-  static final _monthNames = List.generate(12, (i) => i + 1)
-      .map((i) => _monthFormatter.format(DateTime(_yearPlaceholder, i)))
-      .toList();
+  static final _monthNames = List.generate(
+    12,
+    (i) => i + 1,
+  ).map((i) => _monthFormatter.format(DateTime(_yearPlaceholder, i))).toList();
 
   int year;
   int month;
 
   _Month(this.year, this.month);
 
-  _Month.fromDate(Date date)
-      : this.year = date.year,
-        this.month = date.month;
+  _Month.fromDate(Date date) : this.year = date.year, this.month = date.month;
 
   void next() {
     if (++month > 12) {
@@ -945,7 +981,8 @@ class _Month {
     if (month == 4 || month == 6 || month == 9 || month == 11) {
       return 30;
     } else if (month == 2) {
-      var isLeapYear = (year.remainder(4) == 0 && year.remainder(100) != 0) ||
+      var isLeapYear =
+          (year.remainder(4) == 0 && year.remainder(100) != 0) ||
           (year.remainder(400) == 0);
       return isLeapYear ? 29 : 28;
     } else {

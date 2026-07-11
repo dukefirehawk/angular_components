@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 import 'dart:math';
 
 import 'package:ngdart/angular.dart';
@@ -63,7 +63,7 @@ import 'package:intl/intl.dart';
     NgIf,
     EnterAcceptsDirective,
     KeyboardOnlyFocusIndicatorDirective,
-    KeyUpBoundaryDirective
+    KeyUpBoundaryDirective,
   ],
   providers: [
     ExistingProvider(DeferredContentAware, MaterialExpansionPanel),
@@ -95,13 +95,13 @@ class MaterialExpansionPanel
   bool initialized = false;
 
   MaterialExpansionPanel(
-      this._ngZone,
-      this._changeDetector,
-      this._domService,
-      @Attribute('shouldExpandOnLeft') String? expandOnLeft,
-      @Attribute('forceContentWhenClosed') String? forceContent)
-      : shouldExpandOnLeft = expandOnLeft != null,
-        forceContentWhenClosed = forceContent != null;
+    this._ngZone,
+    this._changeDetector,
+    this._domService,
+    @Attribute('shouldExpandOnLeft') String? expandOnLeft,
+    @Attribute('forceContentWhenClosed') String? forceContent,
+  ) : shouldExpandOnLeft = expandOnLeft != null,
+      forceContentWhenClosed = forceContent != null;
 
   /// Set the auto focus child so that we can focus on it when the panel opens.
   ///
@@ -128,9 +128,10 @@ class MaterialExpansionPanel
       _focusOnOpenChild = RootFocusable(element.nativeElement);
     } else {
       assert(
-          element == null,
-          'Warning expansion panel content has a #focus'
-          'child which is not an Element, or Focusable');
+        element == null,
+        'Warning expansion panel content has a #focus'
+        'child which is not an Element, or Focusable',
+      );
     }
   }
 
@@ -140,17 +141,19 @@ class MaterialExpansionPanel
     _mainPanel = mainPanel;
     _ngZone.runOutsideAngular(() {
       if (_mainPanel != null) {
-        _disposer.addStreamSubscription(_mainPanel!.onTransitionEnd
-            .where((e) => e.eventPhase == Event.AT_TARGET)
-            .listen((_) {
-          // Clear height override so it will match the active child's height.
-          _mainPanel?.style.height = '';
-          // If we just finished closing, let deferred content stop rendering
-          // the panel body.
-          if (!isExpanded) {
-            _ngZone.run(() => _contentVisible.add(false));
-          }
-        }));
+        _disposer.addStreamSubscription(
+          _mainPanel!.onTransitionEnd
+              .where((e) => e.eventPhase == Event.AT_TARGET)
+              .listen((_) {
+                // Clear height override so it will match the active child's height.
+                _mainPanel?.style.height = '';
+                // If we just finished closing, let deferred content stop rendering
+                // the panel body.
+                if (!isExpanded) {
+                  _ngZone.run(() => _contentVisible.add(false));
+                }
+              }),
+        );
       }
     });
 
@@ -159,10 +162,12 @@ class MaterialExpansionPanel
       // in tests) just forward the isExpanded change event so deferredContent
       // can disappear.
       if (!_mainPanelHasHeightTransition) {
-        _disposer.addStreamSubscription(isExpandedChange.listen((expanded) {
-          // Just check for false (closed). Open (true) is always done first.
-          if (!expanded!) _contentVisible.add(false);
-        }));
+        _disposer.addStreamSubscription(
+          isExpandedChange.listen((expanded) {
+            // Just check for false (closed). Open (true) is always done first.
+            if (!expanded!) _contentVisible.add(false);
+          }),
+        );
       }
     });
     _domService.scheduleRead(transitionCheck.call);
@@ -175,12 +180,14 @@ class MaterialExpansionPanel
     _headerPanel = headerPanel;
     if (_headerPanel != null) {
       _ngZone.runOutsideAngular(() {
-        _disposer.addStreamSubscription(_headerPanel!.onTransitionEnd
-            .where((e) => e.eventPhase == Event.AT_TARGET)
-            .listen((_) {
-          // Clear height override so it will match the active child's height.
-          _headerPanel?.style.height = '';
-        }));
+        _disposer.addStreamSubscription(
+          _headerPanel!.onTransitionEnd
+              .where((e) => e.eventPhase == Event.AT_TARGET)
+              .listen((_) {
+                // Clear height override so it will match the active child's height.
+                _headerPanel?.style.height = '';
+              }),
+        );
       });
     }
   }
@@ -247,8 +254,9 @@ class MaterialExpansionPanel
   @Output('expandedChangeByUser')
   Stream<bool> get isExpandedChangeByUserAction =>
       _isExpandedChangeByUserAction.stream;
-  final _isExpandedChangeByUserAction =
-      StreamController<bool>.broadcast(sync: true);
+  final _isExpandedChangeByUserAction = StreamController<bool>.broadcast(
+    sync: true,
+  );
 
   @override
   Stream<bool> get contentVisible => _contentVisible.stream;
@@ -354,8 +362,8 @@ class MaterialExpansionPanel
 
   bool get shouldShowHiddenHeaderExpandIcon =>
       hasCustomExpandIcon || alwaysHideExpandIcon
-          ? false
-          : (hideExpandedHeader && !disabled);
+      ? false
+      : (hideExpandedHeader && !disabled);
 
   /// Option to set if widget should show save/cancel buttons `true` by default.
   @Input()
@@ -398,31 +406,43 @@ class MaterialExpansionPanel
     }
   }
 
-  static final _closePanelMsg = Intl.message('Hide panel',
-      name: '_closePanelMsg',
-      desc: 'ARIA label for a button that hides the panel.');
+  static final _closePanelMsg = Intl.message(
+    'Hide panel',
+    name: '_closePanelMsg',
+    desc: 'ARIA label for a button that hides the panel.',
+  );
 
-  static final _openPanelMsg = Intl.message('Show panel',
-      name: '_openPanelMsg',
-      desc: 'ARIA label for a button that shows the panel.');
+  static final _openPanelMsg = Intl.message(
+    'Show panel',
+    name: '_openPanelMsg',
+    desc: 'ARIA label for a button that shows the panel.',
+  );
 
-  String _namedPanelMsg(String panelName) => Intl.message('$panelName panel',
-      name: '_namedPanelMsg',
-      args: [panelName],
-      desc: 'ARIA label for a button that shows or hides the panel.',
-      examples: const {'panelName': 'Conversions'});
+  String _namedPanelMsg(String panelName) => Intl.message(
+    '$panelName panel',
+    name: '_namedPanelMsg',
+    args: [panelName],
+    desc: 'ARIA label for a button that shows or hides the panel.',
+    examples: const {'panelName': 'Conversions'},
+  );
 
-  static final expandAriaMsg = Intl.message('Expand',
-      desc: 'Aria label used for the button used to expand the panel.');
+  static final expandAriaMsg = Intl.message(
+    'Expand',
+    desc: 'Aria label used for the button used to expand the panel.',
+  );
 
-  final _openController =
-      StreamController<AsyncAction<bool>?>.broadcast(sync: true);
-  final _closeController =
-      StreamController<AsyncAction<bool>?>.broadcast(sync: true);
-  final _saveController =
-      StreamController<AsyncAction<bool>?>.broadcast(sync: true);
-  final _cancelController =
-      StreamController<AsyncAction<bool>?>.broadcast(sync: true);
+  final _openController = StreamController<AsyncAction<bool>?>.broadcast(
+    sync: true,
+  );
+  final _closeController = StreamController<AsyncAction<bool>?>.broadcast(
+    sync: true,
+  );
+  final _saveController = StreamController<AsyncAction<bool>?>.broadcast(
+    sync: true,
+  );
+  final _cancelController = StreamController<AsyncAction<bool>?>.broadcast(
+    sync: true,
+  );
 
   /// Event fired when panel is trying to close.
   ///
@@ -456,13 +476,15 @@ class MaterialExpansionPanel
   void ngOnInit() {
     // We only focus on the relevant button when the expanded state is changed
     // by user action.
-    _disposer.addStreamSubscription(isExpandedChangeByUserAction.listen((_) {
-      // Wait for the button reference to be set after change detection is done
-      // and buttonDirective is created.
-      _ngZone.onEventDone.first.then(([_]) {
-        _expandCollapseButton?.focus();
-      });
-    }));
+    _disposer.addStreamSubscription(
+      isExpandedChangeByUserAction.listen((_) {
+        // Wait for the button reference to be set after change detection is done
+        // and buttonDirective is created.
+        _ngZone.onEventDone.first.then(([_]) {
+          _expandCollapseButton?.focus();
+        });
+      }),
+    );
     initialized = true;
   }
 
@@ -556,7 +578,10 @@ class MaterialExpansionPanel
   /// example, trying to close a panel with unsaved changes may fail because
   /// the user has cancelled the operation.
   Future<bool> changeState(
-      bool expand, bool byUserAction, StreamController stream) {
+    bool expand,
+    bool byUserAction,
+    StreamController stream,
+  ) {
     if (isExpanded == expand) {
       return Future.value(true);
     }
@@ -672,12 +697,15 @@ class MaterialExpansionPanel
 
     _domService.scheduleRead(() {
       final contentHeight = max<int>(
-          _headerContent?.scrollHeight ?? 0, _actionContent?.scrollHeight ?? 0);
+        _headerContent?.scrollHeight ?? 0,
+        _actionContent?.scrollHeight ?? 0,
+      );
       var expandedHeaderHeight = '';
 
       final headerPanelStyle = _headerPanel?.getComputedStyle();
       // Do our best to make sure that onTransitionEnd will fire later.
-      final hasHeightTransition = contentHeight > 0 &&
+      final hasHeightTransition =
+          contentHeight > 0 &&
           headerPanelStyle?.transition.contains('height') == true;
 
       if (hasHeightTransition) expandedHeaderHeight = '${contentHeight}px';
@@ -693,15 +721,19 @@ class MaterialExpansionPanel
     _disposer.dispose();
   }
 
-  static final _msgSave = Intl.message('Save',
-      name: '_msgSave',
-      desc: 'Text on save button.',
-      meaning: 'Text on save button.');
+  static final _msgSave = Intl.message(
+    'Save',
+    name: '_msgSave',
+    desc: 'Text on save button.',
+    meaning: 'Text on save button.',
+  );
 
-  static final _msgCancel = Intl.message('Cancel',
-      name: '_msgCancel',
-      desc: 'Text on cancel button.',
-      meaning: 'Text on cancel button.');
+  static final _msgCancel = Intl.message(
+    'Cancel',
+    name: '_msgCancel',
+    desc: 'Text on cancel button.',
+    meaning: 'Text on cancel button.',
+  );
 
   String? attributeToString(Object? value) {
     if (value != null) {

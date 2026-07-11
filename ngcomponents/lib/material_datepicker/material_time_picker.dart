@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:intl/intl.dart';
@@ -27,9 +27,7 @@ import 'package:ngcomponents/utils/disposer/disposer.dart';
     materialInputDirectives,
     NgStyle,
   ],
-  directiveTypes: [
-    Typed<MaterialDropdownSelectComponent<DateTime>>(),
-  ],
+  directiveTypes: [Typed<MaterialDropdownSelectComponent<DateTime>>()],
   providers: [ExistingProvider(HasDisabled, MaterialTimePickerComponent)],
   templateUrl: 'material_time_picker.html',
   styleUrls: ['material_time_picker.scss.css'],
@@ -38,7 +36,12 @@ class MaterialTimePickerComponent extends KeyboardHandlerMixin
     implements HasDisabled, OnInit, OnDestroy {
   static const minutesInDay = 24 * 60;
   static DateTime _utcTime(int hour, [int minute = 0]) => DateTime.utc(
-      _unixEpoch.year, _unixEpoch.month, _unixEpoch.day, hour, minute);
+    _unixEpoch.year,
+    _unixEpoch.month,
+    _unixEpoch.day,
+    hour,
+    minute,
+  );
 
   static DateTime _localTime(int hour, [int minute = 0]) =>
       DateTime(_unixEpoch.year, _unixEpoch.month, _unixEpoch.day, hour, minute);
@@ -55,17 +58,21 @@ class MaterialTimePickerComponent extends KeyboardHandlerMixin
     DateFormat.jm(),
     DateFormat.Hm(),
     DateFormat.jms(),
-    DateFormat.Hms()
+    DateFormat.Hms(),
   ];
 
   /// Generates the list of time options to be used in the picking dropdown,
   /// based on [increment] in minutes.
-  static List<DateTime> _generateTimeOptions(int increment,
-      {bool utc = false}) {
+  static List<DateTime> _generateTimeOptions(
+    int increment, {
+    bool utc = false,
+  }) {
     final time = utc ? _utcTime : _localTime;
     final minutesToTime = (minutes) => time(minutes ~/ 60, minutes % 60);
     return List<DateTime>.generate(
-        minutesInDay ~/ increment, (index) => minutesToTime(index * increment));
+      minutesInDay ~/ increment,
+      (index) => minutesToTime(index * increment),
+    );
   }
 
   final Clock _clock;
@@ -131,8 +138,9 @@ class MaterialTimePickerComponent extends KeyboardHandlerMixin
   set utc(bool value) {
     _utc = value;
 
-    timeOptions =
-        TimeSelectionOptions(_generateTimeOptions(_increment, utc: _utc));
+    timeOptions = TimeSelectionOptions(
+      _generateTimeOptions(_increment, utc: _utc),
+    );
 
     time = _time;
   }
@@ -203,8 +211,9 @@ class MaterialTimePickerComponent extends KeyboardHandlerMixin
 
     _increment = value;
 
-    timeOptions =
-        TimeSelectionOptions(_generateTimeOptions(_increment, utc: _utc));
+    timeOptions = TimeSelectionOptions(
+      _generateTimeOptions(_increment, utc: _utc),
+    );
   }
 
   /// Publishes events when the selected time changes.
@@ -221,20 +230,22 @@ class MaterialTimePickerComponent extends KeyboardHandlerMixin
   String renderTime(DateTime time) => outputFormat.format(time);
 
   MaterialTimePickerComponent(@Inject(datepickerClock) this._clock) {
-    timeOptions =
-        TimeSelectionOptions(_generateTimeOptions(_increment, utc: _utc));
+    timeOptions = TimeSelectionOptions(
+      _generateTimeOptions(_increment, utc: _utc),
+    );
   }
 
   @override
   void ngOnInit() {
-    _disposer
-        .addStreamSubscription(selectedTime.selectionChanges.listen((change) {
-      /// Triggers _trySetTime only when user selects/changes selection.
-      /// Deselect or clear the selection will not trigger _trySetTime.
-      if (change.last.added.isNotEmpty) {
-        time = selectedTime.selectedValues.first;
-      }
-    }));
+    _disposer.addStreamSubscription(
+      selectedTime.selectionChanges.listen((change) {
+        /// Triggers _trySetTime only when user selects/changes selection.
+        /// Deselect or clear the selection will not trigger _trySetTime.
+        if (change.last.added.isNotEmpty) {
+          time = selectedTime.selectedValues.first;
+        }
+      }),
+    );
   }
 
   /// Sets [time] to now if it's null.
@@ -282,8 +293,11 @@ class MaterialTimePickerComponent extends KeyboardHandlerMixin
     }
 
     final formatsToParse = [outputFormat];
-    formatsToParse.addAll(_supportedTimeFormats
-        .where((DateFormat f) => outputFormat.pattern != f.pattern));
+    formatsToParse.addAll(
+      _supportedTimeFormats.where(
+        (DateFormat f) => outputFormat.pattern != f.pattern,
+      ),
+    );
 
     DateTime? parsed = _parseTimeOfFormats(timeText, formatsToParse);
     if (parsed == null) {
@@ -355,31 +369,39 @@ class MaterialTimePickerComponent extends KeyboardHandlerMixin
     event.stopPropagation();
   }
 
-  static final dropdownPlaceholderMsg = Intl.message('Select time',
-      name: 'MaterialTimePickerComponent_dropdownPlaceholderMsg',
-      desc: 'Placeholder text for an empty time picker dropdown button.');
+  static final dropdownPlaceholderMsg = Intl.message(
+    'Select time',
+    name: 'MaterialTimePickerComponent_dropdownPlaceholderMsg',
+    desc: 'Placeholder text for an empty time picker dropdown button.',
+  );
 
-  static final inputPlaceholderMsg = Intl.message('Enter time',
-      name: 'MaterialTimePickerComponent_inputPlaceholderMsg',
-      desc: 'Placeholder text for an empty time picker input box.');
+  static final inputPlaceholderMsg = Intl.message(
+    'Enter time',
+    name: 'MaterialTimePickerComponent_inputPlaceholderMsg',
+    desc: 'Placeholder text for an empty time picker input box.',
+  );
 
   String timeIsTooEarlyMsg(String minimumTime) => Intl.message(
-      'Enter $minimumTime or later',
-      name: 'timeIsTooEarlyMsg',
-      args: [minimumTime],
-      examples: const {'minimumTime': '13:35'},
-      meaning: 'Error message',
-      desc: 'Displayed when the user enters a valid time, but it\'s before the '
-          'minimum time accepted by the time input field.');
+    'Enter $minimumTime or later',
+    name: 'timeIsTooEarlyMsg',
+    args: [minimumTime],
+    examples: const {'minimumTime': '13:35'},
+    meaning: 'Error message',
+    desc:
+        'Displayed when the user enters a valid time, but it\'s before the '
+        'minimum time accepted by the time input field.',
+  );
 
   String timeIsTooLateMsg(String maximumTime) => Intl.message(
-      'Enter $maximumTime or earlier',
-      name: 'timeIsTooLateMsg',
-      args: [maximumTime],
-      examples: const {'maximumTime': '23:59'},
-      meaning: 'Error message',
-      desc: 'Displayed when the user enters a valid time, but it\'s after the '
-          'maximum time accepted by the time input field.');
+    'Enter $maximumTime or earlier',
+    name: 'timeIsTooLateMsg',
+    args: [maximumTime],
+    examples: const {'maximumTime': '23:59'},
+    meaning: 'Error message',
+    desc:
+        'Displayed when the user enters a valid time, but it\'s after the '
+        'maximum time accepted by the time input field.',
+  );
 }
 
 /// [StringSelectionOptions] for DateTime dropdown selector.

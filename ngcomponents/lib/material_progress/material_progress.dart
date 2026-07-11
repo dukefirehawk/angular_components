@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:intl/intl.dart';
@@ -13,7 +13,7 @@ import 'package:ngcomponents/utils/browser/feature_detector/feature_detector.dar
 const String ARIA_VALUENOW_ATTR = "aria-valuenow";
 const Map<String, double> _indeterminateTiming = {
   'duration': 2000.0,
-  'iterations': double.infinity
+  'iterations': double.infinity,
 };
 
 /// The progress bars are for situations where the percentage completed can be
@@ -82,27 +82,32 @@ class MaterialProgressComponent implements AfterViewInit, OnDestroy {
   String get ariaValue =>
       indeterminate ? _loadingValue : _activeProgressValue(activeProgress);
 
-  final String _loadingValue =
-      Intl.message('loading', desc: 'Label text for loading progress');
+  final String _loadingValue = Intl.message(
+    'loading',
+    desc: 'Label text for loading progress',
+  );
 
-  String _activeProgressValue(int activeProgress) =>
-      Intl.message('active progress $activeProgress',
-          name: 'MaterialProgressComponent__activeProgressValue',
-          desc: 'Label text for active progress',
-          args: [activeProgress],
-          examples: const {'activeProgress': 20});
+  String _activeProgressValue(int activeProgress) => Intl.message(
+    'active progress $activeProgress',
+    name: 'MaterialProgressComponent__activeProgressValue',
+    desc: 'Label text for active progress',
+    args: [activeProgress],
+    examples: const {'activeProgress': 20},
+  );
 
   String get activeAndSecondaryProgressValue =>
       _activeAndSecondaryProgressValue(activeProgress, secondaryProgress);
 
   String _activeAndSecondaryProgressValue(
-          int activeProgress, int secondaryProgress) =>
-      Intl.message(
-          'active progress $activeProgress secondary progress $secondaryProgress',
-          name: 'MaterialProgressComponent__activeAndSecondaryProgressValue',
-          desc: 'Label text for active and secondary progress',
-          args: [activeProgress, secondaryProgress],
-          examples: const {'activeProgress': 5, 'secondaryProgress': 25});
+    int activeProgress,
+    int secondaryProgress,
+  ) => Intl.message(
+    'active progress $activeProgress secondary progress $secondaryProgress',
+    name: 'MaterialProgressComponent__activeAndSecondaryProgressValue',
+    desc: 'Label text for active and secondary progress',
+    args: [activeProgress, secondaryProgress],
+    examples: const {'activeProgress': 5, 'secondaryProgress': 25},
+  );
 
   String get primaryTransform => 'scaleX(${_calcRatio(activeProgress)})';
 
@@ -127,10 +132,10 @@ class MaterialProgressComponent implements AfterViewInit, OnDestroy {
   Animation? _secondaryAnimation;
 
   MaterialProgressComponent(
-      @Attribute('disable-fancy-animation') String? disableFancyAnimation,
-      this._changeDetector,
-      this._element)
-      : _useFancyAnimation = disableFancyAnimation == null;
+    @Attribute('disable-fancy-animation') String? disableFancyAnimation,
+    this._changeDetector,
+    this._element,
+  ) : _useFancyAnimation = disableFancyAnimation == null;
 
   @override
   void ngAfterViewInit() {
@@ -153,7 +158,8 @@ class MaterialProgressComponent implements AfterViewInit, OnDestroy {
     if (!indeterminate ||
         !_useFancyAnimation ||
         !_isInitialized ||
-        !supportsAnimationApi) return;
+        !supportsAnimationApi)
+      return;
 
     final width = _element.getBoundingClientRect().width;
     if (width == 0) {
@@ -174,7 +180,7 @@ class MaterialProgressComponent implements AfterViewInit, OnDestroy {
       const {'transform': 'translateX(0px) scaleX(0.5)', 'offset': 0.25},
       {
         'transform': 'translateX(${0.25 * width}px) scaleX(0.75)',
-        'offset': 0.5
+        'offset': 0.5,
       },
       {'transform': 'translateX(${width}px) scaleX(0)', 'offset': 0.75},
       {'transform': 'translateX(${width}px) scaleX(0)'},
@@ -185,9 +191,13 @@ class MaterialProgressComponent implements AfterViewInit, OnDestroy {
       const {'transform': 'translateX(0px) scaleX(0.6)', 'offset': 0.8},
       {'transform': 'translateX(${width}px) scaleX(0.1)'},
     ];
-    _primaryAnimation =
-        _primaryIndicator!.animate(primaryKeyframes, _indeterminateTiming);
-    _secondaryAnimation =
-        _secondaryIndicator!.animate(secondaryKeyframes, _indeterminateTiming);
+    _primaryAnimation = _primaryIndicator!.animate(
+      primaryKeyframes,
+      _indeterminateTiming,
+    );
+    _secondaryAnimation = _secondaryIndicator!.animate(
+      secondaryKeyframes,
+      _indeterminateTiming,
+    );
   }
 }

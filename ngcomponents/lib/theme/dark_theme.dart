@@ -2,7 +2,7 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:ngcomponents/theme/module.dart';
@@ -33,7 +33,7 @@ class AcxDarkTheme {
   final bool isDarkTheme;
 
   AcxDarkTheme(@Inject(darkThemeToken) @Optional() bool? dark)
-      : isDarkTheme = (dark ?? false);
+    : isDarkTheme = (dark ?? false);
 
   void theme(HtmlElement element) {
     if (isDarkTheme) {

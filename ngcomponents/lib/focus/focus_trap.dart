@@ -2,7 +2,7 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:ngcomponents/focus/focus.dart';
@@ -33,7 +33,8 @@ class FocusTrapComponent implements OnDestroy {
   set content(FocusContentWrapper? value) {
     _content = value;
     if (_content != null && _autoFocusDirective == null) {
-      _content!._element.focus();
+      final element = _content!.element as HTMLElement;
+      element.focus();
     }
   }
 
@@ -45,19 +46,27 @@ class FocusTrapComponent implements OnDestroy {
   void focusFirst() {
     if (_content != null) {
       _focusFirstInOrder(
-          DomTreeIterator(_content!.element, scope: _content!.element));
+        DomTreeIterator(_content!.element, scope: _content!.element),
+      );
     }
   }
 
   void focusLast() {
-    _focusFirstInOrder(DomTreeIterator(_content!.element,
-        scope: _content!.element, reverse: true, wraps: true));
+    _focusFirstInOrder(
+      DomTreeIterator(
+        _content!.element,
+        scope: _content!.element,
+        reverse: true,
+        wraps: true,
+      ),
+    );
   }
 
   void _focusFirstInOrder(Iterator<Element> iterator) {
     while (iterator.moveNext()) {
-      if (iterator.current.tabIndex == 0 && _visible(iterator.current)) {
-        iterator.current.focus();
+      HTMLElement element = iterator.current as HTMLElement;
+      if (element.tabIndex == 0 && _visible(element)) {
+        element.focus();
         return;
       }
     }
@@ -65,25 +74,24 @@ class FocusTrapComponent implements OnDestroy {
   }
 
   bool _visible(Element element) {
-    return (element.offsetWidth != 0 && element.offsetHeight != 0);
+    final elem = element as HTMLElement;
+    return (elem.offsetWidth != 0 && elem.offsetHeight != 0);
   }
 
   void _focusDefault() {
     if (_autoFocusDirective != null) {
       _autoFocusDirective!.focus();
     } else if (_content != null) {
-      _content!.element.focus();
+      final element = _content!.element as HTMLElement;
+      element.focus();
     }
   }
 }
 
-@Directive(
-  selector: '[focusContentWrapper]',
-)
+@Directive(selector: '[focusContentWrapper]')
 class FocusContentWrapper extends FocusableDirective {
   Element _element;
-  FocusContentWrapper(super.element)
-      : _element = element;
+  FocusContentWrapper(super.element) : _element = element;
 
   Element get element => _element;
 }

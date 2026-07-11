@@ -6,7 +6,7 @@
 library events;
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:js/js.dart';
@@ -42,7 +42,8 @@ bool isStandardTriggerEvent(UIEvent event) {
 
 typedef Predicate<T> = bool Function(T value);
 
-Predicate<T> not<T>(Predicate<T> predicate) => (value) => !predicate(value);
+Predicate<T> not<T>(Predicate<T> predicate) =>
+    (value) => !predicate(value);
 
 /// A stream of click, mouseup or focus events outside a given element.
 Stream<Event> triggersOutside(dynamic /* Element | ElementRef */ element) {
@@ -60,85 +61,86 @@ Stream<Event> triggersOutsideAny(Predicate<Node> checkNodeInside) {
   EventListener? listener;
 
   controller = StreamController.broadcast(
-      sync: true,
-      onListen: () {
-        assert(clickListener == null);
-        assert(mouseDownListener == null);
-        assert(mouseUpListener == null);
+    sync: true,
+    onListen: () {
+      assert(clickListener == null);
+      assert(mouseDownListener == null);
+      assert(mouseUpListener == null);
 
-        Event? lastEvent;
-        Event? lastDownEvent;
+      Event? lastEvent;
+      Event? lastDownEvent;
 
-        listener = (Event e) {
-          lastEvent = e;
-          var node = e.target as Node?;
-          while (node != null) {
-            if (checkNodeInside(node)) {
-              return;
-            } else {
-              node = node.parent;
-            }
-          }
-          controller.add(e);
-        };
-
-        // Keep track of mousedown events so that we can filter mouseup events
-        // that occurred on a different element than the mousedown.
-        mouseDownListener = document.onMouseDown.listen((MouseEvent e) {
-          lastDownEvent = e;
-        });
-
-        // Listen to mouseup to prevent scenarios where a single click event
-        // both opens and closes an element.
-        mouseUpListener = document.onMouseUp.listen((MouseEvent e) {
-          // Allow for the event to be listened to if there was no down event
-          // for example if it was canceled or if the target is the same as
-          // where the 'click' started.
-          if (lastDownEvent == null || e.target == lastDownEvent!.target) {
-            listener!(e);
-          }
-          lastEvent = e;
-        });
-
-        clickListener = document.onClick.listen((MouseEvent e) {
-          // Ignore the click if we just saw a mouseup on the same element... it
-          // probably means that the mouseup was part of this same click.
-          //
-          // This prevents scenarios where clicking an element that displays
-          // another element (e.g. a button to open a popup) inadvertently
-          // triggers an "outside" event, immediately hiding the just-displayed
-          // element.
-          if (lastEvent?.type == 'mouseup' && e.target == lastEvent?.target) {
+      listener = (Event e) {
+        lastEvent = e;
+        var node = e.target as Node?;
+        while (node != null) {
+          if (checkNodeInside(node)) {
             return;
+          } else {
+            node = node.parent;
           }
-          // Allow for the event to be listened to if there was no down event
-          // for example if it was canceled or if the target is the same as
-          // where the 'click' started.
-          if (lastDownEvent == null || e.target == lastDownEvent!.target) {
-            listener!(e);
-          }
-          lastDownEvent = null;
-        });
+        }
+        controller.add(e);
+      };
 
-        // Since 'focusin' event is not supported in Firefox, listen to 'focus'
-        // event with useCapture set to true to implement event delegation and
-        // capture changes to active element on document.
-        document.addEventListener('focus', listener, true);
-
-        // Handles touches outside of element for Safari on iOS devices since
-        // touch events are not detected as clicks on iOS platforms.
-        document.addEventListener('touchend', listener);
-      },
-      onCancel: () {
-        clickListener!.cancel();
-        clickListener = null;
-        mouseDownListener?.cancel();
-        mouseDownListener = null;
-        mouseUpListener!.cancel();
-        mouseUpListener = null;
-        document.removeEventListener('focus', listener, true);
-        document.removeEventListener('touchend', listener);
+      // Keep track of mousedown events so that we can filter mouseup events
+      // that occurred on a different element than the mousedown.
+      mouseDownListener = document.onMouseDown.listen((MouseEvent e) {
+        lastDownEvent = e;
       });
+
+      // Listen to mouseup to prevent scenarios where a single click event
+      // both opens and closes an element.
+      mouseUpListener = document.onMouseUp.listen((MouseEvent e) {
+        // Allow for the event to be listened to if there was no down event
+        // for example if it was canceled or if the target is the same as
+        // where the 'click' started.
+        if (lastDownEvent == null || e.target == lastDownEvent!.target) {
+          listener!(e);
+        }
+        lastEvent = e;
+      });
+
+      clickListener = document.onClick.listen((MouseEvent e) {
+        // Ignore the click if we just saw a mouseup on the same element... it
+        // probably means that the mouseup was part of this same click.
+        //
+        // This prevents scenarios where clicking an element that displays
+        // another element (e.g. a button to open a popup) inadvertently
+        // triggers an "outside" event, immediately hiding the just-displayed
+        // element.
+        if (lastEvent?.type == 'mouseup' && e.target == lastEvent?.target) {
+          return;
+        }
+        // Allow for the event to be listened to if there was no down event
+        // for example if it was canceled or if the target is the same as
+        // where the 'click' started.
+        if (lastDownEvent == null || e.target == lastDownEvent!.target) {
+          listener!(e);
+        }
+        lastDownEvent = null;
+      });
+
+      // Since 'focusin' event is not supported in Firefox, listen to 'focus'
+      // event with useCapture set to true to implement event delegation and
+      // capture changes to active element on document.
+      document.addEventListener('focus', listener, true);
+
+      // Handles touches outside of element for Safari on iOS devices since
+      // touch events are not detected as clicks on iOS platforms.
+      document.addEventListener('touchend', listener);
+    },
+    onCancel: () {
+      clickListener!.cancel();
+      clickListener = null;
+      mouseDownListener?.cancel();
+      mouseDownListener = null;
+      mouseUpListener!.cancel();
+      mouseUpListener = null;
+      document.removeEventListener('focus', listener, true);
+      document.removeEventListener('touchend', listener);
+    },
+  );
   return controller.stream;
 }
 
@@ -154,18 +156,21 @@ Stream<Rectangle?> onResize(Element element) {
   late StreamController<Rectangle?> controller;
   late ResizeObserver observer;
   controller = StreamController<Rectangle?>.broadcast(
-      sync: true,
-      onListen: () {
-        observer = ResizeObserver(allowInterop((entries, _) {
+    sync: true,
+    onListen: () {
+      observer = ResizeObserver(
+        allowInterop((entries, _) {
           for (var entry in entries) {
             controller.add(entry.contentRect);
           }
-        }));
-        observer.observe(element);
-      },
-      onCancel: () {
-        observer.disconnect();
-      });
+        }),
+      );
+      observer.observe(element);
+    },
+    onCancel: () {
+      observer.disconnect();
+    },
+  );
   return controller.stream;
 }
 

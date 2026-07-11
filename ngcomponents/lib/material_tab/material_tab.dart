@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:ngcomponents/content/deferred_content_aware.dart';
@@ -53,8 +53,9 @@ class MaterialTabComponent extends RootFocusable
   final _visible = StreamController<bool>.broadcast(sync: true);
 
   MaterialTabComponent(
-      HtmlElement super.element, @Optional() IdGenerator? idGenerator)
-      : _uuid = (idGenerator ?? SequentialIdGenerator.fromUUID()).nextId();
+    HtmlElement super.element,
+    @Optional() IdGenerator? idGenerator,
+  ) : _uuid = (idGenerator ?? SequentialIdGenerator.fromUUID()).nextId();
 
   @ViewChild('content')
   set content(DivElement? div) {

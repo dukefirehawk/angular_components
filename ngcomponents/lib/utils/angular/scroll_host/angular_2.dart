@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:ngcomponents/src/utils/angular/scroll_host/scroll_host_base.dart';
@@ -24,9 +24,7 @@ const scrollHostProviders = <Provider>[
 @Deprecated('Use [scrollHostProviders] or [scrollHostNewModule]')
 const scrollHostModule = scrollHostProviders;
 
-const scrollHostNewModule = Module(
-  provide: scrollHostProviders,
-);
+const scrollHostNewModule = Module(provide: scrollHostProviders);
 
 /// Provides a scroll host that is restricted within the content area of
 /// a specific element.
@@ -48,8 +46,9 @@ class ElementScrollHost implements OnInit, OnDestroy, ElementScrollHostBase {
 
   // This is sync to reduce the time between StickyController writing to the
   // DOM and clients writing to the DOM, making scrolling smoother.
-  final StreamController<Null> _onUpdate =
-      StreamController.broadcast(sync: true);
+  final StreamController<Null> _onUpdate = StreamController.broadcast(
+    sync: true,
+  );
 
   ElementScrollHostBase? _scrollHost;
 
@@ -62,8 +61,12 @@ class ElementScrollHost implements OnInit, OnDestroy, ElementScrollHostBase {
   bool _useTouchGestureListener = true;
   bool _enableSmoothPushing = false;
 
-  ElementScrollHost(this._domService, this._ngZone,
-      this._gestureListenerFactory, this.element);
+  ElementScrollHost(
+    this._domService,
+    this._ngZone,
+    this._gestureListenerFactory,
+    this.element,
+  );
 
   @override
   void ngOnInit() {
@@ -73,9 +76,13 @@ class ElementScrollHost implements OnInit, OnDestroy, ElementScrollHostBase {
   void _init() {
     _scrollHost?.dispose();
     _scrollHost = ElementScrollHostBase(
-        _domService, _ngZone, _gestureListenerFactory, element,
-        usePositionSticky: _usePositionSticky,
-        useTouchGestureListener: _useTouchGestureListener);
+      _domService,
+      _ngZone,
+      _gestureListenerFactory,
+      element,
+      usePositionSticky: _usePositionSticky,
+      useTouchGestureListener: _useTouchGestureListener,
+    );
     stickyController?.enableSmoothPushing = _enableSmoothPushing;
 
     if (!_usePositionSticky) {
@@ -244,8 +251,12 @@ class ElementScrollHost implements OnInit, OnDestroy, ElementScrollHostBase {
 /// Provides a scroll host that uses the browser window content area.
 @Injectable()
 class WindowScrollHost extends WindowScrollHostBase implements OnDestroy {
-  WindowScrollHost(super.domService, super.ngZone,
-      super.gestureListenerFactory, super.window);
+  WindowScrollHost(
+    super.domService,
+    super.ngZone,
+    super.gestureListenerFactory,
+    super.window,
+  );
 
   @override
   ngOnDestroy() {
@@ -258,9 +269,7 @@ class WindowScrollHost extends WindowScrollHostBase implements OnDestroy {
 ///
 /// The sticky controller will respect their position and
 /// will put the other sticky headers and footers below or above them.
-@Directive(
-  selector: '[acxStickyFloating]',
-)
+@Directive(selector: '[acxStickyFloating]')
 class StickyFloatingTracker implements OnInit, OnDestroy {
   final ScrollHost _scrollHost;
   final Element _element;
@@ -288,13 +297,14 @@ class StickyFloatingTracker implements OnInit, OnDestroy {
 /// name, adding and removing it in a dom write callback.
 /// E.g. in the example above, if the panning is top-left, both the
 /// `pan-style-top` and the `pan-style-left` styles names will be set.
-@Directive(
-  selector: '[acxPanClass]',
-)
+@Directive(selector: '[acxPanClass]')
 class AcxPanClassDirective extends BasePanClassDirective
     implements OnInit, OnDestroy {
   AcxPanClassDirective(
-      super.domService, super.scrollHost, HtmlElement super.element);
+    super.domService,
+    super.scrollHost,
+    HtmlElement super.element,
+  );
 
   @override
   void ngOnInit() => startPanListener();
@@ -323,9 +333,7 @@ class AcxPanClassDirective extends BasePanClassDirective
 /// known to not work correctly. Suggestion is to have the ngIf and
 /// acxStickyElements on different html elements (i.e., add an extra outer div
 /// for the ngIf).
-@Directive(
-  selector: '[acxStickyElement]',
-)
+@Directive(selector: '[acxStickyElement]')
 class StickyElementDirective implements AfterViewInit, OnDestroy {
   final Element _stickyElement;
   final ScrollHost _scrollHost;
@@ -390,8 +398,13 @@ class StickyElementDirective implements AfterViewInit, OnDestroy {
   }
 
   void _stick() {
-    _stickyController?.stick(_stickyElement, _position, _endElement,
-        stickyClass: _stickyClass, stickyKey: _stickyKey);
+    _stickyController?.stick(
+      _stickyElement,
+      _position,
+      _endElement,
+      stickyClass: _stickyClass,
+      stickyKey: _stickyKey,
+    );
   }
 
   void _unstick() {

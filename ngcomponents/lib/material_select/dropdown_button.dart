@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:ngcomponents/button_decorator/button_decorator.dart';
@@ -28,7 +28,7 @@ import 'package:ngcomponents/utils/id_generator/id_generator.dart';
   templateUrl: 'dropdown_button.html',
   styleUrls: [
     'package:ngcomponents/button_decorator/button_decorator.scss.css',
-    'dropdown_button.scss.css'
+    'dropdown_button.scss.css',
   ],
   directives: [
     ButtonDirective,
@@ -65,7 +65,9 @@ class DropdownButtonComponent extends Object
   @Input()
   set role(String? value) {
     assert(
-        ariaRole == null, 'Aria role can only be set before initialization.');
+      ariaRole == null,
+      'Aria role can only be set before initialization.',
+    );
     _role = value;
   }
 

@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 import 'dart:math' show max, min;
 
 import 'package:ngdart/angular.dart';
@@ -193,8 +193,10 @@ class DomService {
           completer.complete(highResTimer);
         });
       });
-      _nextFrameFuture =
-          ZonedFuture(completer.future, _ngZone.runOutsideAngular);
+      _nextFrameFuture = ZonedFuture(
+        completer.future,
+        _ngZone.runOutsideAngular,
+      );
     }
     return _nextFrameFuture;
   }
@@ -207,10 +209,15 @@ class DomService {
   Stream<Null>? get onIdle {
     if (_onIdleStream == null) {
       _onIdleController = StreamController.broadcast(
-          sync: true, onListen: _resetIdleTimer, onCancel: _resetIdleTimer);
+        sync: true,
+        onListen: _resetIdleTimer,
+        onCancel: _resetIdleTimer,
+      );
       // TODO(google): consider scoping it to be inside the managed zone:
-      _onIdleStream =
-          ZonedStream(_onIdleController!.stream, _ngZone.runOutsideAngular);
+      _onIdleStream = ZonedStream(
+        _onIdleController!.stream,
+        _ngZone.runOutsideAngular,
+      );
       // TODO(google): integrate with Chrome's new idle detection API
     }
     return _onIdleStream;
@@ -331,7 +338,9 @@ class DomService {
     if (_onQueuesProcessedStream == null) {
       _onQueuesProcessedController = StreamController.broadcast(sync: true);
       _onQueuesProcessedStream = ZonedStream(
-          _onQueuesProcessedController!.stream, _ngZone.runOutsideAngular);
+        _onQueuesProcessedController!.stream,
+        _ngZone.runOutsideAngular,
+      );
     }
     return _onQueuesProcessedStream;
   }
@@ -346,7 +355,9 @@ class DomService {
     if (_onLayoutChangedStream == null) {
       _onLayoutChangedController = StreamController.broadcast(sync: true);
       _onLayoutChangedStream = ZonedStream(
-          _onLayoutChangedController!.stream, _ngZone.runOutsideAngular);
+        _onLayoutChangedController!.stream,
+        _ngZone.runOutsideAngular,
+      );
       _ngZone.runOutsideAngular(() {
         // Capture events from Angular
         _ngZone.onTurnStart.listen((_) {
@@ -402,8 +413,11 @@ class DomService {
   /// Returns a subscription that allows pausing, resuming and canceling the
   /// observer.
   StreamSubscription<DomService> trackLayoutChange<T>(
-      T Function() fn, void Function(T) callback,
-      {int framesToStabilize = 1, bool runInAngularZone = false}) {
+    T Function() fn,
+    void Function(T) callback, {
+    int framesToStabilize = 1,
+    bool runInAngularZone = false,
+  }) {
     // TODO(google): Move layout checking into ruler service when landed.
     var trackerCallback = callback;
     if (runInAngularZone) {
@@ -537,7 +551,7 @@ enum DomServiceState {
   Writing,
 
   /// The DOM service is executing all scheduled reads to the DOM.
-  Reading
+  Reading,
 }
 
 class _ChangeTracker<T> {
@@ -550,7 +564,11 @@ class _ChangeTracker<T> {
   int _stableFrameCounter = 0;
 
   _ChangeTracker(
-      this._domService, this._fn, this._callback, this._framesToStabilize) {
+    this._domService,
+    this._fn,
+    this._callback,
+    this._framesToStabilize,
+  ) {
     assert(_framesToStabilize > 0);
   }
 

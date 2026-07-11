@@ -2,7 +2,7 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:ngcomponents/focus/focus.dart';
@@ -26,18 +26,19 @@ import 'package:ngcomponents/utils/disposer/disposer.dart';
 /// The menu expands when the button is clicked and closes when either an item
 /// is selected or a region outside the dropdown is clicked.
 @Component(
-    selector: 'material-menu',
-    directives: [
-      MaterialButtonComponent,
-      MaterialIconComponent,
-      MaterialTooltipDirective,
-      MenuPopupComponent,
-      NgIf,
-      PopupSourceDirective
-    ],
-    providers: [ExistingProvider(HasDisabled, MaterialMenuComponent)],
-    templateUrl: 'material_menu.html',
-    changeDetection: ChangeDetectionStrategy.onPush)
+  selector: 'material-menu',
+  directives: [
+    MaterialButtonComponent,
+    MaterialIconComponent,
+    MaterialTooltipDirective,
+    MenuPopupComponent,
+    NgIf,
+    PopupSourceDirective,
+  ],
+  providers: [ExistingProvider(HasDisabled, MaterialMenuComponent)],
+  templateUrl: 'material_menu.html',
+  changeDetection: ChangeDetectionStrategy.onPush,
+)
 class MaterialMenuComponent extends Object
     with
         FocusableMixin,
@@ -108,9 +109,11 @@ class MaterialMenuComponent extends Object
     focusable = _focusTarget;
     // Other listeners which call focus() on isExpandedChange may have to await
     // an extra cycle before the focusable is updated.
-    _disposer.addStreamSubscription(isExpandedChange.listen((_) {
-      focusable = _focusTarget;
-    }));
+    _disposer.addStreamSubscription(
+      isExpandedChange.listen((_) {
+        focusable = _focusTarget;
+      }),
+    );
   }
 
   @override

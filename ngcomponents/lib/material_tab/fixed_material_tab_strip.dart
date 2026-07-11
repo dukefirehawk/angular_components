@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:ngcomponents/annotations/rtl_annotation.dart';
@@ -26,7 +26,7 @@ import 'package:ngcomponents/material_tab/tab_change_event.dart';
     FocusListDirective,
     FocusItemDirective,
     TabButtonComponent,
-    NgFor
+    NgFor,
   ],
   templateUrl: 'fixed_material_tab_strip.html',
   styleUrls: ['fixed_material_tab_strip.scss.css'],
@@ -49,8 +49,9 @@ class FixedMaterialTabStripComponent implements AfterViewInit {
   /// changing.
   @Output()
   Stream<TabChangeEvent> get beforeTabChange => _beforeTabChange.stream;
-  final _beforeTabChange =
-      StreamController<TabChangeEvent>.broadcast(sync: true);
+  final _beforeTabChange = StreamController<TabChangeEvent>.broadcast(
+    sync: true,
+  );
 
   /// Stream of [TabChangeEvent] instances, published when the tab has changed.
   @Output()
@@ -90,9 +91,11 @@ class FixedMaterialTabStripComponent implements AfterViewInit {
   @Input()
   List<String> tabIds = [];
 
-  FixedMaterialTabStripComponent(this._changeDetector,
-      @Optional() @Inject(rtlToken) bool? isRtl, this._ngZone)
-      : _transitionAmount = _calculateTransitionAmount(isRtl ?? false) {
+  FixedMaterialTabStripComponent(
+    this._changeDetector,
+    @Optional() @Inject(rtlToken) bool? isRtl,
+    this._ngZone,
+  ) : _transitionAmount = _calculateTransitionAmount(isRtl ?? false) {
     _updateTabIndicatorTransform();
   }
 

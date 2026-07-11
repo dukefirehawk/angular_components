@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:ngcomponents/utils/angular/scroll_host/interface.dart';
@@ -60,9 +60,14 @@ class NonTouchPanController implements PanController {
     if (_controller == null) {
       assert(_stream == null);
       _controller = StreamController.broadcast(
-          sync: true, onListen: _onListen, onCancel: _onCancel);
-      _stream =
-          ZonedStream<PanEvent>(_controller!.stream, ngZone.runOutsideAngular);
+        sync: true,
+        onListen: _onListen,
+        onCancel: _onCancel,
+      );
+      _stream = ZonedStream<PanEvent>(
+        _controller!.stream,
+        ngZone.runOutsideAngular,
+      );
     }
     return _stream;
   }
@@ -76,9 +81,11 @@ class NonTouchPanController implements PanController {
       _onWheelSubscription = host!.onMouseWheel.listen((WheelEvent event) {
         if (_wasScrolling) return;
         _panTop = _panTop || ((event.deltaY < 0) && (host!.scrollTop == 0));
-        _panRight = _panRight ||
+        _panRight =
+            _panRight ||
             ((event.deltaX > 0) && (host!.scrollLeft == maxScrollX));
-        _panBottom = _panBottom ||
+        _panBottom =
+            _panBottom ||
             ((event.deltaY > 0) && (host!.scrollTop == maxScrollY));
         _panLeft = _panLeft || ((event.deltaX < 0) && (host!.scrollLeft == 0));
         _scheduleNotification();
@@ -115,8 +122,12 @@ class NonTouchPanController implements PanController {
         return;
       }
       if (_endPan) _resetPans();
-      PanEventImpl event =
-          PanEventImpl(_panTop, _panRight, _panBottom, _panLeft);
+      PanEventImpl event = PanEventImpl(
+        _panTop,
+        _panRight,
+        _panBottom,
+        _panLeft,
+      );
       if ((event != _lastEvent) &&
           (event.isValid) &&
           (!event.isSubsetOf(_lastEvent))) {
@@ -246,7 +257,8 @@ class PanEventImpl implements PanEvent {
       (isLeft == other.isLeft);
 
   @override
-  String toString() => '$isPanning ${isTop ? "t" : ""}'
+  String toString() =>
+      '$isPanning ${isTop ? "t" : ""}'
       '${isRight ? "r" : ""}${isBottom ? "b" : ""}${isLeft ? "l" : ""}';
 
   @override

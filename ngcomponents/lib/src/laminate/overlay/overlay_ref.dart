@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngcomponents/laminate/enums/visibility.dart';
 import 'package:ngcomponents/laminate/portal/portal.dart';
@@ -16,8 +16,8 @@ import 'package:ngcomponents/src/laminate/overlay/overlay_state.dart';
 ///
 /// This exists to separate the ruler API from tight coupling on overlays; see
 /// [Ruler.update] for the default implementation.
-typedef AsyncApplyState<E> = Future<void> Function(
-    OverlayState state, E element);
+typedef AsyncApplyState<E> =
+    Future<void> Function(OverlayState state, E element);
 
 /// A handler to return the position and size of the *content* of [element].
 ///
@@ -25,8 +25,8 @@ typedef AsyncApplyState<E> = Future<void> Function(
 ///
 /// This exists to separate the ruler API from tight coupling on overlays; see
 /// [Ruler.measure] and [Ruler.track] for the default implementations.
-typedef AsyncMeasureSize<E> = Stream<Rectangle> Function(E element,
-    {bool track});
+typedef AsyncMeasureSize<E> =
+    Stream<Rectangle> Function(E element, {bool track});
 
 /// A handle to manipulate an existing overlay pane.
 class OverlayRef implements PortalHost {
@@ -53,9 +53,12 @@ class OverlayRef implements PortalHost {
     }
     await _applyChanges();
     yield* (_runOutsideAngular(() {
-      return _asyncMeasureSize(overlayElement, track: true)
-          .distinct(_isEqualSize);
-    }) as Stream<Rectangle>?)!;
+          return _asyncMeasureSize(
+            overlayElement,
+            track: true,
+          ).distinct(_isEqualSize);
+        })
+        as Stream<Rectangle>?)!;
   }
 
   /// An event stream that fires when the overlay's visibility changes.
@@ -138,14 +141,14 @@ class OverlayRef implements PortalHost {
   }
 
   OverlayRef(
-      this._asyncApplyState,
-      this._asyncMeasureSize,
-      this._delegatePortalHost,
-      this.containerElement,
-      this.overlayElement,
-      this._runOutsideAngular,
-      {OverlayState? state})
-      : this.state = MutableOverlayState.from(state) {
+    this._asyncApplyState,
+    this._asyncMeasureSize,
+    this._delegatePortalHost,
+    this.containerElement,
+    this.overlayElement,
+    this._runOutsideAngular, {
+    OverlayState? state,
+  }) : this.state = MutableOverlayState.from(state) {
     _stateUpdateListener = this.state.onUpdate.listen((_) => _applyChanges());
   }
 }

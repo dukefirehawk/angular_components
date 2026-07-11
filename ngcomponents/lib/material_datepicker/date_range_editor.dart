@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 import 'dart:math';
 
 import 'package:ngdart/angular.dart';
@@ -127,9 +127,11 @@ class DateRangeEditorComponent implements OnInit, AfterViewInit, Focusable {
   /// Checks if custom comparison is a valid option.
   bool get isCustomComparisonValid => model.isCustomComparisonValid;
 
-  static final comparisonHeaderMsg = Intl.message('Compare',
-      name: 'comparisonHeaderMsg',
-      desc: 'Label for a toggle that turns time comparison on/off.');
+  static final comparisonHeaderMsg = Intl.message(
+    'Compare',
+    name: 'comparisonHeaderMsg',
+    desc: 'Label for a toggle that turns time comparison on/off.',
+  );
 
   /// Whether to enable compact calendar styles.
   @Input()
@@ -274,10 +276,13 @@ class DateRangeEditorComponent implements OnInit, AfterViewInit, Focusable {
 
   DatepickerDateRange _createDaysToTodayRange(int numDays) =>
       relativeDaysToToday
-          ? LastNDaysToTodayRange.beforeToday(_clock, numDays)
-          : DatepickerDateRange('$numDays $daysToTodayMsg',
-              _today!.add(days: -(numDays - 1)), _today,
-              isPredefined: true);
+      ? LastNDaysToTodayRange.beforeToday(_clock, numDays)
+      : DatepickerDateRange(
+          '$numDays $daysToTodayMsg',
+          _today!.add(days: -(numDays - 1)),
+          _today,
+          isPredefined: true,
+        );
 
   set daysToYesterday(String value) {
     int? numDays = _parseDaysInput(value);
@@ -327,21 +332,25 @@ class DateRangeEditorComponent implements OnInit, AfterViewInit, Focusable {
   Date? _today;
 
   DateRangeEditorComponent(
-      this._elementRef,
-      this._domService,
-      this._ngZone,
-      @Optional() DateRangeEditorHost? editorHost,
-      @Optional() @Inject(datepickerClock) Clock? clock,
-      Clock legacyClock) {
+    this._elementRef,
+    this._domService,
+    this._ngZone,
+    @Optional() DateRangeEditorHost? editorHost,
+    @Optional() @Inject(datepickerClock) Clock? clock,
+    Clock legacyClock,
+  ) {
     // TODO(google): Migrate to use only datepickerClock
     _clock ??= legacyClock;
     _today = Date.today(_clock);
     editorHost?.dateRangeEditorCreated(this);
-    nextPrevModel = DateRangeEditorNextPrevModel(onNext: () {
-      calendarPicker?.scrollToDate(_visibleMonth!.add(months: 1));
-    }, onPrev: () {
-      calendarPicker?.scrollToDate(_visibleMonth!.add(months: -1));
-    });
+    nextPrevModel = DateRangeEditorNextPrevModel(
+      onNext: () {
+        calendarPicker?.scrollToDate(_visibleMonth!.add(months: 1));
+      },
+      onPrev: () {
+        calendarPicker?.scrollToDate(_visibleMonth!.add(months: -1));
+      },
+    );
   }
 
   @override
@@ -421,7 +430,8 @@ class DateRangeEditorComponent implements OnInit, AfterViewInit, Focusable {
       final subitems = <SelectableMenuItem<DatepickerPreset>>[];
       for (var alternative in preset.alternatives) {
         bool isValid = _validPresets.contains(alternative);
-        subitems.add(SelectableMenuItem(
+        subitems.add(
+          SelectableMenuItem(
             cssClasses: ['preset-dropdown-item'],
             value: alternative,
             action: () {
@@ -433,15 +443,20 @@ class DateRangeEditorComponent implements OnInit, AfterViewInit, Focusable {
             tooltip: isValid ? '' : rangeDisabledTooltip,
             selectableState: isValid
                 ? SelectableOption.Selectable
-                : SelectableOption.Disabled));
+                : SelectableOption.Disabled,
+          ),
+        );
       }
       subMenu = MenuModel([
         MenuItemGroupWithSelection(
-            items: subitems, selectionModel: _presetSelection)
+          items: subitems,
+          selectionModel: _presetSelection,
+        ),
       ]);
       //}
       bool isValid = _validPresets.contains(preset);
-      items.add(SelectableMenuItem(
+      items.add(
+        SelectableMenuItem(
           value: preset,
           action: () {
             _presetSelection.select(preset);
@@ -450,12 +465,18 @@ class DateRangeEditorComponent implements OnInit, AfterViewInit, Focusable {
           },
           itemRenderer: _renderPreset,
           tooltip: isValid ? '' : rangeDisabledTooltip,
-          selectableState:
-              isValid ? SelectableOption.Selectable : SelectableOption.Disabled,
-          subMenu: subMenu));
+          selectableState: isValid
+              ? SelectableOption.Selectable
+              : SelectableOption.Disabled,
+          subMenu: subMenu,
+        ),
+      );
     }
     _presetsMenu = MenuModel([
-      MenuItemGroupWithSelection(items: items, selectionModel: _presetSelection)
+      MenuItemGroupWithSelection(
+        items: items,
+        selectionModel: _presetSelection,
+      ),
     ]);
   }
 
@@ -469,7 +490,10 @@ class DateRangeEditorComponent implements OnInit, AfterViewInit, Focusable {
   }
 
   void onAlternativePresetClicked(
-      UIEvent? event, DatepickerPreset parent, DatepickerPreset alternative) {
+    UIEvent? event,
+    DatepickerPreset parent,
+    DatepickerPreset alternative,
+  ) {
     // Replace parent preset with alternative in main menu.
     for (var i = 0; i < _presets.length; i++) {
       if (_presets[i] == parent) {
@@ -499,8 +523,12 @@ class DateRangeEditorComponent implements OnInit, AfterViewInit, Focusable {
     var oldRange = model.value?.range;
     _presetSelection.clear();
     if (oldRange != null) {
-      model.selectRange(DatepickerDateRange.custom(oldRange.start, oldRange.end)
-          .clamp(min: minDate, max: maxDate));
+      model.selectRange(
+        DatepickerDateRange.custom(
+          oldRange.start,
+          oldRange.end,
+        ).clamp(min: minDate, max: maxDate),
+      );
     }
     if (model.basic) {
       model.shouldShowPredefinedList = false;
@@ -530,8 +558,9 @@ class DateRangeEditorComponent implements OnInit, AfterViewInit, Focusable {
       // A month was selected - switch back to the calendar picker and scroll
       // the month into view.
       showMonthSelector = false;
-      _monthSelectorState =
-          CalendarState.empty(resolution: CalendarResolution.months);
+      _monthSelectorState = CalendarState.empty(
+        resolution: CalendarResolution.months,
+      );
       final selectedMonth = state.selection(state.currentSelection);
       _domService.scheduleWrite(() {
         calendarPicker?.scrollToDate(selectedMonth.start!);
@@ -540,8 +569,9 @@ class DateRangeEditorComponent implements OnInit, AfterViewInit, Focusable {
   }
 
   CalendarState get monthSelectorState => _monthSelectorState;
-  CalendarState _monthSelectorState =
-      CalendarState.empty(resolution: CalendarResolution.months);
+  CalendarState _monthSelectorState = CalendarState.empty(
+    resolution: CalendarResolution.months,
+  );
 
   static final _monthFormatter = DateFormat.yMMM();
   Date? _visibleMonth;
@@ -580,45 +610,66 @@ class DateRangeEditorComponent implements OnInit, AfterViewInit, Focusable {
 
   MenuModel get presetsMenu => _presetsMenu;
 
-  static final navigateBeforeMsg = Intl.message('Previous date range',
-      name: 'navigateBeforeMsg',
-      meaning: 'Update the calendar display to show the previous time period.',
-      desc: 'Label for control button which changes the range of dates shown in'
-          'the calendar to the previous range of dates.');
+  static final navigateBeforeMsg = Intl.message(
+    'Previous date range',
+    name: 'navigateBeforeMsg',
+    meaning: 'Update the calendar display to show the previous time period.',
+    desc:
+        'Label for control button which changes the range of dates shown in'
+        'the calendar to the previous range of dates.',
+  );
 
-  static final navigateNextMsg = Intl.message('Next date range',
-      name: 'navigateNextMsg',
-      meaning: 'Update the calendar display to show the next time period',
-      desc: 'Label for control button which changes the range of dates shown in'
-          'the calendar to the next range of dates.');
+  static final navigateNextMsg = Intl.message(
+    'Next date range',
+    name: 'navigateNextMsg',
+    meaning: 'Update the calendar display to show the next time period',
+    desc:
+        'Label for control button which changes the range of dates shown in'
+        'the calendar to the next range of dates.',
+  );
 
-  static final clearRangeMsg = Intl.message('Clear date range',
-      name: 'DateRangeEditorComponent_clearRangeMsg',
-      meaning: 'Clear the current range.',
-      desc: 'Label for an option in the preset list at the left which '
-          'clears the current selection.');
+  static final clearRangeMsg = Intl.message(
+    'Clear date range',
+    name: 'DateRangeEditorComponent_clearRangeMsg',
+    meaning: 'Clear the current range.',
+    desc:
+        'Label for an option in the preset list at the left which '
+        'clears the current selection.',
+  );
 
-  static final customRangeMsg = Intl.message('Custom',
-      name: 'DateRangeEditorComponent_customRangeMsg',
-      meaning: 'Replace the current range with a Custom range that has the '
-          'same endpoints.',
-      desc: 'Label for an option in the preset list at the left which '
-          'replaces the current selection with a "Custom" range.');
+  static final customRangeMsg = Intl.message(
+    'Custom',
+    name: 'DateRangeEditorComponent_customRangeMsg',
+    meaning:
+        'Replace the current range with a Custom range that has the '
+        'same endpoints.',
+    desc:
+        'Label for an option in the preset list at the left which '
+        'replaces the current selection with a "Custom" range.',
+  );
 
   // TODO(google): Check if some locales require text before the input.
-  static final daysToTodayMsg = Intl.message('days up to today',
-      name: 'daysToTodayMsg',
-      desc: 'Label for number input which changes the range of dates shown in'
-          ' the calendar to [today - number, today].');
+  static final daysToTodayMsg = Intl.message(
+    'days up to today',
+    name: 'daysToTodayMsg',
+    desc:
+        'Label for number input which changes the range of dates shown in'
+        ' the calendar to [today - number, today].',
+  );
 
-  static final daysToYesterdayMsg = Intl.message('days up to yesterday',
-      name: 'daysToYesterdayMsg',
-      desc: 'Label for number input which changes the range of dates shown in'
-          ' the calendar to [yesterday - number, yesterday].');
+  static final daysToYesterdayMsg = Intl.message(
+    'days up to yesterday',
+    name: 'daysToYesterdayMsg',
+    desc:
+        'Label for number input which changes the range of dates shown in'
+        ' the calendar to [yesterday - number, yesterday].',
+  );
 
-  static final rangeDisabledTooltip = Intl.message('No days available',
-      name: 'DateRangeEditorComponent_rangeDisabledTooltip',
-      desc: 'Message that explains why a date range is invalid.');
+  static final rangeDisabledTooltip = Intl.message(
+    'No days available',
+    name: 'DateRangeEditorComponent_rangeDisabledTooltip',
+    desc: 'Message that explains why a date range is invalid.',
+  );
 }
 
 typedef NextPrevCallback = void Function();
@@ -643,11 +694,19 @@ class DateRangeEditorNextPrevModel implements Sequential {
 
   void update(Date? visibleMonth, Date minDate, Date maxDate) {
     if (visibleMonth == null) return;
-    hasPrev.value = compareDatesAtResolution(
-            visibleMonth, minDate, CalendarResolution.months) >
+    hasPrev.value =
+        compareDatesAtResolution(
+          visibleMonth,
+          minDate,
+          CalendarResolution.months,
+        ) >
         0;
-    hasNext.value = compareDatesAtResolution(
-            visibleMonth, maxDate, CalendarResolution.months) <
+    hasNext.value =
+        compareDatesAtResolution(
+          visibleMonth,
+          maxDate,
+          CalendarResolution.months,
+        ) <
         0;
   }
 }

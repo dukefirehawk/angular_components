@@ -2,7 +2,7 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:intl/intl.dart';
@@ -24,10 +24,7 @@ const tooltipShowDelay = Duration(milliseconds: 600);
 ///
 /// NOTE: This directive will be used in conjunction with tooltips once they are
 /// made to be popups instead of just using popups.
-@Directive(
-  selector: '[tooltipSource]',
-  exportAs: 'tooltipSource',
-)
+@Directive(selector: '[tooltipSource]', exportAs: 'tooltipSource')
 class MaterialTooltipSourceDirective extends PopupSourceDirective
     implements Toggler, AfterViewInit, OnDestroy {
   @HostBinding('style.cursor')
@@ -38,9 +35,10 @@ class MaterialTooltipSourceDirective extends PopupSourceDirective
 
   @HostBinding('attr.aria-label')
   static final tooltipLabel = Intl.message(
-      'Mouseover or press enter on this icon for more information.',
-      name: 'MaterialTooltipSourceDirective_tooltipLabel',
-      desc: 'Label for help icon which opens a help center tooltip.');
+    'Mouseover or press enter on this icon for more information.',
+    name: 'MaterialTooltipSourceDirective_tooltipLabel',
+    desc: 'Label for help icon which opens a help center tooltip.',
+  );
 
   final HtmlElement element;
   late DelayedAction _show;
@@ -49,11 +47,16 @@ class MaterialTooltipSourceDirective extends PopupSourceDirective
   bool _isMouseInside = false;
 
   MaterialTooltipSourceDirective(
-      DomPopupSourceFactory domPopupSourceFactory,
-      this.element,
-      @Attribute('initPopupAriaAttributes') String? initAriaAttributes)
-      : super(domPopupSourceFactory, element, /* referenceDirective */ null,
-            /* focusable */ null, initAriaAttributes) {
+    DomPopupSourceFactory domPopupSourceFactory,
+    this.element,
+    @Attribute('initPopupAriaAttributes') String? initAriaAttributes,
+  ) : super(
+        domPopupSourceFactory,
+        element,
+        /* referenceDirective */ null,
+        /* focusable */ null,
+        initAriaAttributes,
+      ) {
     _show = DelayedAction(tooltipShowDelay, activate);
   }
 

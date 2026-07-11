@@ -2,7 +2,7 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 
@@ -16,10 +16,7 @@ import 'package:ngdart/angular.dart';
 /// Example usage:
 ///     <material-button ref #button="ref"></materialButton>
 ///     <!-- You can now use 'button' in this template as a property -->
-@Directive(
-  selector: '[ref]',
-  exportAs: 'ref',
-)
+@Directive(selector: '[ref]', exportAs: 'ref')
 class ReferenceDirective {
   final Element? elementRef;
 

@@ -2,7 +2,7 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:intl/intl.dart';
@@ -16,8 +16,9 @@ import 'package:ngcomponents/src/material_tree/material_tree_root.dart';
 import 'package:ngcomponents/mixins/material_dropdown_base.dart';
 import 'package:ngcomponents/model/selection/selection_options.dart';
 
-const materialTreeLeftPaddingToken =
-    OpaqueToken('MaterialTreeGroupComponent_materialTreeLeftPaddingToken');
+const materialTreeLeftPaddingToken = OpaqueToken(
+  'MaterialTreeGroupComponent_materialTreeLeftPaddingToken',
+);
 
 /// An internal component for rendering selection options.
 ///
@@ -37,7 +38,7 @@ const materialTreeLeftPaddingToken =
     MaterialTreeGroupComponent,
     NgFor,
     NgIf,
-    NgClass
+    NgClass,
   ],
   directiveTypes: [
     Typed<MaterialTreeGroupComponent>.of([#T]),
@@ -101,15 +102,12 @@ class MaterialTreeGroupComponent<T> extends MaterialTreeNode<T?>
   final String fixedPadding;
 
   MaterialTreeGroupComponent(
-      this._root,
-      ChangeDetectorRef changeDetector,
-      [@Optional()
-          this._dropdownHandle,
-      @Optional()
-      @Inject(materialTreeLeftPaddingToken)
-          int? constantLeftPadding])
-      : fixedPadding = '${constantLeftPadding ?? defaultConstantLeftPadding}px',
-        super(_root as MaterialTreeRoot<T>, changeDetector);
+    this._root,
+    ChangeDetectorRef changeDetector, [
+    @Optional() this._dropdownHandle,
+    @Optional() @Inject(materialTreeLeftPaddingToken) int? constantLeftPadding,
+  ]) : fixedPadding = '${constantLeftPadding ?? defaultConstantLeftPadding}px',
+       super(_root as MaterialTreeRoot<T>, changeDetector);
 
   // This is only used to standardize all the different group components.
   @HostBinding('class.material-tree-group')
@@ -164,8 +162,11 @@ class MaterialTreeGroupComponent<T> extends MaterialTreeNode<T?>
       if (isMultiSelect &&
           previouslyToggledNode != null &&
           (e is MouseEvent && e.shiftKey)) {
-        toggleSelectionRangeInclusive(previouslyToggledNode, option as T,
-            isSelected(previouslyToggledNode));
+        toggleSelectionRangeInclusive(
+          previouslyToggledNode,
+          option as T,
+          isSelected(previouslyToggledNode),
+        );
       }
 
       // For single select, within a dropdown, close the dropdown on toggle.
@@ -218,6 +219,8 @@ class MaterialTreeGroupComponent<T> extends MaterialTreeNode<T?>
     onDestroy();
   }
 
-  static final viewMoreMsg = Intl.message('View more',
-      desc: 'Label for a link that allows user to see the collapsed options.');
+  static final viewMoreMsg = Intl.message(
+    'View more',
+    desc: 'Label for a link that allows user to see the collapsed options.',
+  );
 }

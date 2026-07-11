@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:ngcomponents/button_decorator/button_decorator.dart';
@@ -175,8 +175,9 @@ class MaterialDateRangePickerComponent
   /// This can be used if it's more convenient to mutate something in-place
   /// instead of getting and setting new date range values.
   @Input('reference')
-  ObservableReference<DatepickerComparison?> selection =
-      ObservableReference(null);
+  ObservableReference<DatepickerComparison?> selection = ObservableReference(
+    null,
+  );
 
   /// Whether or not this date range picker supports choosing time comparison
   /// ranges.
@@ -189,8 +190,9 @@ class MaterialDateRangePickerComponent
   set supportsComparison(bool value) {
     _supportsComparison = value;
     if (!supportsComparison && selection.value?.comparison != null) {
-      selection.value =
-          DatepickerComparison.noComparison(selection.value!.range);
+      selection.value = DatepickerComparison.noComparison(
+        selection.value!.range,
+      );
     }
   }
 
@@ -399,16 +401,16 @@ class MaterialDateRangePickerComponent
   final String popupClassName;
 
   MaterialDateRangePickerComponent(
-      @Optional() @Inject(datepickerClock) Clock? clock,
-      Clock legacyClock,
-      @Optional() DatepickerConfig? config,
-      @Attribute('popupClass') String? popupClass,
-      @Optional() @SkipSelf() this._popupSizeProvider,
-      HtmlElement element,
-      this._domService,
-      this._ngZone)
-      : _config = config ?? DatepickerConfig(),
-        popupClassName = constructEncapsulatedCss(popupClass, element.classes) {
+    @Optional() @Inject(datepickerClock) Clock? clock,
+    Clock legacyClock,
+    @Optional() DatepickerConfig? config,
+    @Attribute('popupClass') String? popupClass,
+    @Optional() @SkipSelf() this._popupSizeProvider,
+    HtmlElement element,
+    this._domService,
+    this._ngZone,
+  ) : _config = config ?? DatepickerConfig(),
+      popupClassName = constructEncapsulatedCss(popupClass, element.classes) {
     // TODO(google): Migrate to use only datepickerClock
     clock ??= legacyClock;
 
@@ -436,17 +438,22 @@ class MaterialDateRangePickerComponent
     // Wire the internal model and the external value up to each other.
     _updateFormattedRanges(selection.value);
     _disposer
-      ..addDisposable(selection.stream.listen((v) {
-        model.value = _maybeStripComparison(v);
-        _updateFormattedRanges(v);
-      }))
-      ..addDisposable(model.changes
-          .map((v) => v.date)
-          .map(needsApply)
-          .listen(_showApplyBar))
-      ..addDisposable(model.changes
-          .where((_) => !_popupVisible) // handle next/prev buttons while closed
-          .listen((v) => selection.value = v.date));
+      ..addDisposable(
+        selection.stream.listen((v) {
+          model.value = _maybeStripComparison(v);
+          _updateFormattedRanges(v);
+        }),
+      )
+      ..addDisposable(
+        model.changes.map((v) => v.date).map(needsApply).listen(_showApplyBar),
+      )
+      ..addDisposable(
+        model.changes
+            .where(
+              (_) => !_popupVisible,
+            ) // handle next/prev buttons while closed
+            .listen((v) => selection.value = v.date),
+      );
   }
 
   @override
@@ -457,8 +464,10 @@ class MaterialDateRangePickerComponent
         _comparisonOptions != null &&
         selection.value != null &&
         !_isComparisonOptionsSupported(selection.value!)) {
-      throw UnsupportedError('Your comparisonOptions don\'t support your'
-          ' input datePickerComparison: ${selection.value}');
+      throw UnsupportedError(
+        'Your comparisonOptions don\'t support your'
+        ' input datePickerComparison: ${selection.value}',
+      );
     }
   }
 
@@ -500,8 +509,11 @@ class MaterialDateRangePickerComponent
           // without user interaction, which is a bad user experience.  As a
           // general rule, the selection should only change as the direct and
           // immediate result of an action performed by the user.
-          model.value =
-              DatepickerComparison.reclamp(model.value, minDate, maxDate);
+          model.value = DatepickerComparison.reclamp(
+            model.value,
+            minDate,
+            maxDate,
+          );
           model.minDate = minDate;
           model.maxDate = maxDate;
           model.basic = isBasic;
@@ -565,7 +577,8 @@ class MaterialDateRangePickerComponent
 
   void onRangeClicked(UIEvent event) {
     // Close eagerly for preset ranges and the cleared range.
-    final shouldCloseEagerly = _isPreset(model.value) ||
+    final shouldCloseEagerly =
+        _isPreset(model.value) ||
         (model.value!.range == null && model.value!.comparison == null);
     if (shouldCloseEagerly) {
       // Don't render preset changes to the calendar while the popup is closing
@@ -662,27 +675,37 @@ class MaterialDateRangePickerComponent
       _comparisonOptions!.contains(ComparisonOption.custom) ||
       _comparisonOptions!.any((option) => cmp.comparesTo(option));
 
-  static final cancelButtonMsg = Intl.message('Cancel',
-      meaning: 'Button in a date picker',
-      desc: 'Label for a "cancel" button -- abandon the current date'
-          ' selection and go back to whatever it was before the user'
-          ' opened the date picker');
+  static final cancelButtonMsg = Intl.message(
+    'Cancel',
+    meaning: 'Button in a date picker',
+    desc:
+        'Label for a "cancel" button -- abandon the current date'
+        ' selection and go back to whatever it was before the user'
+        ' opened the date picker',
+  );
 
   String get applyButtonMsg => applyButtonLabel ?? _applyButtonMsg;
 
-  static final _applyButtonMsg = Intl.message('Apply',
-      name: '_applyButtonMsg',
-      meaning: 'Button in a date picker',
-      desc: 'Label for an "Apply" button -- accept and apply the date range '
-          'seen in the date picker.');
+  static final _applyButtonMsg = Intl.message(
+    'Apply',
+    name: '_applyButtonMsg',
+    meaning: 'Button in a date picker',
+    desc:
+        'Label for an "Apply" button -- accept and apply the date range '
+        'seen in the date picker.',
+  );
 
-  String _compareMsg(String to) => Intl.message('Compared: $to',
-      name: '_compareMsg',
-      desc: 'Indicates what date range the current date range is compared to',
-      args: [to],
-      examples: const {'to': 'Jul 21, 2014 - Aug 3, 2015'});
+  String _compareMsg(String to) => Intl.message(
+    'Compared: $to',
+    name: '_compareMsg',
+    desc: 'Indicates what date range the current date range is compared to',
+    args: [to],
+    examples: const {'to': 'Jul 21, 2014 - Aug 3, 2015'},
+  );
 
-  static final _placeHolderMsg = Intl.message('Select a date range',
-      name: '_placeHolderMsg',
-      desc: 'Placeholder text for a date range picker with an empty range.');
+  static final _placeHolderMsg = Intl.message(
+    'Select a date range',
+    name: '_placeHolderMsg',
+    desc: 'Placeholder text for a date range picker with an empty range.',
+  );
 }

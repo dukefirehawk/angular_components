@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 import 'dart:math';
 
 import 'package:ngdart/angular.dart';
@@ -127,13 +127,16 @@ abstract class MaterialDateGridBase
   final ChangeDetectorRef changeDetector;
   final DomService _domService;
 
-  MaterialDateGridBase(Clock clock, CalendarState initialState,
-      this.changeDetector, this._domService, String mode)
-      : paddingTop = MIN_BUFFER_SIZE_PX,
-        paddingBottom = MIN_BUFFER_SIZE_PX,
-        today = Date.today(clock),
-        model =
-            ObservableReference<CalendarState>(initialState, coalesce: true) {
+  MaterialDateGridBase(
+    Clock clock,
+    CalendarState initialState,
+    this.changeDetector,
+    this._domService,
+    String mode,
+  ) : paddingTop = MIN_BUFFER_SIZE_PX,
+      paddingBottom = MIN_BUFFER_SIZE_PX,
+      today = Date.today(clock),
+      model = ObservableReference<CalendarState>(initialState, coalesce: true) {
     // Get the 1-indexed starting weekday for the current locale, and use that.
     startingWeekday = DateFormat().dateSymbols.FIRSTDAYOFWEEK + 1;
 
@@ -145,14 +148,17 @@ abstract class MaterialDateGridBase
   @override
   void ngOnInit() {
     _disposer.addStreamSubscription(
-        _calendarStream = model.stream.listen(onCalendarChange));
+      _calendarStream = model.stream.listen(onCalendarChange),
+    );
 
     if (mode == CalendarSelectionMode.SINGLE_DATE) {
       _inputListener = CalendarListener.singleDate(model);
     }
     if (mode == CalendarSelectionMode.DATE_RANGE) {
-      _inputListener =
-          CalendarListener.dateRange(model, movingStartMaintainsLength: true);
+      _inputListener = CalendarListener.dateRange(
+        model,
+        movingStartMaintainsLength: true,
+      );
     }
     _disposer.addDisposable(_inputListener);
 
@@ -210,7 +216,11 @@ abstract class MaterialDateGridBase
   /// Moves the 'view' by adjusting the heights of the top and bottom padding
   /// divs. Returns the value that scrollTop should be set to.
   int moveView(
-      int scrollTop, int diffPx, int maxPaddingTop, int maxPaddingBottom) {
+    int scrollTop,
+    int diffPx,
+    int maxPaddingTop,
+    int maxPaddingBottom,
+  ) {
     var newPaddingTop = paddingTop + diffPx;
     var newPaddingBottom = paddingBottom - diffPx;
 
@@ -279,9 +289,7 @@ abstract class ForcedScrollDirectiveHost {
 /// A directive which forces an element's scrollTop property to have the
 /// specified value, even if the value hasn't changed since the last change
 /// detection cycle. (It's a bit of a hack)
-@Directive(
-  selector: '[imperativelyScrollable]',
-)
+@Directive(selector: '[imperativelyScrollable]')
 class ForcedScrollDirective {
   final HtmlElement _element;
   final DomService _domService;

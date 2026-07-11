@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:intl/intl.dart';
@@ -66,9 +66,10 @@ class ScoreboardComponent implements OnInit, OnDestroy {
   String get forwardIconType => isVertical ? 'expand_more' : chevronForward;
 
   ScoreboardComponent(
-      @Attribute('enableUniformWidths') String? enableUniformWidths,
-      this._domService,
-      this._changeDetector) {
+    @Attribute('enableUniformWidths') String? enableUniformWidths,
+    this._domService,
+    this._changeDetector,
+  ) {
     _enableUniformWidths = enableUniformWidths != 'false'; // Defaults to true
   }
 
@@ -111,7 +112,8 @@ class ScoreboardComponent implements OnInit, OnDestroy {
   set scorecardBar(ScorecardBarDirective? value) {
     _scorecardBar = value;
     _disposer.addDisposable(
-        _scorecardBar!.refreshStream.listen((_) => _refreshArrows()));
+      _scorecardBar!.refreshStream.listen((_) => _refreshArrows()),
+    );
   }
 
   /// Type of scoreboard, e.g., standard, selectable, radio, toggle.
@@ -179,7 +181,8 @@ class ScoreboardComponent implements OnInit, OnDestroy {
   void _resetTabIndex() {
     for (ScorecardComponent component in _scorecards) {
       var offset = _scorecardOffset(component.element);
-      var scorecardBarEndPosition = _scorecardBar!.currentTransformSize +
+      var scorecardBarEndPosition =
+          _scorecardBar!.currentTransformSize +
           _scorecardBar!.currentClientSize -
           _scorecardBar!.currentButtonSize;
       if (offset < scorecardBarEndPosition &&
@@ -218,7 +221,8 @@ class ScoreboardComponent implements OnInit, OnDestroy {
         _selectionModel.select(scorecard);
       }
       _cardSelectionDisposer.addDisposable(
-          scorecard.selectedChange.listen((_) => selectionChange(scorecard)));
+        scorecard.selectedChange.listen((_) => selectionChange(scorecard)),
+      );
     }
 
     if (resetOnCardChanges) _selectionModel.clear();
@@ -247,30 +251,37 @@ class ScoreboardComponent implements OnInit, OnDestroy {
 
     var width = 0.0;
     // Reset CSS widths so scorecards shrink to their individual widths.
-    _disposer.addDisposable(_domService.scheduleWrite(() {
-      for (var element in scorecardsElem) {
-        element.style.minWidth = '';
-      }
-      _disposer.addDisposable(_domService.scheduleRead(() {
+    _disposer.addDisposable(
+      _domService.scheduleWrite(() {
         for (var element in scorecardsElem) {
-          var elemWidth = element
-              .getComputedStyle()
-              .width
-              .replaceAll(RegExp('[^0-9.]'), '');
-          var elemWidthValue =
-              elemWidth.isEmpty ? 0.0 : double.parse(elemWidth);
-          if (elemWidthValue > width) width = elemWidthValue;
+          element.style.minWidth = '';
         }
-        // Add 1 pixel to handle approximation errors when resetting widths.
-        width += 1;
-        _disposer.addDisposable(_domService.scheduleWrite(() {
-          for (var element in scorecardsElem) {
-            element.style.minWidth = '${width}px';
-          }
-          _refreshArrows();
-        }));
-      }));
-    }));
+        _disposer.addDisposable(
+          _domService.scheduleRead(() {
+            for (var element in scorecardsElem) {
+              var elemWidth = element.getComputedStyle().width.replaceAll(
+                RegExp('[^0-9.]'),
+                '',
+              );
+              var elemWidthValue = elemWidth.isEmpty
+                  ? 0.0
+                  : double.parse(elemWidth);
+              if (elemWidthValue > width) width = elemWidthValue;
+            }
+            // Add 1 pixel to handle approximation errors when resetting widths.
+            width += 1;
+            _disposer.addDisposable(
+              _domService.scheduleWrite(() {
+                for (var element in scorecardsElem) {
+                  element.style.minWidth = '${width}px';
+                }
+                _refreshArrows();
+              }),
+            );
+          }),
+        );
+      }),
+    );
   }
 
   void _updatedSelected() {
@@ -282,15 +293,19 @@ class ScoreboardComponent implements OnInit, OnDestroy {
   }
 
   static final scrollScorecardBarForward = Intl.message(
-      'Scroll scorecard bar forward',
-      desc: 'Aria label of a button that scrolls the scorecard bar horizontally'
-          ' forward. Forward is, to the right in left-to-right layouts'
-          ' and to the left in right-to-left layouts.');
+    'Scroll scorecard bar forward',
+    desc:
+        'Aria label of a button that scrolls the scorecard bar horizontally'
+        ' forward. Forward is, to the right in left-to-right layouts'
+        ' and to the left in right-to-left layouts.',
+  );
   static final scrollScorecardBarBack = Intl.message(
-      'Scroll scorecard bar backward',
-      desc: 'Aria label of a button that scrolls the scorecard bar horizontally'
-          ' backward. Backward is, to the left in left-to-right layouts'
-          ' and to the right in right-to-left layouts.');
+    'Scroll scorecard bar backward',
+    desc:
+        'Aria label of a button that scrolls the scorecard bar horizontally'
+        ' backward. Backward is, to the left in left-to-right layouts'
+        ' and to the right in right-to-left layouts.',
+  );
 }
 
 /// The interaction type of the scoreboard.

@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:ngcomponents/utils/angular/imperative_view/imperative_view.dart';
@@ -18,8 +18,9 @@ abstract class Portal<T> {
   /// Returns a future that completes with an instance of the portal's instance.
   ///
   /// Throws [StateError] if a portal is already attached.
-  Future<dynamic /*ComponentRef<Object> | Map<String, dynamic>*/ > attach(
-      PortalHost? host) {
+  Future<dynamic /*ComponentRef<Object> | Map<String, dynamic>*/> attach(
+    PortalHost? host,
+  ) {
     assert(host != null);
     if (isAttached) {
       throw StateError('Already attached to host!');
@@ -100,8 +101,10 @@ class TemplatePortal extends Portal<Map<String, dynamic>> {
 
   /// Attach to the [host], optionally with [locals] specific to this instance.
   @override
-  Future<Map<String, dynamic>?> attach(PortalHost? host,
-      [Map<String, dynamic> locals = const {}]) {
+  Future<Map<String, dynamic>?> attach(
+    PortalHost? host, [
+    Map<String, dynamic> locals = const {},
+  ]) {
     _locals = locals;
     return super.attach(host).then((value) => value as Map<String, dynamic>?);
   }
@@ -126,8 +129,9 @@ abstract class PortalHost implements Disposable {
   ///
   /// When possible, prefer using [Portal.attach], as it returns a typed result
   /// instead of [dynamic].
-  Future<dynamic /*ComponentRef<Object> | Map<String, dynamic>*/ > attach(
-      Portal<Object?> portal);
+  Future<dynamic /*ComponentRef<Object> | Map<String, dynamic>*/> attach(
+    Portal<Object?> portal,
+  );
 
   /// Detaches any active portal.
   ///
@@ -150,8 +154,9 @@ abstract class BasePortalHost implements PortalHost {
   bool _isDisposed = false;
 
   @override
-  Future<dynamic /*ComponentRef<Object> | Map<String, dynamic>*/ > attach(
-      Portal<Object?>? portal) {
+  Future<dynamic /*ComponentRef<Object> | Map<String, dynamic>*/> attach(
+    Portal<Object?>? portal,
+  ) {
     //assert(portal != null);
     if (_isDisposed) {
       throw StateError('Already disposed.');
@@ -175,7 +180,8 @@ abstract class BasePortalHost implements PortalHost {
   }
 
   Future<ComponentRef<Object>> attachComponentPortal(
-      ComponentPortal<Object> portal);
+    ComponentPortal<Object> portal,
+  );
 
   Future<Map<String, dynamic>> attachTemplatePortal(TemplatePortal portal);
 
@@ -220,9 +226,9 @@ class DelegatingPortalHost implements PortalHost {
   bool get hasAttached => _delegateHost.hasAttached;
 
   @override
-  Future<dynamic /*ComponentRef<Object> | Map<String, dynamic>*/ > attach(
-          Portal<Object?> portal) =>
-      _delegateHost.attach(portal);
+  Future<dynamic /*ComponentRef<Object> | Map<String, dynamic>*/> attach(
+    Portal<Object?> portal,
+  ) => _delegateHost.attach(portal);
 
   @override
   Future<void> detach() => _delegateHost.detach();
@@ -237,9 +243,7 @@ class DelegatingPortalHost implements PortalHost {
 ///
 /// For example:
 ///     <template portalHost="portal"></template>
-@Directive(
-  selector: '[portalHost]',
-)
+@Directive(selector: '[portalHost]')
 class PortalHostDirective extends BasePortalHost {
   final ComponentLoader _componentLoader;
   final ViewContainerRef _viewContainerRef;
@@ -248,7 +252,8 @@ class PortalHostDirective extends BasePortalHost {
 
   @override
   Future<ComponentRef<Object>> attachComponentPortal(
-      ComponentPortal<Object> portal) {
+    ComponentPortal<Object> portal,
+  ) {
     // By default, use the portal host as the origin. If [portal.origin] is set
     // however, then use that.
     ViewContainerRef? viewContainerRef = _viewContainerRef;
@@ -256,7 +261,9 @@ class PortalHostDirective extends BasePortalHost {
       viewContainerRef = portal.origin;
     }
     final ref = _componentLoader.loadNextToLocation(
-        portal.componentFactory, viewContainerRef!);
+      portal.componentFactory,
+      viewContainerRef!,
+    );
     setPortalDisposer(ref.destroy);
     // TODO(google): This is no longer async remove the future if possible.
     return Future.value(ref);
@@ -297,18 +304,21 @@ class DomPortalHost extends BasePortalHost {
 
   @override
   Future<ComponentRef<Object>> attachComponentPortal(
-      ComponentPortal<Object> portal) {
+    ComponentPortal<Object> portal,
+  ) {
     if (portal.origin == null) {
-      throw StateError('A component hosted in a DomPortalHost must '
-          'have an `origin` set, since the DOM element itself '
-          'is not an Angular component.');
+      throw StateError(
+        'A component hosted in a DomPortalHost must '
+        'have an `origin` set, since the DOM element itself '
+        'is not an Angular component.',
+      );
     }
     return _imperativeViewUtils
         .insertComponent(portal.componentFactory, portal.origin!, _hostElement)
         .then((ref) {
-      setPortalDisposer(ref.destroy);
-      return ref;
-    });
+          setPortalDisposer(ref.destroy);
+          return ref;
+        });
   }
 
   @override
@@ -316,10 +326,10 @@ class DomPortalHost extends BasePortalHost {
     return _imperativeViewUtils
         .insertAngularView(_hostElement, portal.template, portal.viewContainer)
         .then((ref) {
-      portal.locals.forEach(ref.viewRef.setLocal);
-      setPortalDisposer(ref.dispose);
-      return BasePortalHost.createLocalsMap(ref.viewRef);
-    });
+          portal.locals.forEach(ref.viewRef.setLocal);
+          setPortalDisposer(ref.dispose);
+          return BasePortalHost.createLocalsMap(ref.viewRef);
+        });
   }
 }
 
@@ -331,16 +341,13 @@ typedef OnTemplatePortalReady = void Function(TemplatePortal portal);
 ///     <template portal (ready)="onReady($event)">
 ///       Hello {{name}}!
 ///     </template>
-@Directive(
-  selector: '[portal]',
-)
+@Directive(selector: '[portal]')
 class TemplatePortalDirective extends TemplatePortal {
   @Output()
   Stream<TemplatePortalDirective> get ready => _ready.stream;
   final _ready = StreamController<TemplatePortalDirective>.broadcast();
 
-  TemplatePortalDirective(
-      super.templateRef, super.viewContainerRef) {
+  TemplatePortalDirective(super.templateRef, super.viewContainerRef) {
     // TODO(google): Consider a better or standard pattern for this.
     scheduleMicrotask(() {
       _ready.add(this);

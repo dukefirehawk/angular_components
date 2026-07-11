@@ -2,7 +2,7 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:ngdart/experimental.dart';
@@ -39,8 +39,12 @@ const domServiceModule = Module(provide: [domServiceBinding]);
 DomService? _singletonService;
 
 @Injectable()
-DomService createDomService(@Optional() @SkipSelf() DomService? service,
-    @Optional() Disposer? disposer, NgZone zone, Window window) {
+DomService createDomService(
+  @Optional() @SkipSelf() DomService? service,
+  @Optional() Disposer? disposer,
+  NgZone zone,
+  Window window,
+) {
   // If DomService was bound higher up the tree use that instance. This allows
   // an application to override the service at root.
   if (service != null) return service;

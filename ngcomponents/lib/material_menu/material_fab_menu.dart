@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:ngcomponents/content/deferred_content.dart';
@@ -77,8 +77,10 @@ class MaterialFabMenuComponent extends Object
   set menuItem(MenuItem? menuItem) {
     //if (menuItem == null) return;
 
-    viewModel =
-        MaterialFabMenuModel(menuItem ?? MenuItem(''), showPopup: showPopup);
+    viewModel = MaterialFabMenuModel(
+      menuItem ?? MenuItem(''),
+      showPopup: showPopup,
+    );
   }
 
   /// Sets the view model for this component.
@@ -161,9 +163,10 @@ class MaterialFabMenuComponent extends Object
   }
 
   void trigger(Event event) {
-    _trigger(event,
-        activateFirstItem:
-            event is KeyboardEvent || _isLikelyScreenReader(event));
+    _trigger(
+      event,
+      activateFirstItem: event is KeyboardEvent || _isLikelyScreenReader(event),
+    );
   }
 
   void hideMenu() {
@@ -173,8 +176,11 @@ class MaterialFabMenuComponent extends Object
     });
   }
 
-  void _trigger(Event event,
-      {bool activateFirstItem = false, bool activateLastItem = false}) {
+  void _trigger(
+    Event event, {
+    bool activateFirstItem = false,
+    bool activateLastItem = false,
+  }) {
     _activateFirstItemOnInit = activateFirstItem;
     _activateLastItemOnInit = activateLastItem;
     _viewModel?.trigger(event);
@@ -214,7 +220,7 @@ class MaterialFabMenuModel {
   final ObservableReference<bool> _showPopup;
 
   MaterialFabMenuModel(this.menuItem, {bool showPopup = false})
-      : _showPopup = ObservableReference<bool>(showPopup);
+    : _showPopup = ObservableReference<bool>(showPopup);
 
   Stream<Change<bool?>> get onShowPopupChange => _showPopup.changes;
 
@@ -224,8 +230,9 @@ class MaterialFabMenuModel {
   /// True if the FAB has a menu and at least one menu item has an icon.
   bool get hasIcons =>
       hasMenu &&
-      menuItem.subMenu.itemGroups
-          .any((itemGroup) => itemGroup.any((item) => item.hasIcon));
+      menuItem.subMenu.itemGroups.any(
+        (itemGroup) => itemGroup.any((item) => item.hasIcon),
+      );
 
   /// True if the FAB menu should be shown.
   bool get showPopup => _showPopup.value ?? false;

@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:ngcomponents/annotations/rtl_annotation.dart';
@@ -78,8 +78,11 @@ import 'package:ngcomponents/utils/id_generator/id_generator.dart';
     Typed<MaterialSelectDropdownItemComponent>.of([#T]),
   ],
   viewProviders: [
-    FactoryProvider<ActiveItemModel>(ActiveItemModel, fromDropdown,
-        deps: [MaterialDropdownSelectComponent])
+    FactoryProvider<ActiveItemModel>(
+      ActiveItemModel,
+      fromDropdown,
+      deps: [MaterialDropdownSelectComponent],
+    ),
   ],
   templateUrl: 'material_dropdown_select.html',
   styleUrls: ['material_dropdown_select.scss.css'],
@@ -193,16 +196,16 @@ class MaterialDropdownSelectComponent<T> extends MaterialSelectBase<T>
   }
 
   MaterialDropdownSelectComponent(
-      @Optional() IdGenerator? idGenerator,
-      @Optional() @SkipSelf() this._popupSizeDelegate,
-      @Optional() @Inject(rtlToken) bool? rtl,
-      @Attribute('popupClass') String? popupClass,
-      @Attribute('buttonAriaRole') this.buttonAriaRole,
-      this._changeDetector,
-      HtmlElement element)
-      : activeModel = ActiveItemModel(idGenerator),
-        popupClassName = constructEncapsulatedCss(popupClass, element.classes),
-        listId = (idGenerator ?? SequentialIdGenerator.fromUUID()).nextId() {
+    @Optional() IdGenerator? idGenerator,
+    @Optional() @SkipSelf() this._popupSizeDelegate,
+    @Optional() @Inject(rtlToken) bool? rtl,
+    @Attribute('popupClass') String? popupClass,
+    @Attribute('buttonAriaRole') this.buttonAriaRole,
+    this._changeDetector,
+    HtmlElement element,
+  ) : activeModel = ActiveItemModel(idGenerator),
+      popupClassName = constructEncapsulatedCss(popupClass, element.classes),
+      listId = (idGenerator ?? SequentialIdGenerator.fromUUID()).nextId() {
     isRtl = rtl;
     preferredPositions = RelativePosition.overlapAlignments;
     iconName = 'arrow_drop_down';
@@ -339,8 +342,9 @@ class MaterialDropdownSelectComponent<T> extends MaterialSelectBase<T>
     _selectionListener = selection.selectionChanges.listen((changes) {
       _changeDetector.markForCheck();
       // Update active item if new items are selected.
-      var added =
-          changes.last.added.isNotEmpty ? changes.last.added.first : null;
+      var added = changes.last.added.isNotEmpty
+          ? changes.last.added.first
+          : null;
       if (added != null && !activeModel.isActive(added)) {
         activeModel.activate(added);
       }
@@ -466,8 +470,13 @@ class MaterialDropdownSelectComponent<T> extends MaterialSelectBase<T>
     if (itemRenderer != null && !disabled) {
       // Don't activate or select if the widget is disabled.
       // Don't select if the selection model is multi-select.
-      activateOnKeyPress(activeModel, event.charCode, options, itemRenderer,
-          !visible && isSingleSelect ? selection : null);
+      activateOnKeyPress(
+        activeModel,
+        event.charCode,
+        options,
+        itemRenderer,
+        !visible && isSingleSelect ? selection : null,
+      );
     }
   }
 
@@ -553,11 +562,12 @@ mixin class ActivateItemOnKeyPressMixin<T> {
   /// If the current item already matches, it will select the next item that
   /// matches.
   void activateOnKeyPress(
-      ActiveItemModel activeModel,
-      int charCode,
-      SelectionOptions? options,
-      ItemRenderer<T>? itemRenderer,
-      SelectionModel? selection) {
+    ActiveItemModel activeModel,
+    int charCode,
+    SelectionOptions? options,
+    ItemRenderer<T>? itemRenderer,
+    SelectionModel? selection,
+  ) {
     // Guard against being called when not all data is initialized.
     if (itemRenderer == null || options == null) return;
 

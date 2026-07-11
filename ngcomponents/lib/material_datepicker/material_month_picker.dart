@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:collection/collection.dart' show IterableExtension;
@@ -41,8 +41,10 @@ class MaterialMonthPickerComponent
   }
 
   CalendarState? get state => _model.value;
-  final ObservableReference<CalendarState> _model =
-      ObservableReference(CalendarState.empty(), coalesce: true);
+  final ObservableReference<CalendarState> _model = ObservableReference(
+    CalendarState.empty(),
+    coalesce: true,
+  );
 
   /// Fired when the calendar state changes -- e.g. when the user starts
   /// dragging the selected date range.
@@ -136,13 +138,16 @@ class MaterialMonthPickerComponent
   void _scrollToSelection() {
     if (state!.selections.isEmpty) return;
 
-    final currentSelection = state!.selections
-        .firstWhereOrNull((s) => s.id == state!.currentSelection);
+    final currentSelection = state!.selections.firstWhereOrNull(
+      (s) => s.id == state!.currentSelection,
+    );
     if (currentSelection == null) return;
 
-    scrollToYear(state!.previewAnchoredAtStart
-        ? currentSelection.end!.year
-        : currentSelection.start!.year);
+    scrollToYear(
+      state!.previewAnchoredAtStart
+          ? currentSelection.end!.year
+          : currentSelection.start!.year,
+    );
   }
 
   void _onCalendarChange(CalendarState? state) {
@@ -158,8 +163,9 @@ class MaterialMonthPickerComponent
     for (HtmlElement element in _container!.querySelectorAll('.year-title')) {
       element.className = 'year-title';
     }
-    for (HtmlElement element
-        in _container!.querySelectorAll('.month:not(.disabled)')) {
+    for (HtmlElement element in _container!.querySelectorAll(
+      '.month:not(.disabled)',
+    )) {
       element.className = 'month';
     }
   }
@@ -168,13 +174,15 @@ class MaterialMonthPickerComponent
     HtmlElement? start;
     HtmlElement? end;
 
-    start = _container!.querySelector(_monthSelector(selection.start!))
-        as HtmlElement?;
+    start =
+        _container!.querySelector(_monthSelector(selection.start!))
+            as HtmlElement?;
     if (start == null) return;
     start.classes.addAll(const ['boundary', 'start']);
 
-    end = _container!.querySelector(_monthSelector(selection.end!))
-        as HtmlElement?;
+    end =
+        _container!.querySelector(_monthSelector(selection.end!))
+            as HtmlElement?;
     if (end == null) return;
     end.classes.addAll(const ['boundary', 'end']);
 
@@ -193,18 +201,24 @@ class MaterialMonthPickerComponent
     // iterates over the months within each year.
     HtmlElement startContainer = range.startContainer as HtmlElement;
     HtmlElement endContainer = range.endContainer as HtmlElement;
-    for (HtmlElement? year = startContainer.nextElementSibling as HtmlElement?;
-        year != null && year != endContainer.nextElementSibling;
-        year = year.nextElementSibling as HtmlElement?) {
-      _highlightElements(year.firstChild as HtmlElement?,
-          end.nextElementSibling as HtmlElement?);
+    for (
+      HtmlElement? year = startContainer.nextElementSibling as HtmlElement?;
+      year != null && year != endContainer.nextElementSibling;
+      year = year.nextElementSibling as HtmlElement?
+    ) {
+      _highlightElements(
+        year.firstChild as HtmlElement?,
+        end.nextElementSibling as HtmlElement?,
+      );
     }
   }
 
   void _highlightElements(HtmlElement? start, HtmlElement? end) {
-    for (HtmlElement? element = start;
-        element != null && element != end;
-        element = element.nextElementSibling as HtmlElement?) {
+    for (
+      HtmlElement? element = start;
+      element != null && element != end;
+      element = element.nextElementSibling as HtmlElement?
+    ) {
       element.classes.add('highlight');
     }
   }
@@ -233,7 +247,8 @@ class MaterialMonthPickerComponent
         compareDatesAtResolution(date, maxDate, state!.resolution) <= 0;
   }
 
-  String _monthSelector(Date date) => '.year[$_yearAttribute="${date.year}"] '
+  String _monthSelector(Date date) =>
+      '.year[$_yearAttribute="${date.year}"] '
       '.month[$_monthAttribute="${date.month}"]';
 
   // Needed so we can circle the current date.
@@ -253,8 +268,9 @@ class MaterialMonthPickerComponent
   StreamSubscription? _calendarStream;
 
   MaterialMonthPickerComponent(
-      @Optional() @Inject(datepickerClock) Clock? clock,
-      @Attribute('mode') String? mode) {
+    @Optional() @Inject(datepickerClock) Clock? clock,
+    @Attribute('mode') String? mode,
+  ) {
     clock ??= Clock();
 
     // Init minDate and maxDate to sensible defaults
@@ -284,8 +300,10 @@ class MaterialMonthPickerComponent
     } else if (_mode == CalendarSelectionMode.DATE_RANGE) {
       // TODO(google): Add support for movingStartMaintainsLength==false if
       // we see use cases for month range picking.
-      _inputListener =
-          CalendarListener.dateRange(_model, movingStartMaintainsLength: true);
+      _inputListener = CalendarListener.dateRange(
+        _model,
+        movingStartMaintainsLength: true,
+      );
     }
   }
 
@@ -339,8 +357,9 @@ class MaterialMonthPickerComponent
   }
 
   void _resetView() {
-    final initialDate =
-        state!.selections.isEmpty ? _today : state!.selections.first.start!;
+    final initialDate = state!.selections.isEmpty
+        ? _today
+        : state!.selections.first.start!;
     _renderAllYears();
     scrollToYear(initialDate.year);
     _renderHighlights();

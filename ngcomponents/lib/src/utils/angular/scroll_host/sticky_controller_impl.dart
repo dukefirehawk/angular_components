@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 import 'dart:math' show min, max;
 
 import 'package:ngcomponents/utils/angular/scroll_host/interface.dart';
@@ -31,8 +31,13 @@ class StickyControllerImpl implements StickyController {
   StickyControllerImpl(this._domService, this._scrollHost);
 
   @override
-  void stick(Element element, StickyPosition position, Element? range,
-      {String? stickyClass, String? stickyKey}) {
+  void stick(
+    Element element,
+    StickyPosition position,
+    Element? range, {
+    String? stickyClass,
+    String? stickyKey,
+  }) {
     _StickyRow? row = _rowMap[element];
     // if the definition's key fields are the same, assume that nothing changed
     if ((row != null) &&
@@ -42,8 +47,13 @@ class StickyControllerImpl implements StickyController {
       return;
     }
     unstick(element);
-    _rowMap[element] =
-        _StickyRow(element, position, range, stickyClass, stickyKey);
+    _rowMap[element] = _StickyRow(
+      element,
+      position,
+      range,
+      stickyClass,
+      stickyKey,
+    );
     _startEventListeners();
   }
 
@@ -140,20 +150,32 @@ class StickyControllerImpl implements StickyController {
         num newTop = max(hostRect.top, rect.bottom);
         num newHeight = hostRect.bottom - newTop;
         if ((newTop != hostRect.top) && (newHeight > 0)) {
-          hostRect =
-              Rectangle(hostRect.left, newTop, hostRect.width, newHeight);
+          hostRect = Rectangle(
+            hostRect.left,
+            newTop,
+            hostRect.width,
+            newHeight,
+          );
         }
       } else {
         num newBottom = min(hostRect.bottom, rect.top);
         num newHeight = newBottom - hostRect.top;
         if ((newBottom != hostRect.bottom) && (newHeight > 0)) {
-          hostRect =
-              Rectangle(hostRect.left, hostRect.top, hostRect.width, newHeight);
+          hostRect = Rectangle(
+            hostRect.left,
+            hostRect.top,
+            hostRect.width,
+            newHeight,
+          );
         }
       }
     }
     return Rectangle(
-        hostRect.left, hostRect.top, hostRect.width, hostRect.height);
+      hostRect.left,
+      hostRect.top,
+      hostRect.width,
+      hostRect.height,
+    );
   }
 
   StickyContainerLayout<_StickyRow> _getLayout() {
@@ -161,8 +183,10 @@ class StickyControllerImpl implements StickyController {
     Rectangle hostPosition = _getAvailableArea();
 
     return StickyRowUtils.calculateLayout<_StickyRow>(
-        hostPosition, _orderedRows!,
-        enableSmoothPushing: enableSmoothPushing);
+      hostPosition,
+      _orderedRows!,
+      enableSmoothPushing: enableSmoothPushing,
+    );
   }
 
   /// Moves sticky rows back to their sticky locations after the host has moved.
@@ -257,8 +281,13 @@ class _StickyRow implements StickyRowPosition {
   num get translateY => _translateY;
   num _translateY = 0;
 
-  _StickyRow(this.element, this.position, this.range, this.stickyClass,
-      this._stickyKey) {
+  _StickyRow(
+    this.element,
+    this.position,
+    this.range,
+    this.stickyClass,
+    this._stickyKey,
+  ) {
     assert(isTop || isBottom);
   }
 
@@ -274,8 +303,12 @@ class _StickyRow implements StickyRowPosition {
   /// Observes the position of the row's Element and its range.
   void readRowPositions() {
     rowPosition = element.getBoundingClientRect();
-    rowPosition = Rectangle(rowPosition!.left, rowPosition!.top - translateY,
-        rowPosition!.width, rowPosition!.height);
+    rowPosition = Rectangle(
+      rowPosition!.left,
+      rowPosition!.top - translateY,
+      rowPosition!.width,
+      rowPosition!.height,
+    );
     rangePosition = range?.getBoundingClientRect();
   }
 
@@ -326,14 +359,8 @@ class _StickyRow implements StickyRowPosition {
   }
 
   @override
-  String toString() => '_StickyRow ${{
-        'isBottom': isBottom,
-        'isTop': isTop,
-        'rowPosition': rowPosition,
-        'rangePosition': rangePosition,
-        'translateY': translateY,
-        'stickyClass': stickyClass,
-      }}';
+  String toString() =>
+      '_StickyRow ${{'isBottom': isBottom, 'isTop': isTop, 'rowPosition': rowPosition, 'rangePosition': rangePosition, 'translateY': translateY, 'stickyClass': stickyClass}}';
 }
 
 /// Wraps a row of arbitrary type with additional data needed by the algorithm.
@@ -420,13 +447,8 @@ class StickyContainerLayout<T> {
   }
 
   @override
-  String toString() => 'StickyContainerLayout ${{
-        'hostPosition': hostPosition,
-        'topRows': topRows,
-        'bottomRows': bottomRows,
-        'hiddenRows': hiddenRows,
-        '_translateYs': _translateYs
-      }}';
+  String toString() =>
+      'StickyContainerLayout ${{'hostPosition': hostPosition, 'topRows': topRows, 'bottomRows': bottomRows, 'hiddenRows': hiddenRows, '_translateYs': _translateYs}}';
 }
 
 /// Helper methods, separated for simpler testing.
@@ -436,41 +458,48 @@ abstract class StickyRowUtils {
   static final int MIN_CONTENT_HEIGHT_PX = 100;
 
   /// Whether the row should stick or not, given the surrounding.
-  static bool shouldStick(bool isTop, num hostTop, num hostBottom,
-      Rectangle rowPosition, Rectangle? rangePosition) {
+  static bool shouldStick(
+    bool isTop,
+    num hostTop,
+    num hostBottom,
+    Rectangle rowPosition,
+    Rectangle? rangePosition,
+  ) {
     if (rowPosition.height == 0) {
       return false;
     }
     if (isTop) {
       // the range, if it exists, is still visible or below the bottom
-      bool rangeVisible = rangePosition == null ||
+      bool rangeVisible =
+          rangePosition == null ||
           rangePosition.top > (hostTop + rowPosition.height);
       return
-          // the row is above the top
-          (rowPosition.top < hostTop) &&
-              rangeVisible &&
-              // arbitrary limit to prevent too thin display area
-              ((hostBottom - hostTop - rowPosition.height) >
-                  MIN_CONTENT_HEIGHT_PX);
+      // the row is above the top
+      (rowPosition.top < hostTop) &&
+          rangeVisible &&
+          // arbitrary limit to prevent too thin display area
+          ((hostBottom - hostTop - rowPosition.height) > MIN_CONTENT_HEIGHT_PX);
     } else {
       // the range, if it exists, is still visible or above the top
-      bool rangeVisible = rangePosition == null ||
+      bool rangeVisible =
+          rangePosition == null ||
           rangePosition.bottom < (hostBottom - rowPosition.height);
       return
-          // the row is below the bottom
-          (rowPosition.bottom > hostBottom) &&
-              rangeVisible &&
-              // arbitrary limit to prevent too thin display area
-              ((hostBottom - hostTop - rowPosition.height) >
-                  MIN_CONTENT_HEIGHT_PX);
+      // the row is below the bottom
+      (rowPosition.bottom > hostBottom) &&
+          rangeVisible &&
+          // arbitrary limit to prevent too thin display area
+          ((hostBottom - hostTop - rowPosition.height) > MIN_CONTENT_HEIGHT_PX);
     }
   }
 
   /// Decides what rows should be on top, on bottom, or be hidden (inlined),
   /// and computes an additional offset for top/bottom rows.
   static StickyContainerLayout<T> calculateLayout<T extends StickyRowPosition>(
-      Rectangle hostPosition, List<T> rows,
-      {bool? enableSmoothPushing = false}) {
+    Rectangle hostPosition,
+    List<T> rows, {
+    bool? enableSmoothPushing = false,
+  }) {
     num hostTop = hostPosition.top;
     num hostBottom = hostPosition.bottom;
     var layout = StickyContainerLayout<T>()
@@ -484,12 +513,18 @@ abstract class StickyRowUtils {
     for (var i = 0; i < rows.length; i++) {
       var row = rows[i];
       bool shouldStick = StickyRowUtils.shouldStick(
-          row.isTop, hostTop, hostBottom, row.rowPosition!, row.rangePosition);
+        row.isTop,
+        hostTop,
+        hostBottom,
+        row.rowPosition!,
+        row.rangePosition,
+      );
 
       // Prevent sticky rows with duplicate sticky keys from showing. The set
       // of rows sharing the same sticky key are assumed to be the same height.
       // First check for existing stuck rows with duplicate sticky keys.
-      bool hasStuckDuplicate = shouldStick &&
+      bool hasStuckDuplicate =
+          shouldStick &&
           row.stickyKey != null &&
           stickyKeyToRowIndex?.containsKey(row.stickyKey) == true;
 
@@ -501,11 +536,12 @@ abstract class StickyRowUtils {
         var duplicateRow =
             layout.topRows![stickyKeyToRowIndex![row.stickyKey]!];
         shouldStick = StickyRowUtils.shouldStick(
-            row.isTop,
-            hostTop - duplicateRow.row.rowPosition!.height,
-            hostBottom,
-            row.rowPosition!,
-            row.rangePosition);
+          row.isTop,
+          hostTop - duplicateRow.row.rowPosition!.height,
+          hostBottom,
+          row.rowPosition!,
+          row.rangePosition,
+        );
       }
 
       // Finally, add to layout:
@@ -554,8 +590,10 @@ abstract class StickyRowUtils {
           final duplicateRow =
               layout.topRows![stickyKeyToRowIndex![row.stickyKey]!].row;
           layout.hiddenRows!.add(duplicateRow);
-          layout.topRows![stickyKeyToRowIndex[row.stickyKey]!] =
-              _RowData(row, offsetY: 0);
+          layout.topRows![stickyKeyToRowIndex[row.stickyKey]!] = _RowData(
+            row,
+            offsetY: 0,
+          );
 
           // Partial support for replacing rows of different heights.
           // This still doesn't work correctly when interleaving elements with

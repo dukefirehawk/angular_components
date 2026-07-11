@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:ngcomponents/annotations/rtl_annotation.dart';
@@ -28,9 +28,7 @@ import 'package:ngcomponents/utils/disposer/disposer.dart';
 /// partially covered by the scroll buttons, regardless of how the user
 /// scrolled.
 // TODO(google): move this file to a shared common directory.
-@Directive(
-  selector: '[scorecardBar]',
-)
+@Directive(selector: '[scorecardBar]')
 class ScorecardBarDirective implements OnInit, OnDestroy, AfterViewChecked {
   final _refreshController = StreamController<bool>.broadcast();
   final _disposer = Disposer.oneShot();
@@ -56,11 +54,16 @@ class ScorecardBarDirective implements OnInit, OnDestroy, AfterViewChecked {
   @override
   void ngOnInit() {
     _disposer.addDisposable(_domService.scheduleRead(_readElement));
-    _disposer.addDisposable(_domService.trackLayoutChange(
-        () => '$currentClientSize $currentScrollSize', (dynamic _) {
-      _readElement(windowResize: true);
-      _refreshController.add(true);
-    }, runInAngularZone: true));
+    _disposer.addDisposable(
+      _domService.trackLayoutChange(
+        () => '$currentClientSize $currentScrollSize',
+        (dynamic _) {
+          _readElement(windowResize: true);
+          _refreshController.add(true);
+        },
+        runInAngularZone: true,
+      ),
+    );
   }
 
   @override
@@ -137,25 +140,27 @@ class ScorecardBarDirective implements OnInit, OnDestroy, AfterViewChecked {
   /// This should only be called when the scoreboard is not already in its
   /// start scroll state (e.g., [atStart] is false).
   void scrollBack() {
-    _disposer.addDisposable(_domService.scheduleRead(() {
-      _readElement();
-      var newValue = _scrollingMove;
-      assert(_buttonSize > 0);
-      if (atEnd) {
-        if (newValue != null) {
-          newValue -= _buttonSize;
+    _disposer.addDisposable(
+      _domService.scheduleRead(() {
+        _readElement();
+        var newValue = _scrollingMove;
+        assert(_buttonSize > 0);
+        if (atEnd) {
+          if (newValue != null) {
+            newValue -= _buttonSize;
+          }
         }
-      }
-      if (_transform.abs() - newValue! < 0) {
-        newValue = _transform.abs();
-      }
-      if (_isVertical || !_isRtl) {
-        _transform += newValue;
-      } else {
-        _transform -= newValue;
-      }
-      _updateTransform();
-    }));
+        if (_transform.abs() - newValue! < 0) {
+          newValue = _transform.abs();
+        }
+        if (_isVertical || !_isRtl) {
+          _transform += newValue;
+        } else {
+          _transform -= newValue;
+        }
+        _updateTransform();
+      }),
+    );
   }
 
   /// Scroll the scoreboard forward.
@@ -163,25 +168,27 @@ class ScorecardBarDirective implements OnInit, OnDestroy, AfterViewChecked {
   /// This should only be called when the scoreboard is not already in its
   /// end scroll state (e.g., [atEnd] is false).
   void scrollForward() {
-    _disposer.addDisposable(_domService.scheduleRead(() {
-      _readElement();
-      var newValue = _scrollingMove;
-      assert(_buttonSize > 0);
-      if (atStart) {
-        if (newValue != null) {
-          newValue -= _buttonSize;
+    _disposer.addDisposable(
+      _domService.scheduleRead(() {
+        _readElement();
+        var newValue = _scrollingMove;
+        assert(_buttonSize > 0);
+        if (atStart) {
+          if (newValue != null) {
+            newValue -= _buttonSize;
+          }
         }
-      }
-      if (_scrollSize! + _transform < newValue! + _clientSize!) {
-        newValue = _scrollSize! + _transform - _clientSize!;
-      }
-      if (_isVertical || !_isRtl) {
-        _transform -= newValue;
-      } else {
-        _transform += newValue;
-      }
-      _updateTransform();
-    }));
+        if (_scrollSize! + _transform < newValue! + _clientSize!) {
+          newValue = _scrollSize! + _transform - _clientSize!;
+        }
+        if (_isVertical || !_isRtl) {
+          _transform -= newValue;
+        } else {
+          _transform += newValue;
+        }
+        _updateTransform();
+      }),
+    );
   }
 
   /// Resets the scoreboard to its initial scroll state.
@@ -190,17 +197,21 @@ class ScorecardBarDirective implements OnInit, OnDestroy, AfterViewChecked {
       _transform = 0;
       _updateTransform();
     }
-    _disposer.addDisposable(_domService.scheduleRead(() {
-      _readElement();
-      _refreshController.add(true);
-    }));
+    _disposer.addDisposable(
+      _domService.scheduleRead(() {
+        _readElement();
+        _refreshController.add(true);
+      }),
+    );
   }
 
   void _updateTransform() {
-    _disposer.addDisposable(_domService.scheduleWrite(() {
-      _element.style.transform = 'translate$transformAxis(${_transform}px)';
-      _refreshController.add(true);
-    }));
+    _disposer.addDisposable(
+      _domService.scheduleWrite(() {
+        _element.style.transform = 'translate$transformAxis(${_transform}px)';
+        _refreshController.add(true);
+      }),
+    );
   }
 
   void _readElement({windowResize = false}) {

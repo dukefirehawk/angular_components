@@ -2,7 +2,7 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'dart:html';
+import 'package:web/web.dart';
 import 'dart:math';
 
 import 'package:ngcomponents/material_select/activation_handler.dart';
@@ -15,7 +15,7 @@ import 'package:ngcomponents/model/selection/selection_options.dart';
 // This class must support handling the deselect item as well as normal items,
 // so it cannot implement [ActivationHandler<T>].
 abstract mixin class ShiftClickSelectionMixin<T>
-    implements ActivationHandler<dynamic /* T | String */ > {
+    implements ActivationHandler<dynamic /* T | String */> {
   T? _pivot;
 
   SelectionModel<T> get selection;
@@ -28,8 +28,9 @@ abstract mixin class ShiftClickSelectionMixin<T>
   /// value you shift-click was previously selected all values in the range will
   /// become unselected.
   void _handleClick(MouseEvent e, T value) {
-    var toggleSelection =
-        selection.isSelected(value) ? selection.deselect : selection.select;
+    var toggleSelection = selection.isSelected(value)
+        ? selection.deselect
+        : selection.select;
 
     if (_pivot == null || !e.shiftKey) {
       toggleSelection(value);

@@ -2,7 +2,7 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:ngcomponents/laminate/overlay/constants.dart';
@@ -30,71 +30,78 @@ export 'package:ngcomponents/src/laminate/overlay/render/overlay_dom_render_serv
 /// already.
 /// A hidden focusable element is inserted before and after the overlay
 /// container to support a11y features.
-HtmlElement createAcxOverlayContainer(Object parent,
-    {required String id, required String name, String? className}) {
-  if (parent is! HtmlElement) {
+HTMLElement createAcxOverlayContainer(
+  Object parent, {
+  required String id,
+  required String name,
+  String? className,
+}) {
+  if (parent is! HTMLElement) {
     throw ArgumentError("Not a HtmlElement type");
   }
   var container = parent.querySelector('#$id');
   if (container == null) {
-    container = DivElement()
+    container = HTMLDivElement()
       ..id = id
       ..classes.add(overlayContainerClassName);
     if (className != null) container.classes.add(className);
     parent.append(container);
   }
   container.attributes[overlayContainerNameAttribute] = name;
-  return container as HtmlElement;
+  return container as HTMLElement;
 }
 
 /// Either finds, or creates an "acx-overlay-container" div at the end of body.
 @Injectable()
-HtmlElement getDefaultContainer(
-    @Inject(overlayContainerName) Object name,
-    @Inject(overlayContainerParent) Object parent,
-    @Optional() @SkipSelf() @Inject(overlayContainerToken) Object? container) {
+HTMLElement getDefaultContainer(
+  @Inject(overlayContainerName) Object name,
+  @Inject(overlayContainerParent) Object parent,
+  @Optional() @SkipSelf() @Inject(overlayContainerToken) Object? container,
+) {
   if (container != null) {
-    return container as HtmlElement;
+    return container as HTMLElement;
   }
 
-  return createAcxOverlayContainer(parent,
-      id: overlayDefaultContainerId, name: name as String);
+  return createAcxOverlayContainer(
+    parent,
+    id: overlayDefaultContainerId,
+    name: name as String,
+  );
 }
 
 @Injectable()
 String getDefaultContainerName(
-    @Optional()
-    @SkipSelf()
-    @Inject(overlayContainerName)
-    Object? containerName) {
+  @Optional() @SkipSelf() @Inject(overlayContainerName) Object? containerName,
+) {
   return containerName as String? ?? 'default';
 }
 
 /// Returns an overlay container with debugging aid enabled.
 @Injectable()
-HtmlElement getDebugContainer(@Inject(overlayContainerName) Object name,
-    @Inject(overlayContainerParent) Object parent) {
+HTMLElement getDebugContainer(
+  @Inject(overlayContainerName) Object name,
+  @Inject(overlayContainerParent) Object parent,
+) {
   var element = getDefaultContainer(name, parent, null);
   element.classes.add('debug');
   return element;
 }
 
 @Injectable()
-HtmlElement getOverlayContainerParent(
-    Document document,
-    @Optional()
-    @SkipSelf()
-    @Inject(overlayContainerParent)
-    Object? containerParent) {
-  return containerParent as HtmlElement? ??
-      document.querySelector('body') as HtmlElement;
+HTMLElement getOverlayContainerParent(
+  Document document,
+  @Optional()
+  @SkipSelf()
+  @Inject(overlayContainerParent)
+  Object? containerParent,
+) {
+  return containerParent as HTMLElement? ??
+      document.querySelector('body') as HTMLElement;
 }
 
 /// DI module for Overlay and its dependencies.
 const overlayModule = Module(
-  include: [
-    windowModule,
-  ],
+  include: [windowModule],
   provide: _overlayProviders,
 );
 
@@ -117,16 +124,11 @@ const _overlayProviders = <Provider>[
 ];
 
 /// DI bindings for Overlay and its dependencies.
-const overlayBindings = [
-  windowBindings,
-  _overlayProviders,
-];
+const overlayBindings = [windowBindings, _overlayProviders];
 
 /// Similar to [overlayModule], but enables easy debugging of the overlays.
 const overlayDebugModule = Module(
-  include: [
-    overlayModule,
-  ],
+  include: [overlayModule],
   provide: _overlayDebugProviders,
 );
 
@@ -135,7 +137,4 @@ const _overlayDebugProviders = <Provider>[
 ];
 
 /// Similar to [overlayBindings], but enables easy debugging of the overlays.
-const overlayDebugBindings = [
-  overlayBindings,
-  _overlayDebugProviders,
-];
+const overlayDebugBindings = [overlayBindings, _overlayDebugProviders];

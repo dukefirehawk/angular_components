@@ -2,7 +2,7 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'dart:html';
+import 'package:web/web.dart';
 import 'dart:math';
 
 import 'package:ngdart/angular.dart';
@@ -40,7 +40,11 @@ Map<String, dynamic>? _transformTiming;
 // This is outside of the class because it causes dart2js to inline this
 // function and use faster variable access patterns.
 void _createRipple(
-    int clientX, int clientY, HtmlElement container, bool center) {
+  int clientX,
+  int clientY,
+  HtmlElement container,
+  bool center,
+) {
   // All of the DOM reads occur before the DOM writes.
   final rect = container.getBoundingClientRect();
 
@@ -69,12 +73,18 @@ void _createRipple(
 
 /// Dynamically generate and apply the ripple animation.
 void _applyAnimation(
-    DivElement ripple, bool center, Rectangle rect, int clientX, int clientY) {
+  DivElement ripple,
+  bool center,
+  Rectangle rect,
+  int clientX,
+  int clientY,
+) {
   // The ripple starting diameter is 60% of the largest container dimension.
   final containerWidth = rect.width;
   final containerHeight = rect.height;
-  final maxDimension =
-      (containerWidth > containerHeight) ? containerWidth : containerHeight;
+  final maxDimension = (containerWidth > containerHeight)
+      ? containerWidth
+      : containerHeight;
   final minScale = (maxDimension * 0.6) / _rippleDiameter;
 
   // The ripple ends 10px larger than the container.
@@ -118,7 +128,12 @@ void _applyAnimation(
 /// Apply a static fallback animation for browsers that don't support the
 /// Web Animations API.
 void _applyFallbackAnimation(
-    DivElement ripple, bool center, Rectangle rect, int clientX, int clientY) {
+  DivElement ripple,
+  bool center,
+  Rectangle rect,
+  int clientX,
+  int clientY,
+) {
   String top;
   String left;
 
@@ -159,11 +174,12 @@ class MaterialRippleComponent implements OnDestroy {
   MaterialRippleComponent(this._element) {
     // These are initialized here instead of when they're declared because
     // dart2js would otherwise wait to initialize them until they are used.
-    _ripplePool ??=
-        List<DivElement?>.filled(_maxRipples, null, growable: false);
-    _opacityTiming ??= {
-      'duration': 300.0,
-    };
+    _ripplePool ??= List<DivElement?>.filled(
+      _maxRipples,
+      null,
+      growable: false,
+    );
+    _opacityTiming ??= {'duration': 300.0};
     _opacityKeyframes ??= [
       {'opacity': _minOpacity},
       {'opacity': _maxOpacity, 'offset': 0.25},
@@ -177,8 +193,9 @@ class MaterialRippleComponent implements OnDestroy {
     // This is className = instead of classes.add because classes.add compiles
     // to a DOM read, conversion to List, and then a DOM write.
     if (_rippleTemplate == null) {
-      final className =
-          (supportsAnimationApi) ? '__acx-ripple' : '__acx-ripple fallback';
+      final className = (supportsAnimationApi)
+          ? '__acx-ripple'
+          : '__acx-ripple fallback';
       _rippleTemplate = DivElement()..className = className;
     }
 

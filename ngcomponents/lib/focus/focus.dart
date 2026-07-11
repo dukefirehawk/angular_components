@@ -2,8 +2,9 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
+import 'package:web/web.dart';
+
 import 'dart:async';
-import 'dart:html' show KeyCode, KeyboardEvent, Element, HtmlElement;
 
 import 'package:ngdart/angular.dart';
 import 'package:meta/meta.dart';
@@ -30,10 +31,11 @@ class RootFocusable implements Focusable, Disposable {
     // NOTE: even for elements with tab index unspecified it will return
     // tabIndex as "-1" and we have to set it to "-1"
     // to actually make it focusable.
-    if (_root!.tabIndex! < 0) {
-      _root!.tabIndex = -1;
+    final element = _root! as HTMLElement;
+    if (element.tabIndex < 0) {
+      element.tabIndex = -1;
     }
-    _root!.focus();
+    element.focus();
   }
 
   @override
@@ -43,7 +45,7 @@ class RootFocusable implements Focusable, Disposable {
 }
 
 abstract class ProjectedFocus implements Focusable {
-  Future< /* Focusable | ElementRef */ dynamic> get focusDelegate;
+  Future</* Focusable | ElementRef */ dynamic> get focusDelegate;
   Focusable? _resolvedFocusable;
 
   @override
@@ -53,7 +55,7 @@ abstract class ProjectedFocus implements Focusable {
       return;
     }
     focusDelegate.then((delegate) {
-      assert(delegate is Focusable || delegate is Element);
+      assert(delegate is Focusable || delegate.isA<Element>());
       if (delegate is Focusable) {
         _resolvedFocusable = delegate;
       } else {
@@ -100,54 +102,60 @@ class FocusMoveEvent {
   /// of the `KeyboardEvent`, allowing consumers of this event to control the
   /// underlying DOM event.
   void preventDefault() {
-    if (_preventDefaultDelegate != null) _preventDefaultDelegate!();
+    if (_preventDefaultDelegate != null) _preventDefaultDelegate();
   }
 
   final Function? _preventDefaultDelegate;
 
   @visibleForTesting
   FocusMoveEvent(this.focusItem, this.offset, [this._preventDefaultDelegate])
-      : home = false,
-        end = false,
-        upDown = false,
-        _none = false;
+    : home = false,
+      end = false,
+      upDown = false,
+      _none = false;
 
   @visibleForTesting
   FocusMoveEvent.homeKey(this.focusItem, [this._preventDefaultDelegate])
-      : offset = 0,
-        home = true,
-        end = false,
-        upDown = false,
-        _none = false;
+    : offset = 0,
+      home = true,
+      end = false,
+      upDown = false,
+      _none = false;
 
   @visibleForTesting
   FocusMoveEvent.endKey(this.focusItem, [this._preventDefaultDelegate])
-      : offset = 0,
-        home = false,
-        end = true,
-        upDown = false,
-        _none = false;
+    : offset = 0,
+      home = false,
+      end = true,
+      upDown = false,
+      _none = false;
 
   @visibleForTesting
-  FocusMoveEvent.upDownKey(this.focusItem, this.offset,
-      [this._preventDefaultDelegate])
-      : home = false,
-        end = false,
-        upDown = true,
-        _none = false;
+  FocusMoveEvent.upDownKey(
+    this.focusItem,
+    this.offset, [
+    this._preventDefaultDelegate,
+  ]) : home = false,
+       end = false,
+       upDown = true,
+       _none = false;
 
   @visibleForTesting
-  FocusMoveEvent.none(this.focusItem, this.offset,
-      [this._preventDefaultDelegate])
-      : home = false,
-        end = false,
-        upDown = false,
-        _none = true;
+  FocusMoveEvent.none(
+    this.focusItem,
+    this.offset, [
+    this._preventDefaultDelegate,
+  ]) : home = false,
+       end = false,
+       upDown = false,
+       _none = true;
 
   /// Builds a `FocusMoveEvent` instance from a keyboard event, iff the keycode
   /// is a next, previous, home or end key (i.e. up/down/left/right/home/end).
   factory FocusMoveEvent.fromKeyboardEvent(
-      FocusableItem item, KeyboardEvent kbEvent) {
+    FocusableItem item,
+    KeyboardEvent kbEvent,
+  ) {
     int keyCode = kbEvent.keyCode;
     final preventDefaultFn = () {
       kbEvent.preventDefault();
@@ -184,9 +192,7 @@ class FocusMoveEvent {
 ///
 /// Please put only on content that appears after user action and
 /// requires focus to be changed to it.
-@Directive(
-  selector: '[autoFocus]',
-)
+@Directive(selector: '[autoFocus]')
 class AutoFocusDirective extends RootFocusable implements OnInit, OnDestroy {
   final _disposer = Disposer.oneShot();
 
@@ -199,11 +205,12 @@ class AutoFocusDirective extends RootFocusable implements OnInit, OnDestroy {
   PopupRef? _popupRef;
 
   AutoFocusDirective(
-      HtmlElement super.node,
-      this._domService,
-      @Self() @Optional() this._focusable,
-      @Optional() this._modal,
-      @Optional() this._popupRef);
+    HTMLElement super.node,
+    this._domService,
+    @Self() @Optional() this._focusable,
+    @Optional() this._modal,
+    @Optional() this._popupRef,
+  );
 
   @override
   void ngOnInit() {
@@ -219,7 +226,8 @@ class AutoFocusDirective extends RootFocusable implements OnInit, OnDestroy {
           ? _popupRef!.onVisibleChanged
           : _modal!.resolvedOverlayRef.onVisibleChanged;
       _disposer.addStreamSubscription(
-          onVisibleChanged.listen(_onModalOrPopupVisibleChanged));
+        onVisibleChanged.listen(_onModalOrPopupVisibleChanged),
+      );
     } else {
       _domService.scheduleWrite(focus);
     }
@@ -265,9 +273,10 @@ class AutoFocusDirective extends RootFocusable implements OnInit, OnDestroy {
 /// Tagging elements as [Focusable] allows other components to easily access
 /// which elements can be focused and perform actions on them.
 @Directive(
-    selector: '[focusableElement]',
-    exportAs: 'focusableElement',
-    providers: [ExistingProvider(Focusable, FocusableDirective)])
+  selector: '[focusableElement]',
+  exportAs: 'focusableElement',
+  providers: [ExistingProvider(Focusable, FocusableDirective)],
+)
 class FocusableDirective extends RootFocusable {
-  FocusableDirective(HtmlElement super.node);
+  FocusableDirective(HTMLElement super.node);
 }

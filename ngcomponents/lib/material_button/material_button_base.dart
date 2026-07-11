@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:ngcomponents/button_decorator/button_decorator.dart';
@@ -45,8 +45,11 @@ class MaterialButtonBase extends ButtonDirective {
   int get zElevation =>
       _isMouseDown || _focused ? mediumElevation : lowElevation;
 
-  MaterialButtonBase(HtmlElement super.element, super.role,
-      {super.handleSpacePresses});
+  MaterialButtonBase(
+    HtmlElement super.element,
+    super.role, {
+    super.handleSpacePresses,
+  });
 
   // Set _focused in a microtask to avoid triggering changes during a change
   // detection cycle, which is illegal. This avoids 'AST has changed' errors.

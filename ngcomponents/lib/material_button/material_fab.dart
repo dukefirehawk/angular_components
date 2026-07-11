@@ -2,7 +2,7 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:ngcomponents/material_ripple/material_ripple.dart';
@@ -58,7 +58,7 @@ class MaterialFabComponent extends MaterialButtonBase {
   final ChangeDetectorRef _changeDetector;
 
   MaterialFabComponent(HtmlElement element, this._changeDetector)
-      : super(element, null);
+    : super(element, null);
 
   @visibleForTemplate
   bool get isPressed => isMouseDown || focused;

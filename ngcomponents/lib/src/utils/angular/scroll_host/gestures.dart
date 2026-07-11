@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 import 'dart:math' as math;
 
 import 'package:ngdart/angular.dart';
@@ -39,18 +39,21 @@ class GestureListenerFactory {
   GestureListenerFactory(this._clock);
 
   GestureListener create(
-          Element? element, DirectionCheck isDirectionScrollable) =>
-      GestureListener(element, isDirectionScrollable, _clock);
+    Element? element,
+    DirectionCheck isDirectionScrollable,
+  ) => GestureListener(element, isDirectionScrollable, _clock);
 }
 
 /// Directions in which a parent of [target] can scroll within the [host].
 Map<GestureDirection, bool> innerScrollableDirections(
-    Element? host, EventTarget? target) {
+  Element? host,
+  EventTarget? target,
+) {
   Map<GestureDirection, bool> directions = {
     GestureDirection.up: false,
     GestureDirection.down: false,
     GestureDirection.left: false,
-    GestureDirection.right: false
+    GestureDirection.right: false,
   };
   Element? element = target as Element?;
   while (element != host && element != null) {
@@ -61,13 +64,14 @@ Map<GestureDirection, bool> innerScrollableDirections(
           directions[GestureDirection.left]! || element.scrollLeft > 0;
       directions[GestureDirection.right] =
           directions[GestureDirection.right]! ||
-              element.scrollLeft + element.clientWidth < element.scrollWidth;
+          element.scrollLeft + element.clientWidth < element.scrollWidth;
     }
     String overflowY = style.getPropertyValue('overflow-y');
     if (overflowY == 'auto' || overflowY == 'scroll') {
       directions[GestureDirection.up] =
           directions[GestureDirection.up]! || element.scrollTop > 0;
-      directions[GestureDirection.down] = directions[GestureDirection.down]! ||
+      directions[GestureDirection.down] =
+          directions[GestureDirection.down]! ||
           element.scrollTop + element.clientHeight < element.scrollHeight;
     }
     element = element.parent;
@@ -98,16 +102,21 @@ class GestureListener implements Disposable {
   ///
   /// If the listener to [scrollStream] cannot keep up with the default rate,
   /// a larger [scrollInterval] should be passed.
-  GestureListener(this._element, this._isDirectionScrollable, this._clock,
-      {Duration scrollInterval = _defaultScrollInterval})
-      : _scrollInterval = scrollInterval;
+  GestureListener(
+    this._element,
+    this._isDirectionScrollable,
+    this._clock, {
+    Duration scrollInterval = _defaultScrollInterval,
+  }) : _scrollInterval = scrollInterval;
 
   _Gesture? _gesture;
 
   Stream<GestureEvent> get scrollStream {
     if (_scrollController == null) {
       _scrollController = StreamController<GestureEvent>.broadcast(
-          onListen: _startListeners, onCancel: _onCancel);
+        onListen: _startListeners,
+        onCancel: _onCancel,
+      );
     }
 
     return _scrollController!.stream;
@@ -117,10 +126,12 @@ class GestureListener implements Disposable {
   void _startListeners() {
     if (_disposer != null) return;
     _disposer = Disposer.oneShot();
-    _disposer!
-        .addStreamSubscription(_element!.onTouchStart.listen(_onTouchStart));
-    _disposer!
-        .addStreamSubscription(_element!.onTouchMove.listen(_onTouchMove));
+    _disposer!.addStreamSubscription(
+      _element!.onTouchStart.listen(_onTouchStart),
+    );
+    _disposer!.addStreamSubscription(
+      _element!.onTouchMove.listen(_onTouchMove),
+    );
     _disposer!.addStreamSubscription(_element!.onTouchEnd.listen(_onTouchEnd));
   }
 
@@ -305,8 +316,9 @@ class _Gesture {
   void _syncToLastTouchPoint() {
     Point delta = _lastSyncPoint! - _lastTouchPoint!;
     if (delta.x != 0 || delta.y != 0) {
-      _scrollController!
-          .add(GestureEvent(delta.x as int, delta.y as int, _startingTarget));
+      _scrollController!.add(
+        GestureEvent(delta.x as int, delta.y as int, _startingTarget),
+      );
       _lastSyncPoint = _lastTouchPoint;
     }
   }
@@ -325,10 +337,10 @@ class _Gesture {
   void _addFlingEvent(Timer _) {
     int deltaT = _clock.now().difference(_lastTime!).inMilliseconds;
     double speed = _velocity.abs() - _frictionCoefficient * deltaT;
-    int deltaX =
-        (speed * _velocityX.sign * _scrollInterval.inMilliseconds).round();
-    int deltaY =
-        (speed * _velocityY.sign * _scrollInterval.inMilliseconds).round();
+    int deltaX = (speed * _velocityX.sign * _scrollInterval.inMilliseconds)
+        .round();
+    int deltaY = (speed * _velocityY.sign * _scrollInterval.inMilliseconds)
+        .round();
     if (speed > 0 && (deltaX != 0 || deltaY != 0)) {
       _scrollController!.add(GestureEvent(deltaX, deltaY, _startingTarget));
     } else {

@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 import 'dart:math' show max;
 
 import 'package:ngdart/angular.dart';
@@ -31,7 +31,7 @@ abstract class ScrollHostBase implements ScrollHost {
   GestureListener? _gestureListener;
 
   final Map<Element?, StreamController<IntersectionObserverEntry?>>
-      _intersectionStreams = {};
+  _intersectionStreams = {};
   IntersectionObserver? _intersectionObserver;
 
   StreamController<ScrollHostEvent>? _nativeOnScrollController;
@@ -68,25 +68,32 @@ abstract class ScrollHostBase implements ScrollHost {
   /// The target of scroll events from the scrollbar.
   GlobalEventHandlers get scrollbarHost;
 
-  ScrollHostBase(this._domService, this._ngZone,
-      GestureListenerFactory gestureListenerFactory,
-      {this.usePositionSticky = false, this.useTouchGestureListener = true}) {
+  ScrollHostBase(
+    this._domService,
+    this._ngZone,
+    GestureListenerFactory gestureListenerFactory, {
+    this.usePositionSticky = false,
+    this.useTouchGestureListener = true,
+  }) {
     // TODO(google): add alternative impl based on TouchEvent.supported.
     _panController = NonTouchPanController(_ngZone, _domService, anchorElement);
     _stickyController = usePositionSticky
         ? PositionStickyController(this)
         : StickyControllerImpl(_domService, this);
     if (feature_detector.isTouchInterface && useTouchGestureListener) {
-      _gestureListener =
-          gestureListenerFactory.create(anchorElement, _isDirectionScrollable);
+      _gestureListener = gestureListenerFactory.create(
+        anchorElement,
+        _isDirectionScrollable,
+      );
     }
 
     if (feature_detector.supportsIntersectionObserver) {
       var root = scrollbarHost is Element ? scrollbarHost : null;
       _intersectionObserver = IntersectionObserver(
-          // allowInterop still required; otherwise this breaks under dart2js.
-          js.allowInterop(_onIntersection),
-          {'root': root});
+        // allowInterop still required; otherwise this breaks under dart2js.
+        js.allowInterop(_onIntersection),
+        {'root': root},
+      );
     }
   }
 
@@ -102,9 +109,13 @@ abstract class ScrollHostBase implements ScrollHost {
   Stream<ScrollHostEvent>? get onScroll {
     if (_onScrollStream == null) {
       _onScrollController = StreamController.broadcast(
-          onListen: startNativeScrollListener, sync: true);
+        onListen: startNativeScrollListener,
+        sync: true,
+      );
       _onScrollStream = ZonedStream<ScrollHostEvent>(
-          _onScrollController!.stream, _ngZone.runOutsideAngular);
+        _onScrollController!.stream,
+        _ngZone.runOutsideAngular,
+      );
     }
     return _onScrollStream;
   }
@@ -149,7 +160,9 @@ abstract class ScrollHostBase implements ScrollHost {
   Stream<ScrollHostEvent> get nativeOnScroll {
     if (_nativeOnScrollController == null) {
       _nativeOnScrollController = StreamController<ScrollHostEvent>.broadcast(
-          onListen: _startElementListeners, onCancel: _stopElementListeners);
+        onListen: _startElementListeners,
+        onCancel: _stopElementListeners,
+      );
     }
 
     return _nativeOnScrollController!.stream;
@@ -172,81 +185,85 @@ abstract class ScrollHostBase implements ScrollHost {
 
     if (_gestureListener != null) {
       _elementListenersDisposer!.addStreamSubscription(
-          _gestureListener!.scrollStream.listen((ScrollHostEvent event) {
-        _nativeOnScrollController!.add(event);
-      }));
+        _gestureListener!.scrollStream.listen((ScrollHostEvent event) {
+          _nativeOnScrollController!.add(event);
+        }),
+      );
     }
 
     // Synchronous scrolling isn't necessary with position: sticky (the UI
     // doesn't jump around when position: sticky is used).
     if (!usePositionSticky) {
       _elementListenersDisposer!.addStreamSubscription(
-          anchorElement!.onWheel.listen((WheelEvent event) {
-        // Ignore mouse wheel event if the CTRL key, SHIFT key or META key
-        // (i.e. WIN key for Windows and CMD key for Mac) is pressed.
-        // This is consistent with other Google sites and ensures compatibility
-        // with embedded APIs (e.g. Maps zooms the map when
-        // CTRL/CMD is pressed).
-        if ((event.ctrlKey) || (event.metaKey) || (event.shiftKey)) return;
+        anchorElement!.onWheel.listen((WheelEvent event) {
+          // Ignore mouse wheel event if the CTRL key, SHIFT key or META key
+          // (i.e. WIN key for Windows and CMD key for Mac) is pressed.
+          // This is consistent with other Google sites and ensures compatibility
+          // with embedded APIs (e.g. Maps zooms the map when
+          // CTRL/CMD is pressed).
+          if ((event.ctrlKey) || (event.metaKey) || (event.shiftKey)) return;
 
-        // Use default values from WheelEvent if deltaX/deltaY not supported by
-        // the browser (currently occurred in Firefox). Vertical scrolling still
-        // works if deltaX does not have a value while deltaY has value greater
-        // than 0.
-        num? deltaX;
-        num? deltaY;
+          // Use default values from WheelEvent if deltaX/deltaY not supported by
+          // the browser (currently occurred in Firefox). Vertical scrolling still
+          // works if deltaX does not have a value while deltaY has value greater
+          // than 0.
+          num? deltaX;
+          num? deltaY;
 
-        // html_dart2js throws UnsupportedError if deltaX/deltaY is 'undefined'.
-        // Catch the error here and also handle 'null' value.
-        try {
-          deltaX = event.deltaX;
-          //if (deltaX == null) {
-          //  _logger.severe('deltaX is null in event: $event');
-          //}
-        } on UnsupportedError catch (error) {
-          _logger.severe('deltaX is not supported in event: $event', error);
-        }
-        deltaX ??= 0;
+          // html_dart2js throws UnsupportedError if deltaX/deltaY is 'undefined'.
+          // Catch the error here and also handle 'null' value.
+          try {
+            deltaX = event.deltaX;
+            //if (deltaX == null) {
+            //  _logger.severe('deltaX is null in event: $event');
+            //}
+          } on UnsupportedError catch (error) {
+            _logger.severe('deltaX is not supported in event: $event', error);
+          }
+          deltaX ??= 0;
 
-        try {
-          deltaY = event.deltaY;
-          //f (deltaY == null) {
-          //  _logger.severe('deltaY is null in event: $event');
-          //}
-        } on UnsupportedError catch (error) {
-          _logger.severe('deltaY is not supported in event: $event', error);
-        }
-        deltaY ??= 0;
+          try {
+            deltaY = event.deltaY;
+            //f (deltaY == null) {
+            //  _logger.severe('deltaY is null in event: $event');
+            //}
+          } on UnsupportedError catch (error) {
+            _logger.severe('deltaY is not supported in event: $event', error);
+          }
+          deltaY ??= 0;
 
-        // [event.deltaY] is negated because [scrollDirection] treats the bottom
-        // as the y-axis whereas [event] treats the top as the y-axis.
-        final d = scrollDirection(deltaX, -deltaY);
-        if (deltaY == 0 || !_isDirectionScrollable(d)) return;
-        if (innerScrollableDirections(anchorElement, event.target)[d!]!) return;
+          // [event.deltaY] is negated because [scrollDirection] treats the bottom
+          // as the y-axis whereas [event] treats the top as the y-axis.
+          final d = scrollDirection(deltaX, -deltaY);
+          if (deltaY == 0 || !_isDirectionScrollable(d)) return;
+          if (innerScrollableDirections(anchorElement, event.target)[d!]!)
+            return;
 
-        stopEvent(event);
-        // Firefox sends wheel events with [event.deltaMode] set to 1, meaning
-        // [event.deltaY] uses 'lines' rather than pixels as a unit. There is no
-        // correct way to covert lines to pixels, but 16 pixels/line is works
-        // reasonably well.
-        int pixelsPerDeltaUnit = event.deltaMode == 0 ? 1 : 16;
-        int deltaYPixels = deltaY.toInt() * pixelsPerDeltaUnit;
-        _nativeOnScrollController!.add(ScrollHostEventImpl(0, deltaYPixels));
-      }));
+          stopEvent(event);
+          // Firefox sends wheel events with [event.deltaMode] set to 1, meaning
+          // [event.deltaY] uses 'lines' rather than pixels as a unit. There is no
+          // correct way to covert lines to pixels, but 16 pixels/line is works
+          // reasonably well.
+          int pixelsPerDeltaUnit = event.deltaMode == 0 ? 1 : 16;
+          int deltaYPixels = deltaY.toInt() * pixelsPerDeltaUnit;
+          _nativeOnScrollController!.add(ScrollHostEventImpl(0, deltaYPixels));
+        }),
+      );
     }
 
     // Scroll events can come from the user interacting with the scrollbar,
     // using the mouse wheel, or can be fired by a call to [scrollWithDelta].
     // We use [_scrollInProgress] to ignore events fired by [scrollWithDelta],
     // preventing an infinite loop.
-    _elementListenersDisposer!
-        .addStreamSubscription(scrollbarHost.onScroll.listen((Event event) {
-      if (_scrollInProgress) {
-        _scrollInProgress = false;
-        return;
-      }
-      _nativeOnScrollController!.add(ScrollHostEventImpl(0, 0));
-    }));
+    _elementListenersDisposer!.addStreamSubscription(
+      scrollbarHost.onScroll.listen((Event event) {
+        if (_scrollInProgress) {
+          _scrollInProgress = false;
+          return;
+        }
+        _nativeOnScrollController!.add(ScrollHostEventImpl(0, 0));
+      }),
+    );
   }
 
   void _stopElementListeners() {
@@ -294,9 +311,10 @@ abstract class ScrollHostBase implements ScrollHost {
     assert(feature_detector.supportsIntersectionObserver);
     _intersectionStreams[element] ??=
         StreamController<IntersectionObserverEntry?>.broadcast(
-            onListen: () => _intersectionObserver!.observe(element!),
-            onCancel: () => _intersectionObserver!.unobserve(element!),
-            sync: true);
+          onListen: () => _intersectionObserver!.observe(element!),
+          onCancel: () => _intersectionObserver!.unobserve(element!),
+          sync: true,
+        );
     return _intersectionStreams[element]!.stream;
   }
 }
@@ -305,8 +323,12 @@ abstract class ScrollHostBase implements ScrollHost {
 class WindowScrollHostBase extends ScrollHostBase {
   final Window _window;
 
-  WindowScrollHostBase(super.domService, super.managedZone,
-      super.gestureListenerFactory, this._window);
+  WindowScrollHostBase(
+    super.domService,
+    super.managedZone,
+    super.gestureListenerFactory,
+    this._window,
+  );
 
   @override
   GlobalEventHandlers get scrollbarHost => _window;
@@ -328,7 +350,9 @@ class WindowScrollHostBase extends ScrollHostBase {
       bodyScrollHeight = htmlDoc.body!.scrollHeight;
     }
     return max(
-        bodyScrollHeight, _window.document.documentElement!.scrollHeight);
+      bodyScrollHeight,
+      _window.document.documentElement!.scrollHeight,
+    );
   }
 
   @override
@@ -355,10 +379,14 @@ class WindowScrollHostBase extends ScrollHostBase {
 class ElementScrollHostBase extends ScrollHostBase {
   final Element element;
 
-  ElementScrollHostBase(super.domService, super.managedZone,
-      super.gestureListenerFactory, this.element,
-      {bool usePositionSticky = false, super.useTouchGestureListener = true})
-      : super(usePositionSticky: usePositionSticky) {
+  ElementScrollHostBase(
+    super.domService,
+    super.managedZone,
+    super.gestureListenerFactory,
+    this.element, {
+    bool usePositionSticky = false,
+    super.useTouchGestureListener = true,
+  }) : super(usePositionSticky: usePositionSticky) {
     element.style.overflowY = 'auto';
 
     // Allows scroll host which contains huge iframe be able to scroll on iOS.

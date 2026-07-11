@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:ngcomponents/laminate/overlay/constants.dart';
@@ -71,8 +71,9 @@ class PopupHierarchy {
     // created by another app using ACX.
     // TODO(google): Find a way to compute it only when needed and make it
     // globally accessible.
-    var modalPanes = document
-        .querySelectorAll('.$overlayContainerClassName .pane.modal.visible');
+    var modalPanes = document.querySelectorAll(
+      '.$overlayContainerClassName .pane.modal.visible',
+    );
     if (modalPanes.isNotEmpty) {
       // Only close popups that belong to the currently visible modal or whose
       // modal is no longer visible. Note that since the modal may already

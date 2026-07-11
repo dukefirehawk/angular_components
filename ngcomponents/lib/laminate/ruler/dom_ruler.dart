@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:ngcomponents/src/laminate/ruler/ruler_interface.dart';
@@ -89,7 +89,10 @@ class DomRulerImpl extends RulerBase<Element> implements DomRuler {
 
   @override
   void setCssPropertySync(
-      Element element, String? propertyName, String? propertyValue) {
+    Element element,
+    String? propertyName,
+    String? propertyValue,
+  ) {
     element.style.setProperty(propertyName!, propertyValue);
   }
 }

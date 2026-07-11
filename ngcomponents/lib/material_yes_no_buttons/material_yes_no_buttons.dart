@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:intl/intl.dart';
@@ -169,15 +169,19 @@ class MaterialYesNoButtonsComponent implements HasDisabled {
     _no.add(event);
   }
 
-  static final _msgYes = Intl.message('Yes',
-      name: '_msgYes',
-      desc: 'Text on yes button.',
-      meaning: 'Text on yes button.');
+  static final _msgYes = Intl.message(
+    'Yes',
+    name: '_msgYes',
+    desc: 'Text on yes button.',
+    meaning: 'Text on yes button.',
+  );
 
-  static final _msgNo = Intl.message('No',
-      name: '_msgNo',
-      desc: 'Text on no button.',
-      meaning: 'Text on no button.');
+  static final _msgNo = Intl.message(
+    'No',
+    name: '_msgNo',
+    desc: 'Text on no button.',
+    meaning: 'Text on no button.',
+  );
 }
 
 /// Provides messages from yes/no buttons to be Save/Cancel.
@@ -191,11 +195,17 @@ class MaterialSaveCancelButtonsDirective {
     yesNo.noText = _msgCancel;
   }
 
-  static final _msgSave = Intl.message('Save',
-      desc: 'Text on save button.', meaning: 'Text on save button.');
+  static final _msgSave = Intl.message(
+    'Save',
+    desc: 'Text on save button.',
+    meaning: 'Text on save button.',
+  );
 
-  static final _msgCancel = Intl.message('Cancel',
-      desc: 'Text on cancel button.', meaning: 'Text on cancel button.');
+  static final _msgCancel = Intl.message(
+    'Cancel',
+    desc: 'Text on cancel button.',
+    meaning: 'Text on cancel button.',
+  );
 }
 
 /// Provides default messages from yes/no buttons to be Submit/Cancel.
@@ -207,12 +217,15 @@ class MaterialSaveCancelButtonsDirective {
 class MaterialSubmitCancelButtonsDirective
     extends MaterialSaveCancelButtonsDirective {
   MaterialSubmitCancelButtonsDirective(MaterialYesNoButtonsComponent yesNo)
-      : super(yesNo) {
+    : super(yesNo) {
     yesNo.yesText = _msgSubmit;
   }
 
-  static final _msgSubmit = Intl.message('Submit',
-      desc: 'Text on submit button.', meaning: 'Text on submit button.');
+  static final _msgSubmit = Intl.message(
+    'Submit',
+    desc: 'Text on submit button.',
+    meaning: 'Text on submit button.',
+  );
 }
 
 /// Base implementation of directive to listen to key events.
@@ -223,14 +236,18 @@ abstract class BoundaryAwareKeyDirective implements OnDestroy {
   StreamSubscription? _subscription;
 
   BoundaryAwareKeyDirective.keypress(
-      Element element, @Optional() KeyUpBoundaryDirective? boundary) {
+    Element element,
+    @Optional() KeyUpBoundaryDirective? boundary,
+  ) {
     final stream =
         boundary?.keyPressStream ?? Element.keyPressEvent.forElement(element);
     _subscription = stream.where(_isKeyMatching).listen(_onMatchingKey);
   }
 
   BoundaryAwareKeyDirective.keyup(
-      Element element, @Optional() KeyUpBoundaryDirective? boundary) {
+    Element element,
+    @Optional() KeyUpBoundaryDirective? boundary,
+  ) {
     final stream =
         boundary?.keyUpStream ?? Element.keyUpEvent.forElement(element);
     _subscription = stream.where(_isKeyMatching).listen(_onMatchingKey);
@@ -290,9 +307,11 @@ class EscapeCancelsDirective extends BoundaryAwareKeyDirective
 
   MaterialButtonComponent? get noButton => _yesNo.noButton;
 
-  EscapeCancelsDirective(this._yesNo, Element element,
-      @Optional() KeyUpBoundaryDirective? boundary)
-      : super.keyup(element, boundary);
+  EscapeCancelsDirective(
+    this._yesNo,
+    Element element,
+    @Optional() KeyUpBoundaryDirective? boundary,
+  ) : super.keyup(element, boundary);
 
   @override
   bool _isKeyMatching(KeyboardEvent event) {
@@ -321,9 +340,11 @@ class EnterAcceptsDirective extends BoundaryAwareKeyDirective
   MaterialButtonComponent? get yesButton => _yesNo.yesButton;
   MaterialButtonComponent? get noButton => _yesNo.noButton;
 
-  EnterAcceptsDirective(this._yesNo, Element element,
-      @Optional() KeyUpBoundaryDirective? boundary)
-      : super.keypress(element, boundary);
+  EnterAcceptsDirective(
+    this._yesNo,
+    Element element,
+    @Optional() KeyUpBoundaryDirective? boundary,
+  ) : super.keypress(element, boundary);
 
   /// Enables the directive to be conditionally applied.
   @Input()

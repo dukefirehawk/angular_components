@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:intl/intl.dart';
@@ -38,9 +38,7 @@ import 'package:ngcomponents/utils/browser/events/events.dart';
     StickyElementDirective,
   ],
   templateUrl: 'material_stepper.html',
-  styleUrls: [
-    'material_stepper.scss.css',
-  ],
+  styleUrls: ['material_stepper.scss.css'],
   // TODO(google): Change preserveWhitespace to false to improve codesize.
   preserveWhitespace: true,
   visibility: Visibility.all, // injected
@@ -68,8 +66,9 @@ class MaterialStepperComponent {
 
   List<StepDirective> _stepDirectiveList = [];
 
-  final _activeStepController =
-      StreamController<StepDirective?>.broadcast(sync: true);
+  final _activeStepController = StreamController<StepDirective?>.broadcast(
+    sync: true,
+  );
   final _stepAriaLabel = <StepDirective, String>{};
 
   @ContentChildren(StepDirective)
@@ -292,41 +291,53 @@ class MaterialStepperComponent {
   @Output('activeStepChanged')
   Stream<StepDirective?> get activeStepChanged => _activeStepController.stream;
 
-  static final optionalMsg = Intl.message('Optional',
-      name: 'optionalMsg',
-      desc: 'Label denoting that a step in a task flow is optional.');
+  static final optionalMsg = Intl.message(
+    'Optional',
+    name: 'optionalMsg',
+    desc: 'Label denoting that a step in a task flow is optional.',
+  );
 
-  static final continueMsg = Intl.message('Continue',
-      name: 'continueMsg',
-      desc: 'Button for continuing to the next step in a task flow.');
+  static final continueMsg = Intl.message(
+    'Continue',
+    name: 'continueMsg',
+    desc: 'Button for continuing to the next step in a task flow.',
+  );
 
-  static final _cancelMsg = Intl.message('Cancel',
-      name: '_cancelMsg',
-      desc: 'Button for cancelling the current step in a task flow.');
+  static final _cancelMsg = Intl.message(
+    'Cancel',
+    name: '_cancelMsg',
+    desc: 'Button for cancelling the current step in a task flow.',
+  );
 
   static String _stepAriaAnnounce(
-          int currentStepNumber, int totalSteps, String stepLabel) =>
-      Intl.message('Step $currentStepNumber of $totalSteps, $stepLabel',
-          name: '_stepAriaAnnounce',
-          args: [currentStepNumber, totalSteps, stepLabel],
-          desc: 'Message announced to visually impaired users about '
-              'which step of a multi step process a user is on. '
-              '[REL_NOTE: xilli/03-31-19]',
-          examples: const {
-            'currentStepNumber': 1,
-            'totalSteps': 4,
-            'stepLabel': 'Select campaign settings'
-          });
+    int currentStepNumber,
+    int totalSteps,
+    String stepLabel,
+  ) => Intl.message(
+    'Step $currentStepNumber of $totalSteps, $stepLabel',
+    name: '_stepAriaAnnounce',
+    args: [currentStepNumber, totalSteps, stepLabel],
+    desc:
+        'Message announced to visually impaired users about '
+        'which step of a multi step process a user is on. '
+        '[REL_NOTE: xilli/03-31-19]',
+    examples: const {
+      'currentStepNumber': 1,
+      'totalSteps': 4,
+      'stepLabel': 'Select campaign settings',
+    },
+  );
 }
 
-@Directive(
-  selector: 'material-stepper[backButtonText]',
-)
+@Directive(selector: 'material-stepper[backButtonText]')
 class MaterialStepperBackButtonTextDirective {
   MaterialStepperBackButtonTextDirective(MaterialStepperComponent stepper) {
     stepper.noText = _msgBack;
   }
 
-  static final _msgBack = Intl.message('Back',
-      name: '_msgBack', desc: 'Text on stepper back button between steps');
+  static final _msgBack = Intl.message(
+    'Back',
+    name: '_msgBack',
+    desc: 'Text on stepper back button between steps',
+  );
 }

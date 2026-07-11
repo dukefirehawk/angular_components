@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:quiver/core.dart';
 import 'package:ngcomponents/utils/angular/scroll_host/interface.dart';
@@ -35,15 +35,26 @@ class PositionStickyController implements StickyController {
   PositionStickyController(this._scrollHost);
 
   @override
-  void stick(Element element, StickyPosition position, Element? range,
-      {String? stickyClass, String? stickyKey}) {
-    final stickyElement =
-        _StickyElement(element, position, range, stickyClass, stickyKey);
+  void stick(
+    Element element,
+    StickyPosition position,
+    Element? range, {
+    String? stickyClass,
+    String? stickyKey,
+  }) {
+    final stickyElement = _StickyElement(
+      element,
+      position,
+      range,
+      stickyClass,
+      stickyKey,
+    );
     if (_stickyElements.contains(stickyElement)) return;
 
     // Prevent the element from appearing in the layout more than once.
-    _stickyElements
-        .removeWhere((stickyElement) => element == stickyElement.element);
+    _stickyElements.removeWhere(
+      (stickyElement) => element == stickyElement.element,
+    );
 
     _stickyElements.add(stickyElement);
     _scheduleUpdate();
@@ -110,8 +121,12 @@ class PositionStickyController implements StickyController {
     });
   }
 
-  void _addStickyStyle(_StickyElement stickyElement, String positionProperty,
-      num zIndex, num? offset) {
+  void _addStickyStyle(
+    _StickyElement stickyElement,
+    String positionProperty,
+    num zIndex,
+    num? offset,
+  ) {
     stickyElement.element.style
       ..position = 'sticky'
       ..zIndex = '${zIndex}';
@@ -123,8 +138,10 @@ class PositionStickyController implements StickyController {
           _startIntersectionSubscription(stickyElement);
         }
         // + 1px wasn't enough to trigger an intersection.
-        stickyElement.intersectionElement!.style
-            .setProperty(positionProperty, '${-(offset! + 2)}px');
+        stickyElement.intersectionElement!.style.setProperty(
+          positionProperty,
+          '${-(offset! + 2)}px',
+        );
       } else {
         stickyElement.element.classes.add(stickyElement.stickyClass!);
       }
@@ -165,12 +182,12 @@ class PositionStickyController implements StickyController {
     stickyElement.intersectionSubscription = _scrollHost
         .onIntersection(stickyElement.intersectionElement)
         .listen((e) {
-      if (e!.intersectionRect!.height > 0) {
-        stickyElement.element.classes.remove(stickyElement.stickyClass);
-      } else {
-        stickyElement.element.classes.add(stickyElement.stickyClass!);
-      }
-    });
+          if (e!.intersectionRect!.height > 0) {
+            stickyElement.element.classes.remove(stickyElement.stickyClass);
+          } else {
+            stickyElement.element.classes.add(stickyElement.stickyClass!);
+          }
+        });
   }
 
   void _stopIntersectionSubscription(_StickyElement stickyElement) {
@@ -181,8 +198,9 @@ class PositionStickyController implements StickyController {
   }
 
   void _update() {
-    var topElements =
-        _stickyElements.where((e) => e.position == StickyPosition.TOP).toList();
+    var topElements = _stickyElements
+        .where((e) => e.position == StickyPosition.TOP)
+        .toList();
     var bottomElements = _stickyElements
         .where((e) => e.position == StickyPosition.BOTTOM)
         .toList();
@@ -192,12 +210,17 @@ class PositionStickyController implements StickyController {
     _updateLayout(bottomElements, -1, 'bottom', zIndex);
   }
 
-  int _updateLayout(List<_StickyElement> elements, int sortOrder,
-      String positionProperty, int startZIndex) {
+  int _updateLayout(
+    List<_StickyElement> elements,
+    int sortOrder,
+    String positionProperty,
+    int startZIndex,
+  ) {
     // Create a list of sticky elements and corresponding client rect, sorted by
     // the element's position in the document tree.
-    var elementsAndRects =
-        elements.map((e) => [e, e.element.getBoundingClientRect()]).toList();
+    var elementsAndRects = elements
+        .map((e) => [e, e.element.getBoundingClientRect()])
+        .toList();
     elementsAndRects.sort((a, b) {
       _StickyElement elementA = a[0] as _StickyElement;
       _StickyElement elementB = b[0] as _StickyElement;
@@ -218,8 +241,12 @@ class PositionStickyController implements StickyController {
           stickyKeyOffsets[stickyElement.stickyKey] = offset;
           offset += rect.height;
         }
-        _addStickyStyle(stickyElement, positionProperty, zIndex,
-            stickyKeyOffsets[stickyElement.stickyKey]);
+        _addStickyStyle(
+          stickyElement,
+          positionProperty,
+          zIndex,
+          stickyKeyOffsets[stickyElement.stickyKey],
+        );
       } else {
         _addStickyStyle(stickyElement, positionProperty, zIndex, offset);
         offset += rect.height;
@@ -240,8 +267,13 @@ class _StickyElement {
   Element? intersectionElement;
   StreamSubscription<IntersectionObserverEntry?>? intersectionSubscription;
 
-  _StickyElement(this.element, this.position, this.range, this.stickyClass,
-      this.stickyKey);
+  _StickyElement(
+    this.element,
+    this.position,
+    this.range,
+    this.stickyClass,
+    this.stickyKey,
+  );
 
   @override
   bool operator ==(Object other) {

@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:ngcomponents/focus/focus_interface.dart';
@@ -14,10 +14,7 @@ import 'package:ngcomponents/utils/angular/properties/properties.dart';
 import 'package:ngcomponents/utils/angular/reference/reference.dart';
 
 /// A directive that exposes the [PopupSource] interface as `popupSource`.
-@Directive(
-  selector: '[popupSource]',
-  exportAs: 'popupSource',
-)
+@Directive(selector: '[popupSource]', exportAs: 'popupSource')
 // TODO(google): Deprecate use of `relativeTo` with an Element, use instead.
 // TODO(google): Move the setting of alignOriginX and Y into DomPopupSource.
 class PopupSourceDirective
@@ -38,13 +35,15 @@ class PopupSourceDirective
   /// set the popup related aria attributes. This defaults to true and can be
   /// set to false for cases where the popup source isn't the focus target.
   PopupSourceDirective(
-      this._domPopupSourceFactory,
-      this._element,
-      @Optional() this._referenceDirective,
-      @Optional() this._focusable,
-      @Attribute('initPopupAriaAttributes') String? initAriaAttributes)
-      : _initAriaAttributes =
-            attributeToBool(initAriaAttributes, defaultValue: true);
+    this._domPopupSourceFactory,
+    this._element,
+    @Optional() this._referenceDirective,
+    @Optional() this._focusable,
+    @Attribute('initPopupAriaAttributes') String? initAriaAttributes,
+  ) : _initAriaAttributes = attributeToBool(
+        initAriaAttributes,
+        defaultValue: true,
+      );
 
   @override
   ngOnDestroy() {
@@ -127,10 +126,12 @@ class PopupSourceDirective
 
   void _updateSource() {
     //if (_element != null) {
-    _popupSource = _domPopupSourceFactory.createPopupSource(_element,
-        alignOriginX: _alignOriginX,
-        alignOriginY: _alignOriginY,
-        initAriaAttributes: _initAriaAttributes);
+    _popupSource = _domPopupSourceFactory.createPopupSource(
+      _element,
+      alignOriginX: _alignOriginX,
+      alignOriginY: _alignOriginY,
+      initAriaAttributes: _initAriaAttributes,
+    );
     //}
     if (_popupId != null) {
       _popupSource!.popupId = _popupId;

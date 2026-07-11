@@ -2,7 +2,7 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:ngcomponents/dynamic_component/dynamic_component.dart';
@@ -25,20 +25,21 @@ import 'package:ngcomponents/utils/id_generator/id_generator.dart';
   selector: 'material-select-dropdown-item',
   providers: [
     ExistingProvider(SelectionItem, MaterialSelectDropdownItemComponent),
-    ExistingProvider(HasRenderer, MaterialSelectDropdownItemComponent)
+    ExistingProvider(HasRenderer, MaterialSelectDropdownItemComponent),
   ],
   styleUrls: ['material_select_dropdown_item.scss.css'],
   directives: [
     DynamicComponent,
     MaterialIconComponent,
     MaterialCheckboxComponent,
-    NgIf
+    NgIf,
   ],
   templateUrl: 'material_select_item.html',
   changeDetection: ChangeDetectionStrategy.onPush,
 )
 class MaterialSelectDropdownItemComponent<T>
-    extends MaterialSelectItemComponent<T> implements OnDestroy {
+    extends MaterialSelectItemComponent<T>
+    implements OnDestroy {
   @HostBinding('class')
   static const hostClass = 'item';
 
@@ -58,15 +59,14 @@ class MaterialSelectDropdownItemComponent<T>
   bool _customAriaHandling = false;
 
   MaterialSelectDropdownItemComponent(
-      HtmlElement element,
-      @Attribute('role') String? role,
-      @Optional() DropdownHandle? dropdown,
-      @Optional() ActivationHandler? activationHandler,
-      @Optional() IdGenerator? idGenerator,
-      ChangeDetectorRef cdRef)
-      : _generatedId =
-            (idGenerator ?? SequentialIdGenerator.fromUUID()).nextId(),
-        super(element, dropdown, activationHandler, cdRef, role ?? 'option') {
+    HtmlElement element,
+    @Attribute('role') String? role,
+    @Optional() DropdownHandle? dropdown,
+    @Optional() ActivationHandler? activationHandler,
+    @Optional() IdGenerator? idGenerator,
+    ChangeDetectorRef cdRef,
+  ) : _generatedId = (idGenerator ?? SequentialIdGenerator.fromUUID()).nextId(),
+      super(element, dropdown, activationHandler, cdRef, role ?? 'option') {
     this.itemRenderer = defaultItemRenderer;
     //this.factoryRenderer =
     //    (_) => templateItem.MaterialSelectDropdownItemComponentNgFactory;
@@ -74,7 +74,6 @@ class MaterialSelectDropdownItemComponent<T>
 
   @HostBinding('attr.aria-selected')
   String get seletedStr => '$isSelected';
-
 
   @HostListener('mousedown')
   void preventTextSelectionIfShiftKey(MouseEvent e) {

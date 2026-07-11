@@ -2,7 +2,7 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:ngcomponents/material_button/material_button_base.dart';
@@ -26,7 +26,7 @@ class TabButtonComponent extends MaterialButtonBase with TabMixin {
   final Element _nativeElement;
 
   TabButtonComponent(this._nativeElement)
-      : super(_nativeElement as HtmlElement, 'tab');
+    : super(_nativeElement as HtmlElement, 'tab');
 
   @override
   Element get nativeElement => _nativeElement;

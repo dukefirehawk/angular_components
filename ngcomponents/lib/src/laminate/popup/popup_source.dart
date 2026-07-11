@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngcomponents/focus/focus_interface.dart';
 import 'package:ngcomponents/laminate/enums/alignment.dart';
@@ -15,11 +15,16 @@ import 'package:ngcomponents/laminate/enums/alignment.dart';
 /// component or element.
 abstract class PopupSource {
   /// Create a [PopupSource] from a predefined location ([rectangle]).
-  factory PopupSource.fromRectangle(Rectangle rectangle,
-      {Alignment alignX = Alignment.Start,
-      Alignment alignY = Alignment.Start}) {
-    return _RectanglePopupSource(rectangle,
-        alignOriginX: alignX, alignOriginY: alignY);
+  factory PopupSource.fromRectangle(
+    Rectangle rectangle, {
+    Alignment alignX = Alignment.Start,
+    Alignment alignY = Alignment.Start,
+  }) {
+    return _RectanglePopupSource(
+      rectangle,
+      alignOriginX: alignX,
+      alignOriginY: alignY,
+    );
   }
 
   /// What point of the origin to use on the x-axis.
@@ -89,8 +94,11 @@ class _RectanglePopupSource implements PopupSource {
 
   final Rectangle _predefinedRectangle;
 
-  _RectanglePopupSource(this._predefinedRectangle,
-      {this.alignOriginX, this.alignOriginY});
+  _RectanglePopupSource(
+    this._predefinedRectangle, {
+    this.alignOriginX,
+    this.alignOriginY,
+  });
 
   @override
   Stream<Rectangle>? onDimensionsChanged({bool track = false}) {

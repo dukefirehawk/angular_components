@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 import 'dart:math';
 
 import 'package:ngdart/angular.dart';
@@ -83,8 +83,9 @@ class MaterialPopupComponent extends Object
   /// Stream on which an event is fired after the popup has finished opening.
   @Output('opened')
   Stream<void> get onOpened => _onOpened.stream;
-  final StreamController<void> _onOpened =
-      StreamController<void>.broadcast(sync: true);
+  final StreamController<void> _onOpened = StreamController<void>.broadcast(
+    sync: true,
+  );
 
   final StreamController<bool> _onContentVisible =
       StreamController<bool>.broadcast(sync: true);
@@ -253,26 +254,27 @@ class MaterialPopupComponent extends Object
   String? ariaLabel;
 
   MaterialPopupComponent(
-      @Optional() @SkipSelf() this._hierarchy,
-      @Optional() @SkipSelf() MaterialPopupComponent? parentPopup,
-      @Attribute('role') String? role,
-      this._ngZone,
-      this._overlayService,
-      this._domService,
-      this._zIndexer,
-      @Inject(defaultPopupPositions) this._defaultPreferredPositions,
-      @Inject(overlayRepositionLoop) Object useRepositionLoop,
-      @Inject(overlayViewportBoundaries) Object viewportBoundaries,
-      @Optional() this._popupSizeProvider,
-      this._changeDetector,
-      this._viewContainer,
-      this.elementRef)
-      : this.role = role ?? 'dialog' {
+    @Optional() @SkipSelf() this._hierarchy,
+    @Optional() @SkipSelf() MaterialPopupComponent? parentPopup,
+    @Attribute('role') String? role,
+    this._ngZone,
+    this._overlayService,
+    this._domService,
+    this._zIndexer,
+    @Inject(defaultPopupPositions) this._defaultPreferredPositions,
+    @Inject(overlayRepositionLoop) Object useRepositionLoop,
+    @Inject(overlayViewportBoundaries) Object viewportBoundaries,
+    @Optional() this._popupSizeProvider,
+    this._changeDetector,
+    this._viewContainer,
+    this.elementRef,
+  ) : this.role = role ?? 'dialog' {
     // Close popup if parent closes.
 
     if (parentPopup != null) {
-      _disposer
-          .addStreamSubscription(parentPopup.onClose.listen((_) => close()));
+      _disposer.addStreamSubscription(
+        parentPopup.onClose.listen((_) => close()),
+      );
     }
 
     if (useRepositionLoop is bool) {
@@ -458,12 +460,16 @@ class MaterialPopupComponent extends Object
     // viewport size before popup position is populated.
     _updatePopupMinMaxSize();
 
-    _visibleDisposer.addStreamSubscription(window.onResize
-        .transform(throttleStream(_resizeThrottleDuration, guaranteeLast: true))
-        .listen((_) {
-      _updateViewportSize();
-      _updatePopupMinMaxSize();
-    }));
+    _visibleDisposer.addStreamSubscription(
+      window.onResize
+          .transform(
+            throttleStream(_resizeThrottleDuration, guaranteeLast: true),
+          )
+          .listen((_) {
+            _updateViewportSize();
+            _updatePopupMinMaxSize();
+          }),
+    );
 
     // Put the overlay in the live DOM so we can measure its size.
     _overlayRef?.state.visibility = visibility.Visibility.Hidden;
@@ -480,8 +486,9 @@ class MaterialPopupComponent extends Object
     var popupContentsLayoutStream = _overlayRef
         ?.measureSizeChanges()
         .asBroadcastStream(onListen: _visibleDisposer.addStreamSubscription);
-    var popupSourceLayoutStream =
-        state.source?.onDimensionsChanged(track: state.trackLayoutChanges);
+    var popupSourceLayoutStream = state.source?.onDimensionsChanged(
+      track: state.trackLayoutChanges,
+    );
     if (!state.trackLayoutChanges) {
       popupContentsLayoutStream = popupContentsLayoutStream?.take(1);
     }
@@ -491,26 +498,29 @@ class MaterialPopupComponent extends Object
     //
     // Note: Stream<Rectangle<num>> must be nullable for _visiableDiposer()
     // to work without throwing Null exception during runtime
-    var comboList = [popupContentsLayoutStream, popupSourceLayoutStream]
-        .cast<Stream<Rectangle<num>?>>();
+    var comboList = [
+      popupContentsLayoutStream,
+      popupSourceLayoutStream,
+    ].cast<Stream<Rectangle<num>?>>();
     Stream<List<Rectangle<num>?>> mergedLayoutStream = _mergeStreams(comboList);
 
-    _visibleDisposer
-        .addStreamSubscription(mergedLayoutStream.listen((layoutRects) {
-      // TODO: Need to revisit this logic later
-      // Ignore partial results.
-      //if (layoutRects.every((r) => r != null)) {
-      if (!initialData.isCompleted) {
-        _onPopupOpened();
-        initialData.complete(null);
-      }
-      _initialSourceDimensions = null;
+    _visibleDisposer.addStreamSubscription(
+      mergedLayoutStream.listen((layoutRects) {
+        // TODO: Need to revisit this logic later
+        // Ignore partial results.
+        //if (layoutRects.every((r) => r != null)) {
+        if (!initialData.isCompleted) {
+          _onPopupOpened();
+          initialData.complete(null);
+        }
+        _initialSourceDimensions = null;
 
-      var rect1 = (layoutRects.isNotEmpty ? layoutRects[0] : null);
-      var rect2 = (layoutRects.length > 1 ? layoutRects[1] : null);
+        var rect1 = (layoutRects.isNotEmpty ? layoutRects[0] : null);
+        var rect2 = (layoutRects.length > 1 ? layoutRects[1] : null);
 
-      _schedulePositionUpdate(rect1, rect2);
-    }));
+        _schedulePositionUpdate(rect1, rect2);
+      }),
+    );
 
     // Resolve when the popup has started opening.
     return initialData.future;
@@ -591,8 +601,9 @@ class MaterialPopupComponent extends Object
     var islastTriggerWithKeyboard = hierarchy.islastTriggerWithKeyboard;
     if (state.source is Focusable && islastTriggerWithKeyboard) {
       _domService.scheduleWrite(() {
-        if (_overlayRef!.overlayElement
-            .contains(window.document.activeElement)) {
+        if (_overlayRef!.overlayElement.contains(
+          window.document.activeElement,
+        )) {
           (state.source as Focusable).focus();
         }
       });
@@ -644,10 +655,11 @@ class MaterialPopupComponent extends Object
     var containerRect = _overlayRef!.containerElement.getBoundingClientRect();
     //if (containerRect == null) return null;
     return Rectangle(
-        (sourceDimensions.left - containerRect.left).round(),
-        (sourceDimensions.top - containerRect.top).round(),
-        sourceDimensions.width.round(),
-        sourceDimensions.height.round());
+      (sourceDimensions.left - containerRect.left).round(),
+      (sourceDimensions.top - containerRect.top).round(),
+      sourceDimensions.width.round(),
+      sourceDimensions.height.round(),
+    );
   }
 
   void _startRepositionLoop() {
@@ -684,10 +696,10 @@ class MaterialPopupComponent extends Object
     if (sourceDimensions == null) return;
     _initialSourceDimensions ??= sourceDimensions;
 
-    int newOffsetX =
-        (sourceDimensions.left - _initialSourceDimensions!.left).round();
-    int newOffsetY =
-        (sourceDimensions.top - _initialSourceDimensions!.top).round();
+    int newOffsetX = (sourceDimensions.left - _initialSourceDimensions!.left)
+        .round();
+    int newOffsetY = (sourceDimensions.top - _initialSourceDimensions!.top)
+        .round();
     int scrollShiftX = newOffsetX - _repositionOffsetX;
     int scrollShiftY = newOffsetY - _repositionOffsetY;
     _repositionOffsetX = newOffsetX;
@@ -696,12 +708,19 @@ class MaterialPopupComponent extends Object
     if (state.constrainToViewport) {
       // If necessary, move the popup to fit within the viewport.
       var popupRect = _overlayRef!.overlayElement.getBoundingClientRect();
-      popupRect =
-          _shiftRectangle(popupRect, left: scrollShiftX, top: scrollShiftY);
-      var boundedViewportRect =
-          _boundRectangle(_viewportRect, _viewportBoundaries);
-      var viewportShift =
-          _shiftRectangleToFitWithin(popupRect, boundedViewportRect);
+      popupRect = _shiftRectangle(
+        popupRect,
+        left: scrollShiftX,
+        top: scrollShiftY,
+      );
+      var boundedViewportRect = _boundRectangle(
+        _viewportRect,
+        _viewportBoundaries,
+      );
+      var viewportShift = _shiftRectangleToFitWithin(
+        popupRect,
+        boundedViewportRect,
+      );
       _repositionOffsetX += viewportShift.left as int;
       _repositionOffsetY += viewportShift.top as int;
     }
@@ -717,16 +736,26 @@ class MaterialPopupComponent extends Object
 
   void _updatePopupMinMaxSize() {
     //if (_popupSizeProvider == null) return;
-    var boundedViewportRect =
-        _boundRectangle(_viewportRect, _viewportBoundaries);
+    var boundedViewportRect = _boundRectangle(
+      _viewportRect,
+      _viewportBoundaries,
+    );
     minHeight = _popupSizeProvider?.getMinHeight(
-        _overlayRef!.state.top ?? 0, boundedViewportRect.height);
+      _overlayRef!.state.top ?? 0,
+      boundedViewportRect.height,
+    );
     minWidth = _popupSizeProvider?.getMinWidth(
-        _overlayRef!.state.left ?? 0, boundedViewportRect.width);
+      _overlayRef!.state.left ?? 0,
+      boundedViewportRect.width,
+    );
     maxHeight = _popupSizeProvider?.getMaxHeight(
-        _overlayRef!.state.top ?? 0, boundedViewportRect.height);
+      _overlayRef!.state.top ?? 0,
+      boundedViewportRect.height,
+    );
     maxWidth = _popupSizeProvider?.getMaxWidth(
-        _overlayRef!.state.left ?? 0, boundedViewportRect.width);
+      _overlayRef!.state.left ?? 0,
+      boundedViewportRect.width,
+    );
   }
 
   Iterable<dynamic> get _preferredPositions {
@@ -737,7 +766,10 @@ class MaterialPopupComponent extends Object
 
   /// Returns the best possible alignment from preferred positions.
   RelativePosition? _getBestPosition(
-      Rectangle contentRect, Rectangle sourceRect, Rectangle containerRect) {
+    Rectangle contentRect,
+    Rectangle sourceRect,
+    Rectangle containerRect,
+  ) {
     // This should only be used when space constraints is enforced.
     assert(state.enforceSpaceConstraints);
 
@@ -762,14 +794,16 @@ class MaterialPopupComponent extends Object
       // Build up a tentative position for the popup. These numbers are all
       // relative to the container div.
       var containerPos = Rectangle<num>(
-          position.originX.calcLeft(sourceRect, contentRect),
-          position.originY.calcTop(sourceRect, contentRect),
-          contentRect.width,
-          contentRect.height);
+        position.originX.calcLeft(sourceRect, contentRect),
+        position.originY.calcTop(sourceRect, contentRect),
+        contentRect.width,
+        contentRect.height,
+      );
       // Now translate that into screen space.
       var screenPos = Rectangle<num>.fromPoints(
-          containerPos.topLeft + containerOffset,
-          containerPos.bottomRight + containerOffset);
+        containerPos.topLeft + containerOffset,
+        containerPos.bottomRight + containerOffset,
+      );
       if (_viewportRect.containsRectangle(screenPos)) {
         bestPosition = position;
         break;
@@ -792,7 +826,9 @@ class MaterialPopupComponent extends Object
   ///
   /// Returns a future that completes when the state change is submitted.
   Future _schedulePositionUpdate(
-      Rectangle<num>? contentRect, Rectangle<num>? sourceRect) async {
+    Rectangle<num>? contentRect,
+    Rectangle<num>? sourceRect,
+  ) async {
     if (contentRect == null || sourceRect == null) return;
 
     var contentClientRect = contentRect;
@@ -812,8 +848,10 @@ class MaterialPopupComponent extends Object
     // asynchronously, and are thus not accounted for in the position
     // calculations.
     if (state.matchMinSourceWidth) {
-      contentClientRect = _resizeRectangle(contentClientRect,
-          width: max(sourceClientRect.width, contentClientRect.width));
+      contentClientRect = _resizeRectangle(
+        contentClientRect,
+        width: max(sourceClientRect.width, contentClientRect.width),
+      );
     }
 
     RelativePosition? position;
@@ -821,13 +859,17 @@ class MaterialPopupComponent extends Object
       // Instead of using user-provided positioning, try to determine what
       // would be the best positioning given the viewport bounds and the size
       // of the content being popped-up.
-      position =
-          _getBestPosition(contentClientRect, sourceClientRect, containerRect);
+      position = _getBestPosition(
+        contentClientRect,
+        sourceClientRect,
+        containerRect,
+      );
     }
     if (position == null) {
       position = RelativePosition(
-          originX: state.source!.alignOriginX,
-          originY: state.source!.alignOriginY);
+        originX: state.source!.alignOriginX,
+        originY: state.source!.alignOriginY,
+      );
       if (isRtl) {
         position = position.flipRelativePosition();
       }
@@ -839,9 +881,11 @@ class MaterialPopupComponent extends Object
         : state.offsetX - containerRect.left;
     final offsetY = state.offsetY - containerRect.top;
     _overlayRef!.state
-      ..left = position.originX!.calcLeft(sourceClientRect, contentClientRect) +
+      ..left =
+          position.originX!.calcLeft(sourceClientRect, contentClientRect) +
           offsetX
-      ..top = position.originY!.calcTop(sourceClientRect, contentClientRect) +
+      ..top =
+          position.originY!.calcTop(sourceClientRect, contentClientRect) +
           offsetY
       ..visibility = visibility.Visibility.Visible;
     _overlayRef!.overlayElement.style
@@ -896,31 +940,34 @@ class _DeferredToggleable extends Toggleable {
 // TODO(google): This belongs as a utility not inlined here.
 Stream<List<T>> _mergeStreams<T>(List<Stream<T>> streams) {
   var streamSubscriptions = List<StreamSubscription<T>?>.filled(
-      streams.length, null,
-      growable: false);
+    streams.length,
+    null,
+    growable: false,
+  );
   var cachedResults = List<T?>.filled(streams.length, null, growable: false);
   StreamController<List<T>>? streamController;
 
   streamController = StreamController<List<T>>.broadcast(
-      sync: true,
-      onListen: () {
-        var i = 0;
-        streams.forEach((stream) {
-          var n = i++;
-          streamSubscriptions[n] = stream.listen((result) {
-            cachedResults[n] = result;
-            var results = cachedResults.cast<T>();
-            if (results.isNotEmpty) {
-              streamController?.add(results);
-            }
-          });
+    sync: true,
+    onListen: () {
+      var i = 0;
+      streams.forEach((stream) {
+        var n = i++;
+        streamSubscriptions[n] = stream.listen((result) {
+          cachedResults[n] = result;
+          var results = cachedResults.cast<T>();
+          if (results.isNotEmpty) {
+            streamController?.add(results);
+          }
         });
-      },
-      onCancel: () {
-        for (var sub in streamSubscriptions) {
-          sub!.cancel();
-        }
       });
+    },
+    onCancel: () {
+      for (var sub in streamSubscriptions) {
+        sub!.cancel();
+      }
+    },
+  );
   return streamController.stream;
 }
 
@@ -944,10 +991,11 @@ Rectangle _shiftRectangle(Rectangle rect, {num top = 0, num left = 0}) =>
     Rectangle(rect.left + left, rect.top + top, rect.width, rect.height);
 
 Rectangle _boundRectangle(Rectangle rect, Box boundaries) => Rectangle(
-    rect.left + boundaries.left,
-    rect.top + boundaries.top,
-    rect.width - boundaries.left - boundaries.right,
-    rect.height - boundaries.top - boundaries.bottom);
+  rect.left + boundaries.left,
+  rect.top + boundaries.top,
+  rect.width - boundaries.left - boundaries.right,
+  rect.height - boundaries.top - boundaries.bottom,
+);
 
 /// Returns a transformation which, when applied to [rect], will cause [rect] to
 /// be entirely within [container].

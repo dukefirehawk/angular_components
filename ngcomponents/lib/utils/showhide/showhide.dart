@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:async/async.dart' show StreamQueue;
@@ -14,9 +14,7 @@ import 'package:ngcomponents/utils/browser/dom_service/angular_2.dart';
 /// The element is shown or hidden by removing or adding the
 /// 'acx-showhide-hide' css class at first, and 'acx-showhide-hidden' at the end
 /// of transition (or after 16ms delay if no transition happened).
-@Directive(
-  selector: '[showhide]',
-)
+@Directive(selector: '[showhide]')
 class ShowHideDirective implements OnInit, OnDestroy {
   static const _hideClass = 'acx-showhide-hide';
   static const _hiddenClass = 'acx-showhide-hidden';
@@ -126,8 +124,9 @@ class ShowHideDirective implements OnInit, OnDestroy {
       }
       // if the transition wasn't started because the hidden element already
       // have the same properties, hide it manually
-      Duration timeout =
-          Duration(milliseconds: duration + _transitionTimeoutMs);
+      Duration timeout = Duration(
+        milliseconds: duration + _transitionTimeoutMs,
+      );
       Future.delayed(timeout, complete);
     });
   }

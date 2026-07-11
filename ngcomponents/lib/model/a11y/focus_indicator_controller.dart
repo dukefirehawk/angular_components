@@ -3,19 +3,21 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/di.dart';
 
 const focusIndicatorProviders = [
   FactoryProvider(
-      FocusIndicatorController, createFocusIndicatorControllerIfNotAvailable)
+    FocusIndicatorController,
+    createFocusIndicatorControllerIfNotAvailable,
+  ),
 ];
 
 @Injectable()
 FocusIndicatorController createFocusIndicatorControllerIfNotAvailable(
-        @Optional() @SkipSelf() FocusIndicatorController? controller) =>
-    controller ?? FocusIndicatorController();
+  @Optional() @SkipSelf() FocusIndicatorController? controller,
+) => controller ?? FocusIndicatorController();
 
 /// Utility that attaches an a focus indicator to the page when enabled.
 ///
@@ -93,9 +95,11 @@ class FocusIndicatorController {
 
     _activeElement = document.activeElement;
 
-    window.console.groupCollapsed('Active element '
-        '[${_activeElement!.tagName.toLowerCase()}] '
-        'after "${event.type}"');
+    window.console.groupCollapsed(
+      'Active element '
+      '[${_activeElement!.tagName.toLowerCase()}] '
+      'after "${event.type}"',
+    );
     window.console.log(_activeElement);
     window.console.log(event);
     window.console.groupEnd();

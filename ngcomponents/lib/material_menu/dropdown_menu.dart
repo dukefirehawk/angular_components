@@ -2,7 +2,7 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:ngcomponents/focus/focus.dart';
@@ -23,7 +23,7 @@ import 'package:ngcomponents/utils/disposer/disposer.dart';
   directives: [
     DropdownButtonComponent,
     MenuPopupComponent,
-    PopupSourceDirective
+    PopupSourceDirective,
   ],
   providers: [ExistingProvider(HasDisabled, DropdownMenuComponent)],
   templateUrl: 'dropdown_menu.html',
@@ -44,10 +44,12 @@ class DropdownMenuComponent extends Object
   DropdownMenuComponent(ChangeDetectorRef changeDetector, this._root) {
     // Let Angular pick up changes to [isExpanded] in [MenuPopupWrapper] when
     // it's toggled programmatically, e.g. TabMenuComponent.
-    _disposer.addStreamSubscription(isExpandedChange.listen((_) {
-      focusable = _focusTarget;
-      changeDetector.markForCheck();
-    }));
+    _disposer.addStreamSubscription(
+      isExpandedChange.listen((_) {
+        focusable = _focusTarget;
+        changeDetector.markForCheck();
+      }),
+    );
   }
 
   @override

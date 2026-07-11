@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:ngcomponents/content/deferred_content.dart';
@@ -124,10 +124,15 @@ class MaterialPaperTooltipComponent implements DeferredContentAware, Tooltip {
   final TooltipController _tooltipController;
   final ChangeDetectorRef _changeDetector;
 
-  MaterialPaperTooltipComponent(this._tooltipController, this._changeDetector,
-      HtmlElement hostElement, @Attribute('tooltipClass') String? tooltipClass)
-      : popupClassName =
-            constructEncapsulatedCss(tooltipClass, hostElement.classes);
+  MaterialPaperTooltipComponent(
+    this._tooltipController,
+    this._changeDetector,
+    HtmlElement hostElement,
+    @Attribute('tooltipClass') String? tooltipClass,
+  ) : popupClassName = constructEncapsulatedCss(
+        tooltipClass,
+        hostElement.classes,
+      );
 
   @ViewChild(MaterialPopupComponent)
   set popupChild(MaterialPopupComponent? popup) {

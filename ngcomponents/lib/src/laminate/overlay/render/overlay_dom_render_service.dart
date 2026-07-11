@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart' hide Visibility;
 import 'package:ngcomponents/laminate/enums/visibility.dart';
@@ -28,8 +28,9 @@ const overlayContainerName = OpaqueToken<String>('overlayContainerName');
 const overlayContainerToken = OpaqueToken<HtmlElement>('overlayContainer');
 
 /// Where [overlayContainerToken] should be created.
-const overlayContainerParent =
-    OpaqueToken<HtmlElement>('overlayContainerParent');
+const overlayContainerParent = OpaqueToken<HtmlElement>(
+  'overlayContainerParent',
+);
 
 /// Flag whether to use synchronous reads/writes instead of async.
 ///
@@ -80,15 +81,16 @@ class OverlayDomRenderService {
   int _uniqueId = 0;
 
   OverlayDomRenderService(
-      OverlayStyleConfig styleConfig,
-      @Inject(overlayContainerToken) this.containerElement,
-      @Inject(overlayContainerName) this._containerName,
-      this._domRuler,
-      this._domService,
-      this._imperativeViewUtils,
-      @Inject(overlaySyncDom) this._useDomSynchronously,
-      @Inject(overlayRepositionLoop) this._useRepositionLoop,
-      this._zIndexer) {
+    OverlayStyleConfig styleConfig,
+    @Inject(overlayContainerToken) this.containerElement,
+    @Inject(overlayContainerName) this._containerName,
+    this._domRuler,
+    this._domService,
+    this._imperativeViewUtils,
+    @Inject(overlaySyncDom) this._useDomSynchronously,
+    @Inject(overlayRepositionLoop) this._useRepositionLoop,
+    this._zIndexer,
+  ) {
     containerElement.attributes['name'] = _containerName;
     styleConfig.registerStyles();
     _lastZIndex = _zIndexer.peek();
@@ -123,17 +125,19 @@ class OverlayDomRenderService {
     if (state.visibility == Visibility.Visible) cssClasses.add('visible');
 
     // Write to the DOM.
-    _domRuler.updateSync(pane,
-        cssClasses: cssClasses,
-        width: state.width,
-        height: state.height,
-        top: state.top,
-        left: state.left,
-        bottom: state.bottom,
-        right: state.right,
-        visibility: state.visibility,
-        position: state.position,
-        useCssTransform: !_useRepositionLoop);
+    _domRuler.updateSync(
+      pane,
+      cssClasses: cssClasses,
+      width: state.width,
+      height: state.height,
+      top: state.top,
+      left: state.left,
+      bottom: state.bottom,
+      right: state.right,
+      visibility: state.visibility,
+      position: state.position,
+      useCssTransform: !_useRepositionLoop,
+    );
 
     // This is intentionally not in the ruler.
     if (state.minWidth != null) {
@@ -165,8 +169,11 @@ class OverlayDomRenderService {
   /// synchronously and not part of the read/write queue. This helps performance
   /// but should only be used on elements that will not effect layout much such
   /// as overlays/popups.
-  Stream<Rectangle> measureSize(HtmlElement pane,
-      {bool track = false, bool sync = false}) {
+  Stream<Rectangle> measureSize(
+    HtmlElement pane, {
+    bool track = false,
+    bool sync = false,
+  }) {
     if (track) {
       return _domRuler.track(pane);
     } else {
@@ -186,9 +193,9 @@ class OverlayDomRenderService {
   /// time).
   Future<Rectangle> measureContainer() {
     if (!_useDomSynchronously) {
-      return _domService
-          .onWrite()
-          .then((_) => containerElement.getBoundingClientRect());
+      return _domService.onWrite().then(
+        (_) => containerElement.getBoundingClientRect(),
+      );
     } else {
       return Future<Rectangle>.value(containerElement.getBoundingClientRect());
     }

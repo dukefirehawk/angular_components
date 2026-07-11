@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:intl/intl.dart';
@@ -36,10 +36,12 @@ class MaterialChipComponent<T> extends RootFocusable implements HasRenderer<T> {
 
   MaterialChipComponent(Element super.root);
 
-  static final chipDeleteButtonMessage = Intl.message('Delete',
-      name: 'chipDeleteButtonMessage',
-      desc: 'Label for a button which removes the item when clicked.',
-      meaning: 'Label for a button which removes the item when clicked.');
+  static final chipDeleteButtonMessage = Intl.message(
+    'Delete',
+    name: 'chipDeleteButtonMessage',
+    desc: 'Label for a button which removes the item when clicked.',
+    meaning: 'Label for a button which removes the item when clicked.',
+  );
 
   /// Aria label for delete button.
   @Input()

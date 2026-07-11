@@ -2,7 +2,7 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 
@@ -34,11 +34,13 @@ const windowBindings = [
   FactoryProvider(Window, getWindow),
 ];
 
-const windowModule = Module(provide: [
-  FactoryProvider(Document, getDocument),
-  FactoryProvider(HtmlDocument, getDocument),
-  FactoryProvider(Window, getWindow),
-]);
+const windowModule = Module(
+  provide: [
+    FactoryProvider(Document, getDocument),
+    FactoryProvider(HtmlDocument, getDocument),
+    FactoryProvider(Window, getWindow),
+  ],
+);
 
 /// Returns the current [Window]'s location.
 ///
@@ -51,6 +53,4 @@ const windowModule = Module(provide: [
 Location getLocation(Window window) => window.location;
 
 /// Provides [Location] bound for use within Angular.
-const locationBindings = [
-  FactoryProvider(Location, getLocation),
-];
+const locationBindings = [FactoryProvider(Location, getLocation)];

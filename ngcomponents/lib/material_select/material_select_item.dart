@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:ngcomponents/button_decorator/button_decorator.dart';
@@ -35,7 +35,7 @@ import 'package:ngcomponents/utils/disposer/disposer.dart';
     MaterialCheckboxComponent,
     MaterialIconComponent,
     NgIf,
-    DynamicComponent
+    DynamicComponent,
   ],
   templateUrl: 'material_select_item.html',
   changeDetection: ChangeDetectionStrategy.onPush,
@@ -59,14 +59,17 @@ class MaterialSelectItemComponent<T> extends ButtonDirective
   StreamSubscription? _selectionChangeStreamSub;
 
   MaterialSelectItemComponent(
-      this.element,
-      @Optional() this._dropdown,
-      @Optional() this._activationHandler,
-      this._cdRef,
-      @Attribute('role') String? role,
-      {bool addTabIndexWhenNonTabbable = false})
-      : super(element, role ?? 'option',
-            addTabIndexWhenNonTabbable: addTabIndexWhenNonTabbable) {
+    this.element,
+    @Optional() this._dropdown,
+    @Optional() this._activationHandler,
+    this._cdRef,
+    @Attribute('role') String? role, {
+    bool addTabIndexWhenNonTabbable = false,
+  }) : super(
+         element,
+         role ?? 'option',
+         addTabIndexWhenNonTabbable: addTabIndexWhenNonTabbable,
+       ) {
     _disposer
       ..addStreamSubscription(trigger.listen(handleActivate))
       ..addFunction(() => _selectionChangeStreamSub?.cancel());

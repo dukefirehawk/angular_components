@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:ngcomponents/focus/focus.dart';
@@ -63,16 +63,16 @@ class MaterialCheckboxComponent
   Function? _onTouched;
 
   MaterialCheckboxComponent(
-      this._root,
-      this._changeDetector,
-      @Self() @Optional() NgControl? cd,
-      @Attribute('tabindex') String? hostTabIndex,
-      @Attribute('role') String? role)
-      : _defaultTabIndex = (hostTabIndex != null && hostTabIndex.isNotEmpty)
-            ? hostTabIndex
-            : '0',
-        //hostTabIndex.isNotEmpty ?? false ? hostTabIndex : '0',
-        this.role = role ?? 'checkbox' {
+    this._root,
+    this._changeDetector,
+    @Self() @Optional() NgControl? cd,
+    @Attribute('tabindex') String? hostTabIndex,
+    @Attribute('role') String? role,
+  ) : _defaultTabIndex = (hostTabIndex != null && hostTabIndex.isNotEmpty)
+          ? hostTabIndex
+          : '0',
+      //hostTabIndex.isNotEmpty ?? false ? hostTabIndex : '0',
+      this.role = role ?? 'checkbox' {
     // When NgControl is present on the host element, the component
     // participates in the Forms API.
     if (cd != null) {
@@ -187,10 +187,11 @@ class MaterialCheckboxComponent
   /// If both parameters are provided, then set them as presented, otherwise we
   /// will clear the other one if necessary. Events are only fired if there was
   /// a change and [emitEvent] is true.
-  void _setStates(
-      {bool checked = false,
-      bool indeterminate = false,
-      bool emitEvent = true}) {
+  void _setStates({
+    bool checked = false,
+    bool indeterminate = false,
+    bool emitEvent = true,
+  }) {
     // At most one can be true.
     assert(!checked || !indeterminate);
 
@@ -204,14 +205,14 @@ class MaterialCheckboxComponent
     _checkedStr = indeterminate
         ? indeterminateAriaState
         : _checked
-            ? checkedAriaState
-            : uncheckedAriaState;
+        ? checkedAriaState
+        : uncheckedAriaState;
 
     _icon = _indeterminate
         ? indeterminateIcon
         : _checked
-            ? checkedIcon
-            : uncheckedIcon;
+        ? checkedIcon
+        : uncheckedIcon;
 
     if (emitEvent && _checked != prevChecked) {
       _onChecked.add(_checked);

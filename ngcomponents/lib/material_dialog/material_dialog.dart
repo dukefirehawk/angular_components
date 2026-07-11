@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:ngcomponents/focus/focus_trap.dart';
@@ -76,16 +76,20 @@ class MaterialDialogComponent
   set main(HtmlElement? element) {
     _mainElement = element;
     if (_mainElement != null) {
-      _disposer.addStreamSubscription(_mainElement!.onScroll.listen((_) {
-        _setHeaderFooterScrollBorder();
-      }));
+      _disposer.addStreamSubscription(
+        _mainElement!.onScroll.listen((_) {
+          _setHeaderFooterScrollBorder();
+        }),
+      );
     }
     if (_modal == null) {
       return;
     }
-    _disposer.addStreamSubscription(_modal!.onOpen.listen((_) {
-      _setHeaderFooterScrollBorder();
-    }));
+    _disposer.addStreamSubscription(
+      _modal!.onOpen.listen((_) {
+        _setHeaderFooterScrollBorder();
+      }),
+    );
   }
 
   /// Function to handle escape key events from the dialog. By default it tries
@@ -119,24 +123,26 @@ class MaterialDialogComponent
 
   void _setHeaderFooterScrollBorder() {
     if (!shouldShowScrollStrokes) return;
-    _disposer.addDisposable(_domService.scheduleRead(() {
-      if (_mainElement == null) return;
-      var shouldShowTopScrollStroke =
-          _mainElement!.scrollTop > 0 && error == null;
-      var shouldShowBottomScrollStroke =
-          _mainElement!.clientHeight < _mainElement!.scrollHeight &&
-              _mainElement!.scrollTop <
-                  _mainElement!.scrollHeight - _mainElement!.clientHeight;
-      if (shouldShowTopScrollStroke != this.shouldShowTopScrollStroke ||
-          shouldShowBottomScrollStroke != this.shouldShowBottomScrollStroke) {
-        this.shouldShowTopScrollStroke = shouldShowTopScrollStroke;
-        this.shouldShowBottomScrollStroke = shouldShowBottomScrollStroke;
-        // Update the DOM based on the newly modified state.
-        _ngZone.runAfterChangesObserved(() {
-          _changeDetector.markForCheck();
-        });
-      }
-    }));
+    _disposer.addDisposable(
+      _domService.scheduleRead(() {
+        if (_mainElement == null) return;
+        var shouldShowTopScrollStroke =
+            _mainElement!.scrollTop > 0 && error == null;
+        var shouldShowBottomScrollStroke =
+            _mainElement!.clientHeight < _mainElement!.scrollHeight &&
+            _mainElement!.scrollTop <
+                _mainElement!.scrollHeight - _mainElement!.clientHeight;
+        if (shouldShowTopScrollStroke != this.shouldShowTopScrollStroke ||
+            shouldShowBottomScrollStroke != this.shouldShowBottomScrollStroke) {
+          this.shouldShowTopScrollStroke = shouldShowTopScrollStroke;
+          this.shouldShowBottomScrollStroke = shouldShowBottomScrollStroke;
+          // Update the DOM based on the newly modified state.
+          _ngZone.runAfterChangesObserved(() {
+            _changeDetector.markForCheck();
+          });
+        }
+      }),
+    );
   }
 
   /// Determines whether to listen for when the dialog enters or exits
@@ -151,9 +157,11 @@ class MaterialDialogComponent
     if (_shouldListenForFullscreenChanges) return;
 
     _shouldListenForFullscreenChanges = shouldListenForFullscreenChanges;
-    _disposer.addStreamSubscription(window.onResize.listen((_) {
-      _listenForFullscreenChanges();
-    }));
+    _disposer.addStreamSubscription(
+      window.onResize.listen((_) {
+        _listenForFullscreenChanges();
+      }),
+    );
   }
 
   /// Stream for when the dialog enters or exits fullscreen mode.
@@ -164,13 +172,14 @@ class MaterialDialogComponent
   void _listenForFullscreenChanges() {
     if (!_shouldListenForFullscreenChanges) return;
     _disposer.addDisposable(
-        _domService.scheduleRead(_updateForFullscreenChangesInsideDomReadLoop));
+      _domService.scheduleRead(_updateForFullscreenChangesInsideDomReadLoop),
+    );
   }
 
   void _updateForFullscreenChangesInsideDomReadLoop() {
     final isInFullscreenMode =
         document.body!.clientWidth <= _rootElement.clientWidth &&
-            document.body!.clientHeight <= _rootElement.clientHeight;
+        document.body!.clientHeight <= _rootElement.clientHeight;
     if (_isInFullscreenMode != isInFullscreenMode) {
       _isInFullscreenMode = isInFullscreenMode;
       _isInFullscreenModeStreamController.add(isInFullscreenMode);

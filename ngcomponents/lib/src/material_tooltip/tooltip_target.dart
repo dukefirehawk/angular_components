@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:ngcomponents/laminate/overlay/constants.dart';
@@ -21,22 +21,24 @@ import 'tooltip_source.dart' show tooltipShowDelay;
 /// This directive is used in conjunction with a [Tooltip] Component. Such as
 /// the [MaterialInkTooltipComponent], which gives full control over
 /// the content of a simple tooltip.
-@Directive(
-  selector: '[tooltipTarget]',
-  exportAs: 'tooltipTarget',
-)
+@Directive(selector: '[tooltipTarget]', exportAs: 'tooltipTarget')
 class MaterialTooltipTargetDirective extends TooltipBehavior
     implements AfterViewInit, OnDestroy {
   HtmlElement element;
 
   MaterialTooltipTargetDirective(
-      DomPopupSourceFactory domPopupSourceFactory,
-      ViewContainerRef viewContainerRef,
-      this.element,
-      ChangeDetectorRef changeDetector,
-      @Attribute('initPopupAriaAttributes') String? initAriaAttributes)
-      : super(domPopupSourceFactory, viewContainerRef, element, changeDetector,
-            initAriaAttributes);
+    DomPopupSourceFactory domPopupSourceFactory,
+    ViewContainerRef viewContainerRef,
+    this.element,
+    ChangeDetectorRef changeDetector,
+    @Attribute('initPopupAriaAttributes') String? initAriaAttributes,
+  ) : super(
+        domPopupSourceFactory,
+        viewContainerRef,
+        element,
+        changeDetector,
+        initAriaAttributes,
+      );
 
   /// Show tooltip on focus to allow keyboard users to see tooltip contents.
   @visibleForTemplate
@@ -66,13 +68,17 @@ abstract class TooltipBehavior extends TooltipTarget {
   Stream<bool> get tooltipActivate => _tooltipActivate.stream.distinct();
 
   TooltipBehavior(
-      DomPopupSourceFactory domPopupSourceFactory,
-      ViewContainerRef viewContainerRef,
-      HtmlElement element,
-      this._changeDetector,
-      String? initAriaAttributes)
-      : super(domPopupSourceFactory, viewContainerRef, element,
-            initAriaAttributes) {
+    DomPopupSourceFactory domPopupSourceFactory,
+    ViewContainerRef viewContainerRef,
+    HtmlElement element,
+    this._changeDetector,
+    String? initAriaAttributes,
+  ) : super(
+        domPopupSourceFactory,
+        viewContainerRef,
+        element,
+        initAriaAttributes,
+      ) {
     _show = DelayedAction(tooltipShowDelay, showTooltip);
   }
 
@@ -128,9 +134,11 @@ abstract class TooltipBehavior extends TooltipTarget {
 
     // Don't hide the tooltip if focus went to an element inside the tooltip.
     HtmlElement? el;
-    for (el = event.relatedTarget as HtmlElement?;
-        el!.parent != null;
-        el = el.parent as HtmlElement?) {
+    for (
+      el = event.relatedTarget as HtmlElement?;
+      el!.parent != null;
+      el = el.parent as HtmlElement?
+    ) {
       if (el.className == overlayContainerClassName) return;
     }
 
@@ -148,10 +156,7 @@ abstract class TooltipBehavior extends TooltipTarget {
 /// This directive is used in conjunction with a [Tooltip] Component. Such as
 /// the [MaterialPaperTooltipComponent], which gives full control over the
 /// content of a simple tooltip.
-@Directive(
-  selector: '[clickableTooltipTarget]',
-  exportAs: 'tooltipTarget',
-)
+@Directive(selector: '[clickableTooltipTarget]', exportAs: 'tooltipTarget')
 class ClickableTooltipTargetDirective extends TooltipBehavior
     implements AfterViewInit, OnDestroy {
   late StreamSubscription _tooltipSubscription;
@@ -159,13 +164,18 @@ class ClickableTooltipTargetDirective extends TooltipBehavior
   bool _tooltipVisible = false;
 
   ClickableTooltipTargetDirective(
-      DomPopupSourceFactory domPopupSourceFactory,
-      ViewContainerRef viewContainerRef,
-      this.element,
-      ChangeDetectorRef changeDetector,
-      @Attribute('initPopupAriaAttributes') String? initAriaAttributes)
-      : super(domPopupSourceFactory, viewContainerRef, element, changeDetector,
-            initAriaAttributes) {
+    DomPopupSourceFactory domPopupSourceFactory,
+    ViewContainerRef viewContainerRef,
+    this.element,
+    ChangeDetectorRef changeDetector,
+    @Attribute('initPopupAriaAttributes') String? initAriaAttributes,
+  ) : super(
+        domPopupSourceFactory,
+        viewContainerRef,
+        element,
+        changeDetector,
+        initAriaAttributes,
+      ) {
     _tooltipSubscription = tooltipActivate.listen((visible) {
       _tooltipVisible = visible;
     });
@@ -210,10 +220,18 @@ abstract class TooltipTarget extends PopupSourceDirective {
   final HtmlElement _element;
   String? _previousDescribedbyId;
 
-  TooltipTarget(DomPopupSourceFactory domPopupSourceFactory,
-      this.viewContainerRef, this._element, String? initAriaAttributes)
-      : super(domPopupSourceFactory, _element, /* referenceDirective */ null,
-            /* focusable */ null, initAriaAttributes);
+  TooltipTarget(
+    DomPopupSourceFactory domPopupSourceFactory,
+    this.viewContainerRef,
+    this._element,
+    String? initAriaAttributes,
+  ) : super(
+        domPopupSourceFactory,
+        _element,
+        /* referenceDirective */ null,
+        /* focusable */ null,
+        initAriaAttributes,
+      );
 
   /// Sets the tooltip associated with this target.
   void setTooltip(Tooltip component) {

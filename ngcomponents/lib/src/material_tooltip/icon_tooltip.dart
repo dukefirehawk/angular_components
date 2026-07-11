@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:intl/intl.dart';
@@ -68,7 +68,7 @@ import 'tooltip_target.dart';
     ClickableTooltipTargetDirective,
     MaterialIconComponent,
     KeyboardOnlyFocusIndicatorDirective,
-    MaterialPaperTooltipComponent
+    MaterialPaperTooltipComponent,
   ],
   // TODO(google): Change preserveWhitespace to false to improve codesize.
   preserveWhitespace: true,
@@ -105,20 +105,22 @@ class MaterialIconTooltipComponent implements DeferredContentAware {
   int offsetY = 0;
 
   MaterialIconTooltipComponent(
-      AcxDarkTheme darkTheme,
-      this.element,
-      @Attribute('icon') String? icon,
-      @Attribute('type') String? type,
-      @Attribute('size') String? size)
-      : icon = icon ?? '${type ?? "help"}_outline',
-        iconSize = size ?? 'medium' {
+    AcxDarkTheme darkTheme,
+    this.element,
+    @Attribute('icon') String? icon,
+    @Attribute('type') String? type,
+    @Attribute('size') String? size,
+  ) : icon = icon ?? '${type ?? "help"}_outline',
+      iconSize = size ?? 'medium' {
     assert(type == 'help' || type == 'info' || type == 'error' || type == null);
-    assert(iconSize == 'x-small' ||
-        iconSize == 'small' ||
-        iconSize == 'medium' ||
-        iconSize == 'large' ||
-        iconSize == 'x-large' ||
-        iconSize == '');
+    assert(
+      iconSize == 'x-small' ||
+          iconSize == 'small' ||
+          iconSize == 'medium' ||
+          iconSize == 'large' ||
+          iconSize == 'x-large' ||
+          iconSize == '',
+    );
 
     darkTheme.themeElement(element);
   }
@@ -137,10 +139,11 @@ class MaterialIconTooltipComponent implements DeferredContentAware {
   Stream<bool> get contentVisible => _contentVisible.stream;
 
   static final helpTooltipLabel = Intl.message(
-      'Mouseover, click, press Enter key or Space key on this icon for more '
-      'information.',
-      name: 'MaterialIconTooltipComponent_helpTooltipLabel',
-      desc: 'Label for help icon which shows help content.');
+    'Mouseover, click, press Enter key or Space key on this icon for more '
+    'information.',
+    name: 'MaterialIconTooltipComponent_helpTooltipLabel',
+    desc: 'Label for help icon which shows help content.',
+  );
 }
 
 /// [RelativePosition] list for the ink tooltip.

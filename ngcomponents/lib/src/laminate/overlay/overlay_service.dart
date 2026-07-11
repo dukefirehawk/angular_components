@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:ngcomponents/src/laminate/overlay/overlay_ref.dart';
@@ -23,8 +23,9 @@ class OverlayService {
   /// as the state instance.
   ///
   /// The returned future completes with a reference to the pane.
-  Future<OverlayRef> createOverlayRef(
-      [OverlayState initialState = _defaultState]) async {
+  Future<OverlayRef> createOverlayRef([
+    OverlayState initialState = _defaultState,
+  ]) async {
     HtmlElement pane = await _renderService.createOverlayPane(initialState);
     return _createRef(pane, initialState);
   }
@@ -53,31 +54,38 @@ class OverlayService {
   final OverlayDomRenderService _renderService;
 
   OverlayRef _createRef(HtmlElement pane, OverlayState state) => OverlayRef(
-      _renderService.applyState,
-      _measurePane,
-      _renderService.createPortalHost(pane),
-      _renderService.containerElement,
-      pane,
-      _ngZone.runOutsideAngular,
-      state: state);
+    _renderService.applyState,
+    _measurePane,
+    _renderService.createPortalHost(pane),
+    _renderService.containerElement,
+    pane,
+    _ngZone.runOutsideAngular,
+    state: state,
+  );
 
   // Depending on client flags, either measure sync or async.
   Stream<Rectangle<num>> _measurePane(HtmlElement pane, {bool track = false}) {
-    return _renderService.measureSize(pane,
-        track: track, sync: _useDomSynchronously);
+    return _renderService.measureSize(
+      pane,
+      track: track,
+      sync: _useDomSynchronously,
+    );
   }
 
   OverlayService(
-      this._ngZone,
-      @Inject(overlaySyncDom) Object useDomSynchronously,
-      this._renderService,
-      @SkipSelf() @Optional() OverlayService? existingInstance) {
+    this._ngZone,
+    @Inject(overlaySyncDom) Object useDomSynchronously,
+    this._renderService,
+    @SkipSelf() @Optional() OverlayService? existingInstance,
+  ) {
     assert(() {
       // Overlay service should not be injected if it is already available
       if (existingInstance != null) {
-        _logger.severe('OverlayService must be a singleton: '
-            'Remove nested OverlayService providers such as overlayBindings, '
-            'popupBindings, datepickerBindings or materialProviders');
+        _logger.severe(
+          'OverlayService must be a singleton: '
+          'Remove nested OverlayService providers such as overlayBindings, '
+          'popupBindings, datepickerBindings or materialProviders',
+        );
       }
       return true;
     }());

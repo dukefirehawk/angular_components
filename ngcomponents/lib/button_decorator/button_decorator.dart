@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:ngcomponents/focus/focus.dart';
@@ -37,13 +37,16 @@ class ButtonDirective extends RootFocusable
   final String? _nonTabbableIndex;
   bool _shouldHandleSpaceKey;
 
-  ButtonDirective(Element super.element, @Attribute('role') String? role,
-      {bool addTabIndexWhenNonTabbable = false, bool handleSpacePresses = true})
-      : this.role = (role ?? 'button'),
-        // Allow the subclass to define how the element should be made
-        // untabbable.
-        _nonTabbableIndex = addTabIndexWhenNonTabbable ? '-1' : null,
-        _shouldHandleSpaceKey = handleSpacePresses;
+  ButtonDirective(
+    Element super.element,
+    @Attribute('role') String? role, {
+    bool addTabIndexWhenNonTabbable = false,
+    bool handleSpacePresses = true,
+  }) : this.role = (role ?? 'button'),
+       // Allow the subclass to define how the element should be made
+       // untabbable.
+       _nonTabbableIndex = addTabIndexWhenNonTabbable ? '-1' : null,
+       _shouldHandleSpaceKey = handleSpacePresses;
 
   /// Role of this component used for a11y.
   @Input()

@@ -2,7 +2,7 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:ngcomponents/button_decorator/button_decorator.dart';
@@ -16,15 +16,11 @@ import 'package:ngcomponents/model/ui/icon.dart';
 /// Icon affix component - if the icon has an action attached to it, then
 /// clicking/triggering the icon will also run the action.
 @Component(
-    selector: 'icon-affix',
-    directives: [
-      ButtonDirective,
-      MaterialIconComponent,
-      NgClass,
-    ],
-    changeDetection: ChangeDetectionStrategy.onPush,
-    styleUrls: ['icon_affix.scss.css'],
-    template: r'''
+  selector: 'icon-affix',
+  directives: [ButtonDirective, MaterialIconComponent, NgClass],
+  changeDetection: ChangeDetectionStrategy.onPush,
+  styleUrls: ['icon_affix.scss.css'],
+  template: r'''
       <material-icon
           baseline
           buttonDecorator
@@ -38,7 +34,8 @@ import 'package:ngcomponents/model/ui/icon.dart';
           [icon]="icon"
           (trigger)="handleActionIconTrigger($event)">
       </material-icon>
-    ''')
+    ''',
+)
 class IconAffixComponent implements BaseAffixComponent<IconAffix> {
   /// The top most menu node.
   ///
@@ -47,8 +44,10 @@ class IconAffixComponent implements BaseAffixComponent<IconAffix> {
 
   final ChangeDetectorRef _cdRef;
 
-  IconAffix _viewModel =
-      IconAffix.simple(icon: Icon.blank(), visibility: IconVisibility.hidden);
+  IconAffix _viewModel = IconAffix.simple(
+    icon: Icon.blank(),
+    visibility: IconVisibility.hidden,
+  );
 
   bool _disabled = false;
 
@@ -71,7 +70,8 @@ class IconAffixComponent implements BaseAffixComponent<IconAffix> {
 
   @override
   set value(IconAffix? newValue) {
-    _viewModel = newValue ??
+    _viewModel =
+        newValue ??
         IconAffix.simple(icon: Icon.blank(), visibility: IconVisibility.hidden);
     _cdRef.markForCheck();
   }

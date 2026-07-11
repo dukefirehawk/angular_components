@@ -2,7 +2,7 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:ngcomponents/focus/focus.dart';
@@ -12,7 +12,7 @@ import 'package:ngcomponents/focus/focus.dart';
 @Directive(
   selector: '[focusActivableItem]',
   providers: [
-    ExistingProvider(FocusableActivateItem, FocusActivableItemDirective)
+    ExistingProvider(FocusableActivateItem, FocusActivableItemDirective),
   ],
 )
 class FocusActivableItemDirective extends RootFocusable
@@ -22,7 +22,7 @@ class FocusActivableItemDirective extends RootFocusable
   @override
   String? key;
 
-  FocusActivableItemDirective(HtmlElement super.root);
+  FocusActivableItemDirective(HTMLElement super.root);
 }
 
 /// A focusable component with a matching [key].

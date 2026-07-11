@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:meta/meta.dart';
 import 'package:ngcomponents/utils/disposer/disposer.dart';
@@ -107,8 +107,13 @@ abstract class StickyController implements Disposable {
   /// If [stickyKey] is provided, then only the last (when [position] is top)
   /// or the first (when [position] is bottom) sticky element with the same
   /// [stickyKey] will be stuck.
-  void stick(Element element, StickyPosition position, Element? range,
-      {String? stickyClass, String? stickyKey});
+  void stick(
+    Element element,
+    StickyPosition position,
+    Element? range, {
+    String? stickyClass,
+    String? stickyKey,
+  });
 
   /// Unregisters the element from sticking.
   void unstick(Element element);

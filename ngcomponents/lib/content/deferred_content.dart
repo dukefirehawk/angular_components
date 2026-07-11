@@ -2,7 +2,9 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'dart:html';
+import 'dart:js_interop';
+
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:ngcomponents/utils/disposer/disposer.dart';
@@ -16,12 +18,10 @@ import 'deferred_content_aware.dart';
 /// Throws if A does not exist.
 /// This directive can be used to avoid the cost of eagerly instantiating
 /// invisible content and the cost of change-detection on invisible content.
-@Directive(
-  selector: '[deferredContent]',
-)
+@Directive(selector: '[deferredContent]')
 class DeferredContentDirective implements OnDestroy {
   final _disposer = Disposer.oneShot();
-  final _placeholder = DivElement();
+  final _placeholder = HTMLDivElement();
 
   ViewContainerRef _viewContainer;
   EmbeddedViewRef? _viewRef;
@@ -65,10 +65,10 @@ class DeferredContentDirective implements OnDestroy {
         // Save the dimensions of the deferred content.
         var rootNodes = _viewRef?.rootNodes ?? [];
         var content = rootNodes.isNotEmpty ? rootNodes.first : null;
-        if (content is HtmlElement) {
+        if (content.isA<HTMLElement>()) {
           // This isn't in DomService.schedule{Read,Write} because
           // it needs to work with components that aren't scheduled.
-          var dimensions = content.getBoundingClientRect();
+          var dimensions = (content as HTMLElement).getBoundingClientRect();
           _placeholder.style
             ..width = '${dimensions.width}px'
             ..height = '${dimensions.height}px';
@@ -80,10 +80,8 @@ class DeferredContentDirective implements OnDestroy {
 
       if (preserveDimensions) {
         // Add the placeholder so the parent's size doesn't change.
-        var container = _viewContainer.element.nativeElement;
-        if (container?.parentNode != null) {
-          container.parentNode.insertBefore(_placeholder, container);
-        }
+        var container = _viewContainer.element;
+        container.parentNode?.insertBefore(_placeholder, container);
       }
     }
     _shown = value;
@@ -95,11 +93,13 @@ class DeferredContentDirective implements OnDestroy {
     DeferredContentAware parent,
     ChangeDetectorRef changeDetector,
   ) {
-    _disposer.addStreamSubscription(parent.contentVisible.listen((value) {
-      _visible = value;
-      _setVisible();
-      changeDetector.markForCheck();
-    }));
+    _disposer.addStreamSubscription(
+      parent.contentVisible.listen((value) {
+        _visible = value;
+        _setVisible();
+        changeDetector.markForCheck();
+      }),
+    );
   }
 
   @override
@@ -116,9 +116,7 @@ class DeferredContentDirective implements OnDestroy {
 /// This directive is not recommended as it will cause Angular to change-detect
 /// the contents even when hidden. If your hidden content has push-detection
 /// enabled, go for it.
-@Directive(
-  selector: '[cachedDeferredContent]',
-)
+@Directive(selector: '[cachedDeferredContent]')
 class CachingDeferredContentDirective implements OnDestroy {
   ViewContainerRef _viewContainer;
   TemplateRef _template;
@@ -142,10 +140,12 @@ class CachingDeferredContentDirective implements OnDestroy {
     DeferredContentAware parent,
     ChangeDetectorRef changeDetector,
   ) {
-    _disposer.addStreamSubscription(parent.contentVisible.listen((value) {
-      _setVisible(value);
-      changeDetector.markForCheck();
-    }));
+    _disposer.addStreamSubscription(
+      parent.contentVisible.listen((value) {
+        _setVisible(value);
+        changeDetector.markForCheck();
+      }),
+    );
   }
 
   @override

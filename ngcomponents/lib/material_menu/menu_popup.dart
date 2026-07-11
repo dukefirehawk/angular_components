@@ -2,7 +2,7 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:ngcomponents/content/deferred_content.dart';
@@ -20,20 +20,21 @@ import 'package:ngcomponents/utils/angular/css/css.dart';
 
 /// A popup that renders a [MenuModel] using a [MenuItemGroupsComponent].
 @Component(
-    selector: 'menu-popup',
-    directives: [
-      AutoFocusDirective,
-      DeferredContentDirective,
-      FocusTrapComponent,
-      MaterialListComponent,
-      MaterialPopupComponent,
-      MenuItemGroupsComponent,
-      MenuRootDirective,
-      NgIf,
-    ],
-    templateUrl: 'menu_popup.html',
-    styleUrls: ['menu_popup.scss.css'],
-    changeDetection: ChangeDetectionStrategy.onPush)
+  selector: 'menu-popup',
+  directives: [
+    AutoFocusDirective,
+    DeferredContentDirective,
+    FocusTrapComponent,
+    MaterialListComponent,
+    MaterialPopupComponent,
+    MenuItemGroupsComponent,
+    MenuRootDirective,
+    NgIf,
+  ],
+  templateUrl: 'menu_popup.html',
+  styleUrls: ['menu_popup.scss.css'],
+  changeDetection: ChangeDetectionStrategy.onPush,
+)
 class MenuPopupComponent extends Object with FocusableMixin, MenuPopupWrapper {
   HtmlElement element;
 

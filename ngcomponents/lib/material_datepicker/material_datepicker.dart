@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:ngcomponents/button_decorator/button_decorator.dart';
@@ -123,8 +123,11 @@ class MaterialDatepickerComponent
   @Output()
   Stream<Date?> get dateChange => _controller.stream;
 
-  void _setDateInternal(Date? date,
-      {CausedBy cause = CausedBy.external, bool closePopup = true}) {
+  void _setDateInternal(
+    Date? date, {
+    CausedBy cause = CausedBy.external,
+    bool closePopup = true,
+  }) {
     if (date == _date) return;
     _controller.add(date);
     _date = date;
@@ -151,8 +154,10 @@ class MaterialDatepickerComponent
   set calendar(CalendarState state) {
     _calendar = state;
     if (!state.has(state.currentSelection)) return;
-    _setDateInternal(state.selection(state.currentSelection).start,
-        cause: CausedBy.rangeConfirm);
+    _setDateInternal(
+      state.selection(state.currentSelection).start,
+      cause: CausedBy.rangeConfirm,
+    );
   }
 
   /// Whether changing the selected date should be disabled.
@@ -205,20 +210,26 @@ class MaterialDatepickerComponent
 
   /// Gets the i18n'ed "Select a date" placeholder text.
   @Input()
-  String selectDatePlaceHolderMsg = Intl.message('Select a date',
-      name: 'selectDatePlaceHolderMsg',
-      desc: 'Placeholder text for datepicker with an empty date.');
+  String selectDatePlaceHolderMsg = Intl.message(
+    'Select a date',
+    name: 'selectDatePlaceHolderMsg',
+    desc: 'Placeholder text for datepicker with an empty date.',
+  );
 
   /// Gets the i18n'ed "Enter date" placeholder text.
   @Input()
-  String placeholderMsg = Intl.message('Enter date',
-      name: 'placeholderMsg',
-      desc: 'Placeholder text for an empty date picker text box.');
+  String placeholderMsg = Intl.message(
+    'Enter date',
+    name: 'placeholderMsg',
+    desc: 'Placeholder text for an empty date picker text box.',
+  );
 
   /// Gets the i18n'ed "Custom" label text.
-  static final customDateMsg = Intl.message('Custom',
-      name: 'customDateMsg',
-      desc: 'Indicates that a single custom date is selected');
+  static final customDateMsg = Intl.message(
+    'Custom',
+    name: 'customDateMsg',
+    desc: 'Indicates that a single custom date is selected',
+  );
 
   String get formattedDate =>
       date != null ? date!.format(outputFormat) : selectDatePlaceHolderMsg;
@@ -287,10 +298,10 @@ class MaterialDatepickerComponent
   String? error;
 
   MaterialDatepickerComponent(
-      HtmlElement element,
-      @Attribute('popupClass') String? popupClass,
-      @Optional() @Inject(datepickerClock) Clock? clock)
-      : popupClassName = constructEncapsulatedCss(popupClass, element.classes) {
+    HtmlElement element,
+    @Attribute('popupClass') String? popupClass,
+    @Optional() @Inject(datepickerClock) Clock? clock,
+  ) : popupClassName = constructEncapsulatedCss(popupClass, element.classes) {
     clock ??= Clock();
 
     // Init minDate and maxDate to sensible defaults

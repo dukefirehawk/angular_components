@@ -2,7 +2,7 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:ngcomponents/content/deferred_content.dart';
@@ -83,10 +83,15 @@ class MaterialInkTooltipComponent implements Tooltip {
   /// Left modifiable so that it can be set by the [MaterialTooltipDirective].
   String popupClassName;
 
-  MaterialInkTooltipComponent(this._tooltipController, this._changeDetector,
-      HtmlElement hostElement, @Attribute('tooltipClass') String? tooltipClass)
-      : popupClassName =
-            constructEncapsulatedCss(tooltipClass, hostElement.classes);
+  MaterialInkTooltipComponent(
+    this._tooltipController,
+    this._changeDetector,
+    HtmlElement hostElement,
+    @Attribute('tooltipClass') String? tooltipClass,
+  ) : popupClassName = constructEncapsulatedCss(
+        tooltipClass,
+        hostElement.classes,
+      );
 
   @override
   void activate() {

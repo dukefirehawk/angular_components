@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:ngcomponents/utils/browser/events/events.dart';
@@ -29,15 +29,13 @@ import 'package:ngcomponents/utils/browser/events/events.dart';
 ///       <button (click)="disclaimerVisible = true">Confirm</button>
 ///     </div>
 ///
-@Directive(
-  selector: '[autoDismissable]:not(material-expansionpanel)',
-)
+@Directive(selector: '[autoDismissable]:not(material-expansionpanel)')
 class AutoDismissDirective {
   final Stream _dismissEvents;
   final NgZone _zone;
 
   AutoDismissDirective(HtmlElement element, this._zone)
-      : _dismissEvents = triggersOutside(element);
+    : _dismissEvents = triggersOutside(element);
 
   bool _ignoreEvents = false;
   bool _autoDismissable = false;

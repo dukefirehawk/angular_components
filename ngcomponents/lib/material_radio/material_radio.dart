@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:ngcomponents/focus/focus.dart';
@@ -31,12 +31,13 @@ const Icon checkedIcon = Icon('radio_button_checked');
 ///
 /// - `no-ink` -- set this attribute to disable the ripple effect on the chip.
 @Component(
-    selector: 'material-radio',
-    directives: [MaterialIconComponent, MaterialRippleComponent, NgIf],
-    providers: [ExistingProvider(HasDisabled, MaterialRadioComponent)],
-    templateUrl: 'material_radio.html',
-    styleUrls: ['material_radio.scss.css'],
-    changeDetection: ChangeDetectionStrategy.onPush)
+  selector: 'material-radio',
+  directives: [MaterialIconComponent, MaterialRippleComponent, NgIf],
+  providers: [ExistingProvider(HasDisabled, MaterialRadioComponent)],
+  templateUrl: 'material_radio.html',
+  styleUrls: ['material_radio.scss.css'],
+  changeDetection: ChangeDetectionStrategy.onPush,
+)
 class MaterialRadioComponent extends RootFocusable
     implements
         ControlValueAccessor<bool>,
@@ -49,13 +50,13 @@ class MaterialRadioComponent extends RootFocusable
   final _disposer = Disposer.oneShot();
 
   MaterialRadioComponent(
-      this._root,
-      this._changeDetector,
-      @Host() @Optional() this._group,
-      @Self() @Optional() NgControl? cd,
-      @Attribute('role') String? role)
-      : this.role = role ?? 'radio',
-        super(_root) {
+    this._root,
+    this._changeDetector,
+    @Host() @Optional() this._group,
+    @Self() @Optional() NgControl? cd,
+    @Attribute('role') String? role,
+  ) : this.role = role ?? 'radio',
+      super(_root) {
     // When NgControl is present on the host element, the component
     // participates in the Forms API.
     cd?.valueAccessor = this;
@@ -152,8 +153,9 @@ class MaterialRadioComponent extends RootFocusable
   }
 
   final _focusMoveCtrl = StreamController<FocusMoveEvent>.broadcast(sync: true);
-  final _selectionMoveCtrl =
-      StreamController<FocusMoveEvent>.broadcast(sync: true);
+  final _selectionMoveCtrl = StreamController<FocusMoveEvent>.broadcast(
+    sync: true,
+  );
 
   @override
   Stream<FocusMoveEvent> get focusmove => _focusMoveCtrl.stream;

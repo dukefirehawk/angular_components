@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:ngcomponents/button_decorator/button_decorator.dart';
@@ -58,7 +58,7 @@ import 'package:quiver/core.dart' as qc show Optional;
     NgClass,
     NgFor,
     NgIf,
-    PopupSourceDirective
+    PopupSourceDirective,
   ],
   templateUrl: 'menu_item_groups.html',
   styleUrls: ['menu_item_groups.scss.css'],
@@ -217,16 +217,24 @@ class MenuItemGroupsComponent
   var _highlightCache = <String, List<HighlightedTextSegment>>{};
 
   factory MenuItemGroupsComponent(
-          MenuRoot menuRoot,
-          ChangeDetectorRef changeDetector,
-          @Optional() DropdownHandle? dropdownHandle,
-          @Optional() IdGenerator? idGenerator) =>
-      MenuItemGroupsComponent._(
-          dropdownHandle, menuRoot, changeDetector, idGenerator);
+    MenuRoot menuRoot,
+    ChangeDetectorRef changeDetector,
+    @Optional() DropdownHandle? dropdownHandle,
+    @Optional() IdGenerator? idGenerator,
+  ) => MenuItemGroupsComponent._(
+    dropdownHandle,
+    menuRoot,
+    changeDetector,
+    idGenerator,
+  );
   //idGenerator ?? SequentialIdGenerator.fromUUID());
 
-  MenuItemGroupsComponent._(this._dropdownHandle, this._menuRoot,
-      this._changeDetector, this._idGenerator) {
+  MenuItemGroupsComponent._(
+    this._dropdownHandle,
+    this._menuRoot,
+    this._changeDetector,
+    this._idGenerator,
+  ) {
     this._subMenuOpener = DelayedAction(_menuDelay, _openSubMenuOnHover);
   }
 
@@ -318,8 +326,10 @@ class MenuItemGroupsComponent
         break;
       case KeyCode.RIGHT:
         if (activeMenuItem?.hasSubMenu == true) {
-          _openSubMenu(activeModel?.activeItem as MenuItem,
-              isOpenedByKeyboard: true);
+          _openSubMenu(
+            activeModel?.activeItem as MenuItem,
+            isOpenedByKeyboard: true,
+          );
         }
         break;
       case KeyCode.LEFT:
@@ -385,7 +395,10 @@ class MenuItemGroupsComponent
   /// Called when a material select item is triggered, whether through keypress
   /// or through click.
   void handleSelectItemTrigger(
-      MenuItem item, MenuItemGroup group, UIEvent event) {
+    MenuItem item,
+    MenuItemGroup group,
+    UIEvent event,
+  ) {
     if (!item.enabled) return;
 
     if (item.hasSubMenu) {
@@ -436,8 +449,8 @@ class MenuItemGroupsComponent
 
   SelectionModel getSelectionModel(MenuItemGroup group) =>
       group is MenuItemGroupWithSelection
-          ? group.selectionModel
-          : SelectionModel.empty();
+      ? group.selectionModel
+      : SelectionModel.empty();
 
   /// Returns the value for a menu item's `aria-checked` attribute value.
   @visibleForTemplate
@@ -496,8 +509,11 @@ class MenuItemGroupsComponent
 
   void _createActiveMenuModelIfNone() {
     if (_idGenerator != null) {
-      activeModel = ActiveMenuItemModel(_idGenerator!,
-          menu: menu, filterOutUnselectableItems: true);
+      activeModel = ActiveMenuItemModel(
+        _idGenerator!,
+        menu: menu,
+        filterOutUnselectableItems: true,
+      );
       if (activateLastItemOnInit) {
         activeModel?.activateLast();
         _autoFocusActiveItem();
@@ -514,8 +530,9 @@ class MenuItemGroupsComponent
     // Set auto-focus to the currently selected list item if this menu is
     // a sub-menu and was opened via keyboard shortcut.
     if (activeModel?.activeItem != null) {
-      _autoFocusItemId =
-          qc.Optional.of(activeModel!.id(activeModel!.activeItem));
+      _autoFocusItemId = qc.Optional.of(
+        activeModel!.id(activeModel!.activeItem),
+      );
     }
   }
 
@@ -564,9 +581,10 @@ class MenuItemGroupsComponent
   void _listenForSelectionChanges(MenuItemGroup group) {
     if (group is MenuItemGroupWithSelection) {
       _disposer.addStreamSubscription(
-          group.selectionModel.selectionChanges.listen((_) {
-        _updateItemsAriaCheckedState(_menu);
-      }));
+        group.selectionModel.selectionChanges.listen((_) {
+          _updateItemsAriaCheckedState(_menu);
+        }),
+      );
     }
   }
 
@@ -596,12 +614,13 @@ class MenuItemGroupsComponent
           if (!item.hasSubMenu) {
             item.ariaChecked = isSelected.toString();
           } else if (group.selectionModel.isSingleSelect) {
-            item.ariaChecked =
-                (isSelected || _anyChildrenSelected(group, item)).toString();
+            item.ariaChecked = (isSelected || _anyChildrenSelected(group, item))
+                .toString();
           } else {
             if (_anyChildrenSelected(group, item)) {
-              item.ariaChecked =
-                  _everyChildrenSelected(group, item) ? 'true' : 'mixed';
+              item.ariaChecked = _everyChildrenSelected(group, item)
+                  ? 'true'
+                  : 'mixed';
             } else {
               item.ariaChecked = isSelected.toString();
             }
@@ -613,15 +632,19 @@ class MenuItemGroupsComponent
 
   /// Whether any children in an item's submenu are selected.
   bool _anyChildrenSelected(MenuItemGroup group, MenuItem item) =>
-      item.subMenu.itemGroups.any((g) =>
-          g is MenuItemGroupWithSelection &&
-          g.any((i) => _isSelected(g.selectionModel, i)));
+      item.subMenu.itemGroups.any(
+        (g) =>
+            g is MenuItemGroupWithSelection &&
+            g.any((i) => _isSelected(g.selectionModel, i)),
+      );
 
   /// Whether all children in an item's submenu are selected.
   bool _everyChildrenSelected(MenuItemGroup group, MenuItem item) =>
-      item.subMenu.itemGroups.every((g) =>
-          g is MenuItemGroupWithSelection &&
-          g.every((i) => _isSelected(g.selectionModel, i)));
+      item.subMenu.itemGroups.every(
+        (g) =>
+            g is MenuItemGroupWithSelection &&
+            g.every((i) => _isSelected(g.selectionModel, i)),
+      );
 }
 
 const _preferredSubMenuPositions = [

@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:ngcomponents/focus/keyboard_only_focus_indicator.dart';
@@ -51,7 +51,7 @@ class ScorecardComponent extends KeyboardOnlyFocusIndicatorDirective {
   final ChangeDetectorRef _changeDetector;
   final HtmlElement element;
   ScorecardComponent(this._changeDetector, this.element, DomService domService)
-      : super(element, domService);
+    : super(element, domService);
 
   /// The title of the scorecard.
   @Input()

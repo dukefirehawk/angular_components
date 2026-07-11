@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:collection';
-import 'dart:html';
+import 'package:web/web.dart';
 
 /// DomTreeIterator is tool that will let you traverse the dom in the dom order
 /// and find all (or specific element).
@@ -27,19 +27,24 @@ class DomTreeIterator implements Iterator<Element> {
   /// [wraps] : if set to true, will not stop at the end of scope,
   ///   but instead will wrap through beginning and will end upon hitting
   ///   the starting element instead.
-  DomTreeIterator(Element? element,
-      {bool reverse = false, Element? scope, bool wraps = false})
-      : _element = element,
-        _startingElement = element,
-        _reverse = reverse,
-        _scope = scope,
-        _wraps = wraps {
+  DomTreeIterator(
+    Element? element, {
+    bool reverse = false,
+    Element? scope,
+    bool wraps = false,
+  }) : _element = element,
+       _startingElement = element,
+       _reverse = reverse,
+       _scope = scope,
+       _wraps = wraps {
     if (_wraps && _scope == null) {
       throw Exception('global wrapping is disallowed, scope is required');
     }
     if (_scope != null && !_scope!.contains(_element)) {
-      throw Exception('if scope is set, '
-          'starting element should be inside of scope');
+      throw Exception(
+        'if scope is set, '
+        'starting element should be inside of scope',
+      );
     }
   }
 
@@ -49,8 +54,12 @@ class DomTreeIterator implements Iterator<Element> {
   /// if wraps is true or inherited from current as true,
   /// new wraps will start from current position.
   DomTreeIterator reversed({wraps}) {
-    return DomTreeIterator(_element,
-        reverse: !_reverse, scope: _scope, wraps: wraps ?? _wraps);
+    return DomTreeIterator(
+      _element,
+      reverse: !_reverse,
+      scope: _scope,
+      wraps: wraps ?? _wraps,
+    );
   }
 
   /// get current element

@@ -2,7 +2,7 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:ngcomponents/button_decorator/button_decorator.dart';
@@ -93,9 +93,12 @@ class MaterialButtonComponent extends MaterialButtonBase {
     _changeDetector.markForCheck();
   }
 
-  MaterialButtonComponent(HtmlElement element, AcxDarkTheme darktheme,
-      this._changeDetector, @Attribute('role') String? role)
-      : super(element, role) {
+  MaterialButtonComponent(
+    HTMLElement element,
+    AcxDarkTheme darktheme,
+    this._changeDetector,
+    @Attribute('role') String? role,
+  ) : super(element, role) {
     //if (_changeDetector == null) throw Exception('Expecting change detector');
     darktheme.themeElement(element);
   }

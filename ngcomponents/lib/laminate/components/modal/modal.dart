@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:ngcomponents/content/deferred_content_aware.dart';
@@ -172,8 +172,9 @@ class ModalComponent
 
   @override
   Stream<AsyncAction<dynamic>?> get onClose => _onClose.stream;
-  final _onClose =
-      StreamController<AsyncAction<dynamic>?>.broadcast(sync: true);
+  final _onClose = StreamController<AsyncAction<dynamic>?>.broadcast(
+    sync: true,
+  );
 
   @override
   Stream<bool> get onVisibleChanged => _onVisibleChanged.stream;
@@ -197,14 +198,20 @@ class ModalComponent
   Future<bool>? _pendingOpen;
   Future<bool>? _pendingClose;
 
-  ModalComponent(OverlayService overlayService, this._element, this._domService,
-      @Optional() @SkipSelf() this._parentModal, @Optional() this._stack)
-      : _resolvedOverlayRef =
-            overlayService.createOverlayRefSync(OverlayState.Dialog) {
+  ModalComponent(
+    OverlayService overlayService,
+    this._element,
+    this._domService,
+    @Optional() @SkipSelf() this._parentModal,
+    @Optional() this._stack,
+  ) : _resolvedOverlayRef = overlayService.createOverlayRefSync(
+        OverlayState.Dialog,
+      ) {
     _disposer
       ..addDisposable(_resolvedOverlayRef)
-      ..addStreamSubscription(_resolvedOverlayRef.onVisibleChanged
-          .listen(_onOverlayVisibleChanged));
+      ..addStreamSubscription(
+        _resolvedOverlayRef.onVisibleChanged.listen(_onOverlayVisibleChanged),
+      );
   }
 
   @Input()
@@ -236,8 +243,9 @@ class ModalComponent
   }
 
   @override
-  Stream<void> get shieldClick => _resolvedOverlayRef.onPanePressed
-      .where((MouseEvent e) => e.eventPhase == Event.AT_TARGET);
+  Stream<void> get shieldClick => _resolvedOverlayRef.onPanePressed.where(
+    (MouseEvent e) => e.eventPhase == Event.AT_TARGET,
+  );
 
   @override
   Stream<bool> get contentVisible => onVisibleChanged;
@@ -254,9 +262,9 @@ class ModalComponent
     if (!temporary) {
       _saveFocus();
       if (_stack != null) {
-        _stack?.onModalOpened(this);
+        _stack.onModalOpened(this);
       } else if (_parentModal != null) {
-        _parentModal?.hidden = true;
+        _parentModal.hidden = true;
       }
     }
     _resolvedOverlayRef.setVisible(true);
@@ -269,9 +277,9 @@ class ModalComponent
     if (!temporary) {
       _restoreFocus();
       if (_stack != null) {
-        _stack?.onModalClosed(this);
+        _stack.onModalClosed(this);
       } else if (_parentModal != null) {
-        _parentModal?.hidden = false;
+        _parentModal.hidden = false;
       }
     }
     _resolvedOverlayRef.setVisible(false);
@@ -283,7 +291,7 @@ class ModalComponent
 
   void _restoreFocus() {
     if (_lastFocusedElement == null) return;
-    if (_stack != null && _stack!.length > 1 || _parentModal != null) return;
+    if (_stack != null && _stack.length > 1 || _parentModal != null) return;
     final elementToFocus = _lastFocusedElement;
     _domService.scheduleWrite(() {
       // Only restore focus if the current active element is inside this overlay
@@ -291,12 +299,13 @@ class ModalComponent
       // Note in a browser activeElement is never null and the null check below
       // is only for testing.
       if (document.activeElement != null &&
-          (_resolvedOverlayRef.overlayElement
-                  .contains(document.activeElement) ||
+          (_resolvedOverlayRef.overlayElement.contains(
+                document.activeElement,
+              ) ||
               document.activeElement == document.body)) {
         // Note that if the [elementToFocus] is no longer in the document,
         // the body element will be focused instead.
-        elementToFocus!.focus();
+        (elementToFocus as HTMLElement).focus();
       }
     });
   }

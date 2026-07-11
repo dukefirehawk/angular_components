@@ -3,10 +3,10 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html' show KeyboardEvent, HtmlElement;
 
 import 'package:ngdart/angular.dart';
 import 'package:ngcomponents/focus/focus.dart';
+import 'package:web/web.dart';
 
 /// `FocusItemDirective`, used in conjunction with [FocusListDirective],
 /// provides a means to move focus between a list of components (or elements)
@@ -21,9 +21,11 @@ class FocusItemDirective extends RootFocusable implements FocusableItem {
   @HostBinding('attr.role')
   final String role;
 
-  FocusItemDirective(HtmlElement super.element, this._changeDetectorRef,
-      @Attribute('role') String? role)
-      : this.role = role ?? 'listitem';
+  FocusItemDirective(
+    HTMLElement super.element,
+    this._changeDetectorRef,
+    @Attribute('role') String? role,
+  ) : this.role = role ?? 'listitem';
 
   @HostBinding('attr.tabindex')
   String tabIndex = '0';

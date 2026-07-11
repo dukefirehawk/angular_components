@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:ngcomponents/laminate/overlay/module.dart'
@@ -20,9 +20,7 @@ import 'package:ngcomponents/material_expansionpanel/material_expansionpanel.dar
 ///     <material-expansionpanel autoDismissable>
 ///     </material-expansionpanel>
 ///
-@Directive(
-  selector: 'material-expansionpanel[autoDismissable]',
-)
+@Directive(selector: 'material-expansionpanel[autoDismissable]')
 class MaterialExpansionPanelAutoDismiss implements OnDestroy {
   final MaterialExpansionPanel _expansionPanel;
 
@@ -37,18 +35,20 @@ class MaterialExpansionPanelAutoDismiss implements OnDestroy {
   StreamSubscription<MouseEvent>? _mouseUpListener;
 
   MaterialExpansionPanelAutoDismiss(
-      this._expansionPanel,
-      @Optional() @Inject(overlayContainerToken) this._overlayContainerToken,
-      this._element) {
+    this._expansionPanel,
+    @Optional() @Inject(overlayContainerToken) this._overlayContainerToken,
+    this._element,
+  ) {
     _clicksOutsideController = StreamController.broadcast(
-        sync: true,
-        onListen: () {
-          _mouseUpListener = document.onMouseUp.listen(_onMouseUp);
-        },
-        onCancel: () {
-          _mouseUpListener?.cancel();
-          _mouseUpListener = null;
-        });
+      sync: true,
+      onListen: () {
+        _mouseUpListener = document.onMouseUp.listen(_onMouseUp);
+      },
+      onCancel: () {
+        _mouseUpListener?.cancel();
+        _mouseUpListener = null;
+      },
+    );
   }
 
   /// Handles expanded status changes from the panel.
@@ -56,8 +56,9 @@ class MaterialExpansionPanelAutoDismiss implements OnDestroy {
   void onExpandedChanged(bool expand) {
     _clicksOutsideSubscription?.cancel();
     if (expand) {
-      _clicksOutsideSubscription = _clicksOutsideController.stream
-          .listen((e) => _expansionPanel.collapse(byUserAction: false));
+      _clicksOutsideSubscription = _clicksOutsideController.stream.listen(
+        (e) => _expansionPanel.collapse(byUserAction: false),
+      );
     }
   }
 

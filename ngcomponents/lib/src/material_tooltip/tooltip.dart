@@ -2,7 +2,7 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'dart:html';
+import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
 import 'package:ngcomponents/laminate/enums/alignment.dart';
@@ -21,10 +21,7 @@ import 'tooltip_source.dart' show tooltipShowDelay;
 import 'tooltip_target.dart';
 
 /// An ink-based tooltip which can be attached to any element.
-@Directive(
-  selector: '[materialTooltip]',
-  providers: [tooltipControllerBinding],
-)
+@Directive(selector: '[materialTooltip]', providers: [tooltipControllerBinding])
 class MaterialTooltipDirective extends TooltipTarget
     implements OnDestroy, OnInit, AfterViewInit {
   final _disposer = Disposer.multi();
@@ -47,18 +44,21 @@ class MaterialTooltipDirective extends TooltipTarget
   ComponentRef? _componentRef;
 
   MaterialTooltipDirective(
-      DomPopupSourceFactory domPopupSourceFactory,
-      ViewContainerRef viewContainerRef,
-      this.element,
-      this._viewLoader,
-      this._changeDetector,
-      this._window,
-      @Attribute('initPopupAriaAttributes') String? initAriaAttributes,
-      @Attribute('tooltipClass') String? tooltipClass)
-      : _popupClassName =
-            constructEncapsulatedCss(tooltipClass, element.classes),
-        super(domPopupSourceFactory, viewContainerRef, element,
-            initAriaAttributes) {
+    DomPopupSourceFactory domPopupSourceFactory,
+    ViewContainerRef viewContainerRef,
+    this.element,
+    this._viewLoader,
+    this._changeDetector,
+    this._window,
+    @Attribute('initPopupAriaAttributes') String? initAriaAttributes,
+    @Attribute('tooltipClass') String? tooltipClass,
+  ) : _popupClassName = constructEncapsulatedCss(tooltipClass, element.classes),
+      super(
+        domPopupSourceFactory,
+        viewContainerRef,
+        element,
+        initAriaAttributes,
+      ) {
     inLongPress = false;
     _delayedActivate = DelayedAction(tooltipShowDelay, _activate);
   }
@@ -66,26 +66,37 @@ class MaterialTooltipDirective extends TooltipTarget
   void _attachHostListeners() {
     if (_hostListenersAttached) return;
     _hostListenersAttached = true;
-    _disposer.addStreamSubscription(element.onClick.listen((_) {
-      hide(true);
-    }));
-    _disposer.addStreamSubscription(element.onBlur.listen((_) {
-      hide(true);
-    }));
-    _disposer.addStreamSubscription(element.onFocus.listen((_) {
-      show();
-    }));
-    if (supportsHover(_window)) {
-      _disposer.addStreamSubscription(element.onMouseOver.listen((_) {
+    _disposer.addStreamSubscription(
+      element.onClick.listen((_) {
+        hide(true);
+      }),
+    );
+    _disposer.addStreamSubscription(
+      element.onBlur.listen((_) {
+        hide(true);
+      }),
+    );
+    _disposer.addStreamSubscription(
+      element.onFocus.listen((_) {
         show();
-      }));
-      _disposer.addStreamSubscription(element.onMouseLeave.listen((_) {
-        hide();
-      }));
+      }),
+    );
+    if (supportsHover(_window)) {
+      _disposer.addStreamSubscription(
+        element.onMouseOver.listen((_) {
+          show();
+        }),
+      );
+      _disposer.addStreamSubscription(
+        element.onMouseLeave.listen((_) {
+          hide();
+        }),
+      );
     }
     if (isHammerLoaded()) {
-      _disposer
-          .addStreamSubscription(element.on['press'].listen(handleLongPress));
+      _disposer.addStreamSubscription(
+        element.on['press'].listen(handleLongPress),
+      );
       _disposer.addStreamSubscription(element.onTouchEnd.listen(endLongPress));
     }
   }
@@ -129,7 +140,9 @@ class MaterialTooltipDirective extends TooltipTarget
     // Note: We also support loading components that contain one <ng-content>,
     // so we provide an empty slot for them.
     _componentRef = _viewLoader.loadNextToLocation(
-        ng.MaterialInkTooltipComponentNgFactory, viewContainerRef);
+      ng.MaterialInkTooltipComponentNgFactory,
+      viewContainerRef,
+    );
 
     // Track the tooltip as `_inkTooltip` so we can set the text later.
     _inkTooltip = _componentRef!.instance;
