@@ -3,6 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:js_interop';
 import 'package:web/web.dart';
 import 'dart:math' show max, min;
 
@@ -182,16 +183,18 @@ class DomService {
         // Delayed initialization of the cross-app event sending.
         // TODO(google): figure out a better way to initialize this earlier
         init();
-        _nextFrameId = _window.requestAnimationFrame((highResTimer) {
-          // Protect against window implementation that does not
-          // cancel the frame.
-          if (completer.isCompleted) return;
-          if (completer == _nextFrameCompleter) {
-            _nextFrameFuture = null;
-            _nextFrameCompleter = null;
-          }
-          completer.complete(highResTimer);
-        });
+        _nextFrameId = _window.requestAnimationFrame(
+          ((highResTimer) {
+            // Protect against window implementation that does not
+            // cancel the frame.
+            if (completer.isCompleted) return;
+            if (completer == _nextFrameCompleter) {
+              _nextFrameFuture = null;
+              _nextFrameCompleter = null;
+            }
+            completer.complete(highResTimer);
+          }).toJS,
+        );
       });
       _nextFrameFuture = ZonedFuture(
         completer.future,
@@ -376,15 +379,30 @@ class DomService {
             _writeQueueChangedLayout = false;
           }
         });
-        _listenOnLayoutEvents(_window.onAnimationEnd);
-        _listenOnLayoutEvents(_window.onResize);
-        _listenOnLayoutEvents(_window.onTransitionEnd);
+
+        _listenOnLayoutEvents(
+          EventStreamProvider<Event>('animationend').forTarget(_window),
+        );
+        _listenOnLayoutEvents(
+          EventStreamProvider<Event>('onresize').forTarget(_window),
+        );
+        _listenOnLayoutEvents(
+          EventStreamProvider<Event>('ontransitionend').forTarget(_window),
+        );
+
+        //_listenOnLayoutEvents(_window.onAnimationEnd);
+        //_listenOnLayoutEvents(_window.onResize);
+        //_listenOnLayoutEvents(_window.onTransitionEnd);
+
         // Listening Angular turn done events coming from other apps.
-        _window.addEventListener(_TURN_DONE_EVENT_TYPE, (_) {
-          if (!_inDispatchTurnDoneEvent) {
-            _scheduleOnLayoutChanged();
-          }
-        });
+        _window.addEventListener(
+          _TURN_DONE_EVENT_TYPE,
+          ((_) {
+            if (!_inDispatchTurnDoneEvent) {
+              _scheduleOnLayoutChanged();
+            }
+          }).toJS,
+        );
       });
     }
     return _onLayoutChangedStream;

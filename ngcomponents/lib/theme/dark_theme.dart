@@ -35,15 +35,15 @@ class AcxDarkTheme {
   AcxDarkTheme(@Inject(darkThemeToken) @Optional() bool? dark)
     : isDarkTheme = (dark ?? false);
 
-  void theme(HtmlElement element) {
+  void theme(HTMLElement element) {
     if (isDarkTheme) {
-      element.classes.add(darkThemeClass);
+      element.classList.add(darkThemeClass);
     }
   }
 
-  void themeElement(HtmlElement element) {
+  void themeElement(HTMLElement element) {
     if (isDarkTheme) {
-      element.classes.add(darkThemeClass);
+      element.classList.add(darkThemeClass);
     }
   }
 }

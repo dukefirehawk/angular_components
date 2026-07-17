@@ -10,7 +10,6 @@ import 'package:ngcomponents/interfaces/has_disabled.dart';
 import 'package:ngcomponents/material_menu/affix/base_affix.dart';
 import 'package:ngcomponents/model/menu/menu_item_affix.dart';
 import 'package:observable/observable.dart';
-import 'package:quiver/core.dart' as qc;
 
 /// Renders the list of menu item affixes.
 ///
@@ -18,18 +17,13 @@ import 'package:quiver/core.dart' as qc;
 /// on any affix list changes.
 // TODO(google): move component management to common utils if useful to others
 @Component(
-    selector: 'menu-item-affix-list',
-    changeDetection: ChangeDetectionStrategy.onPush,
-    directives: [
-      DynamicComponent,
-      NgFor,
-      NgIf,
-    ],
-    providers: [
-      ExistingProvider(HasDisabled, MenuItemAffixListComponent),
-    ],
-    template: '<template #loadPoint></template>',
-    styleUrls: ['menu_item_affix_list.scss.css'])
+  selector: 'menu-item-affix-list',
+  changeDetection: ChangeDetectionStrategy.onPush,
+  directives: [DynamicComponent, NgFor, NgIf],
+  providers: [ExistingProvider(HasDisabled, MenuItemAffixListComponent)],
+  template: '<template #loadPoint></template>',
+  styleUrls: ['menu_item_affix_list.scss.css'],
+)
 class MenuItemAffixListComponent implements HasDisabled, OnDestroy {
   final ChangeDetectorRef _cdRef;
 
@@ -79,8 +73,10 @@ class MenuItemAffixListComponent implements HasDisabled, OnDestroy {
 
   void _clearChildren() {
     viewRef?.clear();
-    for (final ref in _affixComponentRefs.expand((ref) => ref.componentRef)) {
-      ref.destroy();
+    for (final ref in _affixComponentRefs) {
+      if (ref.componentRef != null) {
+        ref.componentRef!.destroy();
+      }
     }
     _affixComponentRefs.clear();
   }
@@ -95,8 +91,8 @@ class MenuItemAffixListComponent implements HasDisabled, OnDestroy {
         final removed = _affixComponentRefs.sublist(start, end);
 
         for (final toRemove in removed) {
-          if (toRemove.componentRef.isPresent) {
-            toRemove.componentRef.value.destroy();
+          if (toRemove.componentRef != null) {
+            toRemove.componentRef!.destroy();
           }
         }
 
@@ -104,11 +100,15 @@ class MenuItemAffixListComponent implements HasDisabled, OnDestroy {
       }
 
       if (change.addedCount > 0) {
-        final allAdded =
-            change.added.whereType<BaseMenuItemAffixModel>().toList().reversed;
+        final allAdded = change.added
+            .whereType<BaseMenuItemAffixModel>()
+            .toList()
+            .reversed;
         for (final toAdd in allAdded) {
           _affixComponentRefs.insert(
-              start, _createComponentRef(toAdd, index: start));
+            start,
+            _createComponentRef(toAdd, index: start),
+          );
         }
       }
     }
@@ -116,36 +116,39 @@ class MenuItemAffixListComponent implements HasDisabled, OnDestroy {
 
   void _initializeItems(Iterable<BaseMenuItemAffixModel> items) {
     _clearChildren();
-    _affixComponentRefs
-        .addAll(items.map((affix) => _createComponentRef(affix)));
+    _affixComponentRefs.addAll(
+      items.map((affix) => _createComponentRef(affix)),
+    );
   }
 
   void _updateItemProperties() {
     for (final ref in _affixComponentRefs) {
-      if (ref.componentRef.isPresent) {
-        ref.componentRef.value.instance.disabled = disabled;
+      if (ref.componentRef != null) {
+        ref.componentRef!.instance.disabled = disabled;
       }
     }
   }
 
-  _AffixRef _createComponentRef(BaseMenuItemAffixModel affix,
-      {int index = -1}) {
+  _AffixRef _createComponentRef(
+    BaseMenuItemAffixModel affix, {
+    int index = -1,
+  }) {
     if (!affix.isVisible) return _AffixRef.hidden(affix);
 
     return _AffixRef(
-        affix,
-        viewRef!.createComponent(affix.componentFactory!, index)
-          ..location.classes.add('affix')
-          ..instance.value = affix
-          ..instance.disabled = disabled);
+      affix,
+      viewRef!.createComponent(affix.componentFactory!, index)
+        ..location.classList.add('affix')
+        ..instance.value = affix
+        ..instance.disabled = disabled,
+    );
   }
 }
 
 class _AffixRef {
   final BaseMenuItemAffixModel affix;
-  final qc.Optional<ComponentRef<BaseAffixComponent>> componentRef;
+  final ComponentRef<BaseAffixComponent>? componentRef;
 
-  _AffixRef(this.affix, ComponentRef<BaseAffixComponent> componentRef)
-      : componentRef = qc.Optional.of(componentRef);
-  _AffixRef.hidden(this.affix) : componentRef = qc.Optional.absent();
+  _AffixRef(this.affix, this.componentRef);
+  _AffixRef.hidden(this.affix) : componentRef = null;
 }

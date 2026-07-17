@@ -2,7 +2,6 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'dart:collection';
 import 'package:web/web.dart';
 
 /// DomTreeIterator is tool that will let you traverse the dom in the dom order
@@ -40,7 +39,7 @@ class DomTreeIterator implements Iterator<Element> {
     if (_wraps && _scope == null) {
       throw Exception('global wrapping is disallowed, scope is required');
     }
-    if (_scope != null && !_scope!.contains(_element)) {
+    if (_scope != null && !_scope.contains(_element)) {
       throw Exception(
         'if scope is set, '
         'starting element should be inside of scope',
@@ -53,7 +52,7 @@ class DomTreeIterator implements Iterator<Element> {
   /// Scope is retained, while wrapping may be overriden
   /// if wraps is true or inherited from current as true,
   /// new wraps will start from current position.
-  DomTreeIterator reversed({wraps}) {
+  DomTreeIterator reversed({dynamic wraps}) {
     return DomTreeIterator(
       _element,
       reverse: !_reverse,
@@ -73,7 +72,7 @@ class DomTreeIterator implements Iterator<Element> {
       return false;
     }
 
-    if (_element == _scope && _element!.children.isEmpty) {
+    if (_element == _scope && _element!.children.length == 0) {
       _element = null;
       return false;
     }
@@ -117,16 +116,16 @@ class DomTreeIterator implements Iterator<Element> {
       } else {
         _element = null;
       }
-    } else if (_element!.parent == null) {
+    } else if (_element!.parentElement == null) {
       // 2
       _element = null;
-    } else if (_element == _firstChild(_element!.parent!)) {
+    } else if (_element == _firstChild(_element!.parentElement!)) {
       // 3
-      _element = _element!.parent;
+      _element = _element!.parentElement;
     } else {
       // 4
       _element = _element!.previousElementSibling;
-      while (_element!.children.isNotEmpty) {
+      while (_element!.children.length > 0) {
         _element = _lastChild(_element!);
       }
     }
@@ -152,20 +151,20 @@ class DomTreeIterator implements Iterator<Element> {
   //
   // 4) Otherwise simply go to the next sibling.
   void _navigateForward() {
-    if (_element!.children.isNotEmpty) {
+    if (_element!.children.length > 0) {
       // 1
       _element = _firstChild(_element!);
     } else {
       // 2
-      while (_element!.parent != null &&
-          _element!.parent != _scope &&
-          _element == _lastChild(_element!.parent!)) {
-        _element = _element!.parent;
+      while (_element!.parentElement != null &&
+          _element!.parentElement != _scope &&
+          _element == _lastChild(_element!.parentElement!)) {
+        _element = _element!.parentElement;
       }
       // 3
-      if (_element!.parent == null ||
-          (_element!.parent == _scope &&
-              _element == _lastChild(_element!.parent!))) {
+      if (_element!.parentElement == null ||
+          (_element!.parentElement == _scope &&
+              _element == _lastChild(_element!.parentElement!))) {
         if (_wraps) {
           _element = _scope;
         } else {
@@ -181,15 +180,15 @@ class DomTreeIterator implements Iterator<Element> {
 /// Returns last descendant in the [scope] in dom order
 Element lastDescendant(Element scope) {
   Element current = scope;
-  while (current.children.isNotEmpty) {
+  while (current.children.length > 0) {
     current = _lastChild(current);
   }
   return current;
 }
 
-Element _firstChild(Element element) => element.children[0];
+Element _firstChild(Element element) => element.children.item(0)!;
 
 Element _lastChild(Element element) {
-  ListBase<Element> children = element.children as ListBase<Element>;
-  return children[children.length - 1];
+  var children = element.children;
+  return children.item(children.length - 1)!;
 }

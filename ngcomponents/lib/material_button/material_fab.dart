@@ -57,7 +57,7 @@ import 'material_button_base.dart';
 class MaterialFabComponent extends MaterialButtonBase {
   final ChangeDetectorRef _changeDetector;
 
-  MaterialFabComponent(HtmlElement element, this._changeDetector)
+  MaterialFabComponent(HTMLElement element, this._changeDetector)
     : super(element, null);
 
   @visibleForTemplate

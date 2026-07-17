@@ -16,13 +16,13 @@ class LabeledList<T> extends collection.DelegatingList<T>
   bool get hasLabel => _labelFcn != null;
 
   @override
-  String? get uiDisplayName => _labelFcn != null ? _labelFcn!() : null;
+  String? get uiDisplayName => _labelFcn != null ? _labelFcn() : null;
 
   LabeledList(super.items, [this._labelFcn]);
 
   LabeledList.withLabelFunction(List<T> items, [LabelFunction? labelFcn])
-      : this(items, labelFcn);
+    : this(items, labelFcn);
 
   LabeledList.withLabel(List<T> items, [String? label])
-      : this(items, label != null ? (() => label) : null);
+    : this(items, label != null ? (() => label) : null);
 }

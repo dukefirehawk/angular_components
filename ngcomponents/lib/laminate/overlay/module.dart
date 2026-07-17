@@ -2,7 +2,9 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'package:web/web.dart';
+import 'dart:js_interop';
+
+import 'package:web/web.dart' hide Module;
 
 import 'package:ngdart/angular.dart';
 import 'package:ngcomponents/laminate/overlay/constants.dart';
@@ -36,18 +38,19 @@ HTMLElement createAcxOverlayContainer(
   required String name,
   String? className,
 }) {
-  if (parent is! HTMLElement) {
+  if (!parent.isA<HTMLElement>()) {
     throw ArgumentError("Not a HtmlElement type");
   }
-  var container = parent.querySelector('#$id');
+  var container = (parent as HTMLElement).querySelector('#$id');
   if (container == null) {
     container = HTMLDivElement()
       ..id = id
-      ..classes.add(overlayContainerClassName);
-    if (className != null) container.classes.add(className);
+      ..classList.add(overlayContainerClassName);
+    if (className != null) container.classList.add(className);
     parent.append(container);
   }
-  container.attributes[overlayContainerNameAttribute] = name;
+  container.setAttribute(overlayContainerNameAttribute, name);
+  //container.attributes.[overlayContainerNameAttribute] = name;
   return container as HTMLElement;
 }
 
@@ -83,7 +86,7 @@ HTMLElement getDebugContainer(
   @Inject(overlayContainerParent) Object parent,
 ) {
   var element = getDefaultContainer(name, parent, null);
-  element.classes.add('debug');
+  element.classList.add('debug');
   return element;
 }
 

@@ -19,21 +19,26 @@ class HighlightAssistant {
   TextHighlighter? __textHighlighter;
 
   /// Gets the default text highlighter, creating a cached instance if needed.
-  TextHighlighter get _textHighlighter => __textHighlighter ??=
-      TextHighlighter(matchFromStartOfWord: _matchFromStartOfWord);
+  TextHighlighter get _textHighlighter => __textHighlighter ??= TextHighlighter(
+    matchFromStartOfWord: _matchFromStartOfWord,
+  );
 
   /// Whether matches should only highlight at the start of words.
   bool _matchFromStartOfWord;
 
   /// Creates new HighlightAssistant, using provided [optionHighlighter] or
   /// TextHighlighter if no value is provided.
-  HighlightAssistant(
-      {Highlighter? optionHighlighter, bool matchFromStartOfWord = false})
-      : _optionHighlighter = optionHighlighter,
-        _matchFromStartOfWord = matchFromStartOfWord;
+  HighlightAssistant({
+    Highlighter? optionHighlighter,
+    bool matchFromStartOfWord = false,
+  }) : _optionHighlighter = optionHighlighter,
+       _matchFromStartOfWord = matchFromStartOfWord;
 
   List<HighlightedTextSegment> highlightOption<T>(
-      String lastQuery, dynamic item, ItemRenderer<T>? itemRenderer) {
+    String lastQuery,
+    dynamic item,
+    ItemRenderer<T>? itemRenderer,
+  ) {
     var queryHighlightCache = _highlightCache[lastQuery] ??= {};
     var value = queryHighlightCache[item];
 
@@ -43,9 +48,11 @@ class HighlightAssistant {
         render = itemRenderer(item) ?? '';
       }
       value = (_optionHighlighter != null
-          ? _optionHighlighter!(lastQuery, item)
+          ? _optionHighlighter(lastQuery, item)
           : _textHighlighter.highlight(
-              render, lastQuery.split(_separatorRegex)));
+              render,
+              lastQuery.split(_separatorRegex),
+            ));
       queryHighlightCache[item] = value;
     }
     return value;

@@ -23,11 +23,14 @@ import 'package:web/web.dart';
 /// Dart Code:
 ///  final popupClass =
 ///      constructEncapsulatedCss('myPopup', _hostElement.classes);
-String constructEncapsulatedCss(String? className, CssClassSet classes) {
+String constructEncapsulatedCss(String? className, DOMTokenList classes) {
   var result = className ?? '';
-  for (final i in classes) {
+
+  // TODO: Check and validate this for ng-content, ng-template
+  for (int i = 0; i < classes.length; i++) {
+    var item = classes.item(i)!;
     // Add encapsulation classes from host
-    if (i.startsWith('_ngcontent')) result += ' $i';
+    if (item.startsWith('_ngcontent')) result += ' $item';
   }
   return result;
 }

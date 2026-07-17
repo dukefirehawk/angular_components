@@ -3,14 +3,13 @@
 // BSD-style license that can be found in the LICENSE file.
 
 @JS()
-library events;
+library;
 
 import 'dart:async';
+import 'dart:js_interop';
+import 'dart:math';
 import 'package:web/web.dart';
 
-import 'package:ngdart/angular.dart';
-import 'package:js/js.dart';
-import 'package:js/js_util.dart' as js_util;
 import 'package:ngcomponents/utils/browser/feature_detector/feature_detector.dart';
 
 /// Determines if the space key was pressed in a [KeyboardEvent].
@@ -36,8 +35,8 @@ bool isStandardMouseEvent(MouseEvent event) =>
 
 /// Whether the [UIEvent] is a standard trigger event without modifier keys.
 bool isStandardTriggerEvent(UIEvent event) {
-  return event is MouseEvent && isStandardMouseEvent(event) ||
-      event is KeyboardEvent && isKeyboardTrigger(event);
+  return event.isA<MouseEvent>() && isStandardMouseEvent(event as MouseEvent) ||
+      event.isA<KeyboardEvent>() && isKeyboardTrigger(event as KeyboardEvent);
 }
 
 typedef Predicate<T> = bool Function(T value);
@@ -46,8 +45,7 @@ Predicate<T> not<T>(Predicate<T> predicate) =>
     (value) => !predicate(value);
 
 /// A stream of click, mouseup or focus events outside a given element.
-Stream<Event> triggersOutside(dynamic /* Element | ElementRef */ element) {
-  if (element is ElementRef) element = element.nativeElement;
+Stream<Event> triggersOutside(Element element) {
   return triggersOutsideAny((node) => node == element);
 }
 
@@ -70,61 +68,69 @@ Stream<Event> triggersOutsideAny(Predicate<Node> checkNodeInside) {
       Event? lastEvent;
       Event? lastDownEvent;
 
-      listener = (Event e) {
+      void onEvent(Event e) {
         lastEvent = e;
         var node = e.target as Node?;
         while (node != null) {
           if (checkNodeInside(node)) {
             return;
           } else {
-            node = node.parent;
+            node = node.parentElement;
           }
         }
         controller.add(e);
-      };
+      }
+      
+      listener = onEvent.toJS;
 
       // Keep track of mousedown events so that we can filter mouseup events
       // that occurred on a different element than the mousedown.
-      mouseDownListener = document.onMouseDown.listen((MouseEvent e) {
-        lastDownEvent = e;
-      });
+      mouseDownListener = EventStreamProviders.mouseDownEvent
+          .forTarget(document)
+          .listen((MouseEvent e) {
+            lastDownEvent = e;
+          });
 
       // Listen to mouseup to prevent scenarios where a single click event
       // both opens and closes an element.
-      mouseUpListener = document.onMouseUp.listen((MouseEvent e) {
-        // Allow for the event to be listened to if there was no down event
-        // for example if it was canceled or if the target is the same as
-        // where the 'click' started.
-        if (lastDownEvent == null || e.target == lastDownEvent!.target) {
-          listener!(e);
-        }
-        lastEvent = e;
-      });
+      mouseUpListener = EventStreamProviders.mouseUpEvent
+          .forTarget(document)
+          .listen((MouseEvent e) {
+            // Allow for the event to be listened to if there was no down event
+            // for example if it was canceled or if the target is the same as
+            // where the 'click' started.
+            if (lastDownEvent == null || e.target == lastDownEvent!.target) {
+              onEvent(e);
+            }
+            lastEvent = e;
+          });
 
-      clickListener = document.onClick.listen((MouseEvent e) {
-        // Ignore the click if we just saw a mouseup on the same element... it
-        // probably means that the mouseup was part of this same click.
-        //
-        // This prevents scenarios where clicking an element that displays
-        // another element (e.g. a button to open a popup) inadvertently
-        // triggers an "outside" event, immediately hiding the just-displayed
-        // element.
-        if (lastEvent?.type == 'mouseup' && e.target == lastEvent?.target) {
-          return;
-        }
-        // Allow for the event to be listened to if there was no down event
-        // for example if it was canceled or if the target is the same as
-        // where the 'click' started.
-        if (lastDownEvent == null || e.target == lastDownEvent!.target) {
-          listener!(e);
-        }
-        lastDownEvent = null;
-      });
+      clickListener = EventStreamProviders.clickEvent.forTarget(document).listen(
+        (MouseEvent e) {
+          // Ignore the click if we just saw a mouseup on the same element... it
+          // probably means that the mouseup was part of this same click.
+          //
+          // This prevents scenarios where clicking an element that displays
+          // another element (e.g. a button to open a popup) inadvertently
+          // triggers an "outside" event, immediately hiding the just-displayed
+          // element.
+          if (lastEvent?.type == 'mouseup' && e.target == lastEvent?.target) {
+            return;
+          }
+          // Allow for the event to be listened to if there was no down event
+          // for example if it was canceled or if the target is the same as
+          // where the 'click' started.
+          if (lastDownEvent == null || e.target == lastDownEvent!.target) {
+            onEvent(e);
+          }
+          lastDownEvent = null;
+        },
+      );
 
       // Since 'focusin' event is not supported in Firefox, listen to 'focus'
       // event with useCapture set to true to implement event delegation and
       // capture changes to active element on document.
-      document.addEventListener('focus', listener, true);
+      document.addEventListener('focus', listener, true.toJS);
 
       // Handles touches outside of element for Safari on iOS devices since
       // touch events are not detected as clicks on iOS platforms.
@@ -137,7 +143,7 @@ Stream<Event> triggersOutsideAny(Predicate<Node> checkNodeInside) {
       mouseDownListener = null;
       mouseUpListener!.cancel();
       mouseUpListener = null;
-      document.removeEventListener('focus', listener, true);
+      document.removeEventListener('focus', listener, true.toJS);
       document.removeEventListener('touchend', listener);
     },
   );
@@ -159,11 +165,14 @@ Stream<Rectangle?> onResize(Element element) {
     sync: true,
     onListen: () {
       observer = ResizeObserver(
-        allowInterop((entries, _) {
-          for (var entry in entries) {
-            controller.add(entry.contentRect);
+        ((JSArray<ResizeObserverEntry> entries, ResizeObserver observer) {
+          final List<ResizeObserverEntry> dartEntries = entries.toDart;
+
+          for (var entry in dartEntries) {
+            var rec = entry.contentRect;
+            controller.add(Rectangle(rec.left, rec.top, rec.width, rec.height));
           }
-        }),
+        }).toJS,
       );
       observer.observe(element);
     },
@@ -182,10 +191,10 @@ Stream<Rectangle?> onResize(Element element) {
 /// itself.
 bool anyParentHasAttribute(Element? target, String attribute) {
   while (target != null) {
-    if (target.attributes.containsKey(attribute)) {
+    if ((target as HTMLElement).hasAttribute(attribute)) {
       return true;
     }
-    target = target.parent;
+    target = target.parentElement;
   }
   return false;
 }
@@ -201,7 +210,7 @@ bool anyParentHasTag(Element? target, String componentTag) {
     if (target.tagName.toLowerCase() == componentTag) {
       return true;
     }
-    target = target.parent;
+    target = target.parentElement;
   }
   return false;
 }
@@ -218,11 +227,10 @@ bool anyParentHasClass(Element target, String className) =>
 /// This element or the closest of its ancestor with the given class.
 Element? closestWithClass(Element? target, String className) {
   while (target != null) {
-    if (target.attributes.containsKey("class") &&
-        target.classes.contains(className)) {
+    if (target.classList.contains(className)) {
       return target;
     }
-    target = target.parent;
+    target = target.parentElement;
   }
   return null;
 }
@@ -233,7 +241,7 @@ bool isParentOf(Element? element, Node? node) {
     if (node == element) {
       return true;
     } else {
-      node = node.parent;
+      node = node.parentElement;
     }
   }
   return false;
@@ -247,7 +255,7 @@ bool isParentOf(Element? element, Node? node) {
 ///     elements.sort(compareDocumentPosition);
 ///     // Now they're sorted according to their position in the document.
 int compareDocumentPosition(Node a, Node b) {
-  int bitmask = js_util.callMethod(a, 'compareDocumentPosition', [b]);
+  int bitmask = a.compareDocumentPosition(b);
   if ((bitmask & 4) != 0 || (bitmask & 16) != 0) {
     // DOCUMENT_POSITION_FOLLOWING or DOCUMENT_POSITION_CONTAINED_BY
     return -1;

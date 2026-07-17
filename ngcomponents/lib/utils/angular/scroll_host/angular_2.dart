@@ -3,7 +3,8 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'package:web/web.dart';
+import 'dart:math';
+import 'package:web/web.dart' hide Module;
 
 import 'package:ngdart/angular.dart';
 import 'package:ngcomponents/src/utils/angular/scroll_host/scroll_host_base.dart';
@@ -41,7 +42,7 @@ const scrollHostNewModule = Module(provide: scrollHostProviders);
 class ElementScrollHost implements OnInit, OnDestroy, ElementScrollHostBase {
   final DomService _domService;
   final NgZone _ngZone;
-  final HtmlElement element;
+  final HTMLElement element;
   final GestureListenerFactory _gestureListenerFactory;
 
   // This is sync to reduce the time between StickyController writing to the
@@ -206,7 +207,7 @@ class ElementScrollHost implements OnInit, OnDestroy, ElementScrollHostBase {
   bool get throttleScrollEvents => scrollHost.throttleScrollEvents;
 
   @override
-  GlobalEventHandlers get scrollbarHost => scrollHost.scrollbarHost;
+  Element get scrollbarHost => scrollHost.scrollbarHost;
 
   @override
   int get clientWidth => scrollHost.clientWidth;
@@ -303,7 +304,7 @@ class AcxPanClassDirective extends BasePanClassDirective
   AcxPanClassDirective(
     super.domService,
     super.scrollHost,
-    HtmlElement super.element,
+    HTMLElement super.element,
   );
 
   @override

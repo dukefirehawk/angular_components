@@ -55,7 +55,7 @@ class MaterialCheckboxComponent
   static const hostClass = 'themeable';
 
   final ChangeDetectorRef _changeDetector;
-  final HtmlElement _root;
+  final HTMLElement _root;
   final String _defaultTabIndex;
 
   @HostBinding('attr.role')
@@ -230,7 +230,7 @@ class MaterialCheckboxComponent
 
   void _syncAriaChecked() {
     //if (_root == null) return;
-    _root.attributes['aria-checked'] = _checkedStr;
+    _root.setAttribute('aria-checked', _checkedStr);
     _changeDetector.markForCheck();
   }
 

@@ -3,6 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math';
 import 'package:web/web.dart';
 
 import 'package:ngdart/angular.dart';
@@ -27,10 +28,7 @@ class DomRulerImpl extends RulerBase<Element> implements DomRuler {
 
   @override
   bool canSyncWrite(Element element) {
-    if (_document is HtmlDocument) {
-      return !(_document as HtmlDocument).body!.contains(element);
-    }
-    return !_document.contains(element);
+    return !_document.body!.contains(element);
   }
 
   @override
@@ -56,10 +54,19 @@ class DomRulerImpl extends RulerBase<Element> implements DomRuler {
   Rectangle measureSync(Element element, {bool offset = false}) {
     // Purposefully don't use a 'canSyncWrite' here because some places in the
     // code will want a synchronous write regardless (e.g. overlays).
+
+    final elm = element as HTMLElement;
     if (offset) {
-      return element.offset;
+      return Rectangle(
+        elm.offsetLeft,
+        elm.offsetTop,
+        elm.offsetWidth,
+        elm.offsetHeight,
+      );
     }
-    return element.getBoundingClientRect();
+    final DOMRect rect = element.getBoundingClientRect();
+
+    return Rectangle(rect.left, rect.top, rect.width, rect.height);
   }
 
   @override
@@ -74,17 +81,17 @@ class DomRulerImpl extends RulerBase<Element> implements DomRuler {
 
   @override
   void removeCssClassesSync(Element element, List<String> classes) {
-    element.classes.removeAll(classes.where((c) => c.isNotEmpty));
+    classes.forEach(element.classList.remove);
   }
 
   @override
   void addCssClassesSync(Element element, List<String> classes) {
-    element.classes.addAll(classes.where((c) => c.isNotEmpty));
+    classes.forEach(element.classList.add);
   }
 
   @override
   void clearCssPropertiesSync(Element element) {
-    element.style.cssText = '';
+    (element as HTMLElement).style.cssText = '';
   }
 
   @override
@@ -93,6 +100,11 @@ class DomRulerImpl extends RulerBase<Element> implements DomRuler {
     String? propertyName,
     String? propertyValue,
   ) {
-    element.style.setProperty(propertyName!, propertyValue);
+    if (propertyName!.isEmpty) return;
+
+    (element as HTMLElement).style.setProperty(
+      propertyName,
+      propertyValue ?? '',
+    );
   }
 }

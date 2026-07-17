@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'package:web/web.dart';
+import 'dart:js_interop';
 
 import 'package:ngdart/di.dart';
 
@@ -43,25 +44,27 @@ class FocusIndicatorController {
   }
 
   void _turnOnKeyNavMode() {
-    window.addEventListener('focus', _onFocus, true);
-    window.addEventListener('blur', _onBlur, true);
+    window.addEventListener('focus', _onFocus.toJS, true.toJS);
+    window.addEventListener('blur', _onBlur.toJS, true.toJS);
 
     _activeElement = document.activeElement;
 
     _focusIndicator = document.createElement('div');
-    _focusIndicator!.id = 'acx-focus-indicator';
-    _focusIndicator!.style.position = 'fixed';
-    _focusIndicator!.style.zIndex = '9999';
-    _focusIndicator!.style.outline = '2px solid #ff9800';
-    _focusIndicator!.style.pointerEvents = 'none';
-    document.body!.append(_focusIndicator!);
+
+    final div = _focusIndicator! as HTMLElement;
+    div.id = 'acx-focus-indicator';
+    div.style.position = 'fixed';
+    div.style.zIndex = '9999';
+    div.style.outline = '2px solid #ff9800';
+    div.style.pointerEvents = 'none';
+    document.body!.append(div);
 
     _startRepositionLoop();
   }
 
   void _turnOffKeyNavMode() {
-    window.removeEventListener('focus', _onFocus, true);
-    window.removeEventListener('blur', _onBlur, true);
+    window.removeEventListener('focus', _onFocus.toJS, true.toJS);
+    window.removeEventListener('blur', _onBlur.toJS, true.toJS);
 
     _activeElement = null;
 
@@ -87,28 +90,28 @@ class FocusIndicatorController {
     if (!_enabled || _activeElement == document.activeElement) return;
 
     if (_activeElement != null) {
-      _activeElement!.style.outline = '';
-      if (_activeElement!.getAttribute('style')?.isEmpty == true) {
-        _activeElement!.attributes.remove('style');
+      var elm = _activeElement as HTMLElement;
+      elm.style.outline = '';
+      if (elm.getAttribute('style')?.isEmpty == true) {
+        elm.removeAttribute('style');
       }
     }
 
     _activeElement = document.activeElement;
 
-    window.console.groupCollapsed(
-      'Active element '
-      '[${_activeElement!.tagName.toLowerCase()}] '
-      'after "${event.type}"',
+    console.groupCollapsed(
+      'Active element [${_activeElement!.tagName.toLowerCase()}] after "${event.type}"'
+          .toJS,
     );
-    window.console.log(_activeElement);
-    window.console.log(event);
-    window.console.groupEnd();
+    console.log(_activeElement);
+    console.log(event);
+    console.groupEnd();
 
-    _activeElement!.style.outline = 'none';
+    (_activeElement as HTMLElement).style.outline = 'none';
   }
 
   void _startRepositionLoop() {
-    _repositionLoopId = window.requestAnimationFrame(_reposition);
+    _repositionLoopId = window.requestAnimationFrame(_reposition.toJS);
   }
 
   void _cancelRepositionLoop() {
@@ -120,10 +123,11 @@ class FocusIndicatorController {
 
   void _reposition(_) {
     var rect = _activeElement!.getBoundingClientRect();
-    _focusIndicator!.style.top = '${rect.top}px';
-    _focusIndicator!.style.left = '${rect.left}px';
-    _focusIndicator!.style.width = '${rect.width}px';
-    _focusIndicator!.style.height = '${rect.height}px';
+    var elm = _focusIndicator as HTMLElement;
+    elm.style.top = '${rect.top}px';
+    elm.style.left = '${rect.left}px';
+    elm.style.width = '${rect.width}px';
+    elm.style.height = '${rect.height}px';
 
     _startRepositionLoop();
   }
