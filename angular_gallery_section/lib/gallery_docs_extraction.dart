@@ -19,10 +19,16 @@ import 'src/common_extractors.dart';
 ///
 /// Will read [assetId] with [assetReader].
 Future<DartDocInfo?> extractDocumentation(
-        String name, AssetId assetId, AssetReader assetReader) async =>
+  String name,
+  AssetId assetId,
+  AssetReader assetReader,
+) async =>
     parseString(content: await assetReader.readAsString(assetId)).unit.accept(
-        GalleryDocumentationExtraction(
-            name, path_utils.assetToPath(assetId.toString())));
+      GalleryDocumentationExtraction(
+        name,
+        path_utils.assetToPath(assetId.toString()),
+      ),
+    );
 
 /// A visitor that extracts a [DartDocInfo] for an identifier [_name] and
 /// additional information from the Angular annotations @Component and
@@ -54,7 +60,7 @@ class GalleryDocumentationExtraction extends SimpleAstVisitor<DartDocInfo> {
   DartDocInfo? visitMixinDeclaration(MixinDeclaration node) =>
       _visitClassOrMixinDeclaration(node);
 
-  DartDocInfo? _visitClassOrMixinDeclaration(NamedCompilationUnitMember node) {
+  DartDocInfo? _visitClassOrMixinDeclaration(CompilationUnitMember node) {
     if (_extractDocumentation(node) == null) return null;
 
     var allProperties = <DartPropertyInfo?>[];
@@ -69,20 +75,27 @@ class GalleryDocumentationExtraction extends SimpleAstVisitor<DartDocInfo> {
       var deprecatedAnnotationNode = _deprecatedAnnotation(member);
       if (propertyAnnotationNode == null) continue;
 
-      allProperties
-          .addAll(member.accept(propertyVisitor)!.map((property) => property
-            ?..annotation = propertyAnnotationNode.name.name
-            ..deprecated = deprecatedAnnotationNode != null
-            ..deprecatedMessage = deprecatedAnnotationNode?.arguments?.arguments
-                    // Visit the first arg or null if no args.
-                    .firstWhereOrNull((_) => true)
-                    ?.accept(StringExtractor()) ??
-                ''
-            ..bindingAlias = propertyAnnotationNode.arguments?.arguments
-                    // Visit the first arg or null if no args.
-                    .firstWhereOrNull((_) => true)
-                    ?.accept(StringExtractor()) ??
-                ''));
+      allProperties.addAll(
+        member
+            .accept(propertyVisitor)!
+            .map(
+              (property) => property
+                ?..annotation = propertyAnnotationNode.name.name
+                ..deprecated = deprecatedAnnotationNode != null
+                ..deprecatedMessage =
+                    deprecatedAnnotationNode?.arguments?.arguments
+                        // Visit the first arg or null if no args.
+                        .firstWhereOrNull((_) => true)
+                        ?.accept(StringExtractor()) ??
+                    ''
+                ..bindingAlias =
+                    propertyAnnotationNode.arguments?.arguments
+                        // Visit the first arg or null if no args.
+                        .firstWhereOrNull((_) => true)
+                        ?.accept(StringExtractor()) ??
+                    '',
+            ),
+      );
     }
 
     _info!.inputs = allProperties
@@ -108,9 +121,9 @@ class GalleryDocumentationExtraction extends SimpleAstVisitor<DartDocInfo> {
   }
 
   @override
-  visitNamedExpression(NamedExpression node) {
-    final name = node.name.label.name;
-    final expression = node.expression;
+  visitNamedArgument(NamedArgument node) {
+    final name = node.name.lexeme;
+    final expression = node.argumentExpression;
     if (name == 'selector') {
       _info!.selector = expression.accept(StringExtractor()) ?? '';
     } else if (name == 'exportAs') {
@@ -119,15 +132,31 @@ class GalleryDocumentationExtraction extends SimpleAstVisitor<DartDocInfo> {
     return null;
   }
 
+  String? _getNodeName(CompilationUnitMember node) {
+    return switch (node) {
+      ClassDeclaration n => n.namePart.typeName.lexeme,
+      EnumDeclaration n => n.namePart.typeName.lexeme,
+      FunctionDeclaration n => n.name.lexeme,
+      MixinDeclaration n => n.name.lexeme,
+      TypeAlias n => n.name.lexeme,
+      ExtensionDeclaration n => n.name?.lexeme, // Extensions can be unnamed
+      _ => null,
+    };
+  }
+
   /// Collect information needed for documentation from [node].
-  DartDocInfo? _extractDocumentation(NamedCompilationUnitMember node) {
-    if (node.name.toString() != _name) return null;
+  DartDocInfo? _extractDocumentation(CompilationUnitMember node) {
+    var nodeName = _getNodeName(node);
+    if (nodeName != _name) {
+      return null;
+    }
 
     final deprecatedAnnotationNode = _deprecatedAnnotation(node);
     _info = DartDocInfo()
-      ..name = node.name.toString()
+      ..name = nodeName!
       ..deprecated = deprecatedAnnotationNode != null
-      ..deprecatedMessage = deprecatedAnnotationNode?.arguments?.arguments
+      ..deprecatedMessage =
+          deprecatedAnnotationNode?.arguments?.arguments
               // Visit the first arg or null if no args.
               .firstWhereOrNull((_) => true)
               ?.accept(StringExtractor()) ??
@@ -174,16 +203,17 @@ class _AllMemberDocsExtraction
     extends SimpleAstVisitor<Iterable<DartPropertyInfo?>> {
   final _MemberDocExtraction _propertyVisitor;
 
-  _AllMemberDocsExtraction(filePath)
-      : _propertyVisitor = _MemberDocExtraction(filePath);
+  _AllMemberDocsExtraction(String filePath)
+    : _propertyVisitor = _MemberDocExtraction(filePath);
 
   @override
   visitConstructorDeclaration(ConstructorDeclaration node) =>
       const Iterable.empty();
 
   @override
-  visitMethodDeclaration(MethodDeclaration node) =>
-      [node.accept(_propertyVisitor)];
+  visitMethodDeclaration(MethodDeclaration node) => [
+    node.accept(_propertyVisitor),
+  ];
 
   @override
   visitFieldDeclaration(FieldDeclaration node) =>
@@ -210,7 +240,7 @@ class _MemberDocExtraction extends SimpleAstVisitor<DartPropertyInfo> {
   /// [VariableDeclaration].
   DartPropertyInfo extractProperty(Declaration node) {
     return DartPropertyInfo()
-      ..name = (node as dynamic /* MethodDeclaration | VariableDeclaration */)
+      ..name = (node as dynamic /* MethodDeclaration | VariableDeclaration */ )
           .name
           .toString()
       ..comment = g3docMarkdownToHtml(parseComment(node.documentationComment))
@@ -219,8 +249,10 @@ class _MemberDocExtraction extends SimpleAstVisitor<DartPropertyInfo> {
 }
 
 final RegExp _singleLineCommentStart = RegExp(r'^///? ?(.*)');
-final RegExp _multiLineCommentStartEnd =
-    RegExp(r'^/\*\*? ?([\s\S]*)\*/$', multiLine: true);
+final RegExp _multiLineCommentStartEnd = RegExp(
+  r'^/\*\*? ?([\s\S]*)\*/$',
+  multiLine: true,
+);
 final RegExp _multiLineCommentLineStart = RegExp(r'^[ \t]*\* ?(.*)');
 
 /// Pulls the raw text out of a comment (i.e. removes the comment
@@ -231,8 +263,9 @@ String parseComment(Comment? commentNode) {
   }
 
   // Handle ///-style comments
-  if (commentNode.tokens
-      .every((t) => _singleLineCommentStart.hasMatch(t.lexeme))) {
+  if (commentNode.tokens.every(
+    (t) => _singleLineCommentStart.hasMatch(t.lexeme),
+  )) {
     return commentNode.tokens
         .map((t) => _singleLineCommentStart.firstMatch(t.lexeme)![1])
         .join('\n');

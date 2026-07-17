@@ -22,10 +22,37 @@ Builder componentApiBuilder(BuilderOptions options) => ComponentApiBuilder();
 /// Builder used to generate the page for a stand alone example app and a
 /// summary used in building the gallery from a @GallerySectionConfig-annotated
 /// class.
-Builder gallerySectionBuilder(BuilderOptions options) => MultiplexingBuilder([
-      GallerySectionBuilder(),
-      GallerySectionSummaryBuilder(),
-    ]);
+Builder gallerySectionBuilder(BuilderOptions options) =>
+    MergedBuilder([GallerySectionBuilder(), GallerySectionSummaryBuilder()]);
 
 Builder exampleAppBuilder(BuilderOptions options) =>
     ExampleAppBuilder(options.config['direction'] ?? 'ltr');
+
+class MergedBuilder implements Builder {
+  final List<Builder> builders;
+
+  MergedBuilder(this.builders);
+
+  @override
+  Future<void> build(BuildStep buildStep) async {
+    for (var builder in builders) {
+      // Replicate the multiplex logic: only run if the input matches the builder's extensions
+      if (builder.buildExtensions.keys.any(
+        (ext) => buildStep.inputId.path.endsWith(ext),
+      )) {
+        await builder.build(buildStep);
+      }
+    }
+  }
+
+  @override
+  Map<String, List<String>> get buildExtensions {
+    final extensions = <String, List<String>>{};
+    for (var builder in builders) {
+      builder.buildExtensions.forEach((input, outputs) {
+        extensions.putIfAbsent(input, () => []).addAll(outputs);
+      });
+    }
+    return extensions;
+  }
+}

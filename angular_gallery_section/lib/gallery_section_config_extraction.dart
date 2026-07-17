@@ -15,10 +15,11 @@ import 'src/common_extractors.dart';
 ///
 /// The asset identified by [assetId] will be read using [assetReader].
 Future<Iterable<ConfigInfo>?> extractGallerySectionConfigs(
-        AssetId assetId, AssetReader assetReader) async =>
-    parseString(
-      content: await assetReader.readAsString(assetId),
-    ).unit.accept(GallerySectionConfigExtraction());
+  AssetId assetId,
+  AssetReader assetReader,
+) async => parseString(
+  content: await assetReader.readAsString(assetId),
+).unit.accept(GallerySectionConfigExtraction());
 
 /// [AstVisitor] to extract multiple @GallerySectionConfig annotations, and
 /// the parameters they are constructed with.
@@ -58,9 +59,9 @@ class _GallerySectionConfigVisitor extends SimpleAstVisitor<ConfigInfo> {
   }
 
   @override
-  visitNamedExpression(NamedExpression node) {
-    final name = node.name.label.name;
-    final expression = node.expression;
+  visitNamedArgument(NamedArgument node) {
+    final name = node.name.lexeme;
+    final expression = node.argumentExpression;
     if (name == 'displayName') {
       config?.displayName = expression.accept(StringExtractor()) ?? '';
     } else if (name == 'group') {

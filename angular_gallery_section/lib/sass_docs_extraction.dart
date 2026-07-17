@@ -15,7 +15,10 @@ import 'package:angular_gallery_section/visitors/path_utils.dart' as path_utils;
 /// with [assetReader]. Does not collect documentation for variables, functions
 /// and mixins when their name starts with an underscore.
 Future<SassDocInfo> extractSassDocs(
-    String name, AssetId assetId, AssetReader assetReader) async {
+  String name,
+  AssetId assetId,
+  AssetReader assetReader,
+) async {
   var libraryDoc = '';
   final contents = await assetReader.readAsString(assetId);
   final stylesheet = Stylesheet.parseScss(contents);
@@ -37,8 +40,13 @@ Future<SassDocInfo> extractSassDocs(
     // Collect the variables, functions and mixins that do not have names
     // starting with an underscore.
     if (node is VariableDeclaration && !node.name.startsWith('_')) {
-      variableDeclarations.add(SassVariableInfo(
-          node.name, node.expression.toString(), _formatComment(node.comment)));
+      variableDeclarations.add(
+        SassVariableInfo(
+          node.name,
+          node.expression.toString(),
+          _formatComment(node.comment),
+        ),
+      );
     } else if (node is FunctionRule && !node.name.startsWith('_')) {
       functionRules.add(_extractCallable(node));
     } else if (node is MixinRule && !node.name.startsWith('_')) {
@@ -46,8 +54,14 @@ Future<SassDocInfo> extractSassDocs(
     }
   }
 
-  return SassDocInfo(name, path_utils.assetToPath(assetId.toString()),
-      libraryDoc, variableDeclarations, functionRules, mixinRules);
+  return SassDocInfo(
+    name,
+    path_utils.assetToPath(assetId.toString()),
+    libraryDoc,
+    variableDeclarations,
+    functionRules,
+    mixinRules,
+  );
 }
 
 /// Gathers the information needed to document a [callable] (function or
@@ -55,15 +69,17 @@ Future<SassDocInfo> extractSassDocs(
 ///
 /// Skips arguments when their names starts with an underscore.
 SassCallableInfo _extractCallable(CallableDeclaration callable) {
-  final args = callable.arguments.arguments
-      .map((arg) => SassArgumentInfo(arg.name, arg.defaultValue.toString()));
-  var restArg = callable.arguments.restArgument;
+  final args = callable.parameters.parameters.map(
+    (arg) => SassArgumentInfo(arg.name, arg.defaultValue.toString()),
+  );
+  var restArg = callable.parameters.restParameter;
   restArg = restArg != null && !restArg.startsWith('_') ? restArg : null;
   return SassCallableInfo(
-      callable.name,
-      args.where((arg) => !arg.name.startsWith('_')),
-      restArg ?? '',
-      _formatComment(callable.comment));
+    callable.name,
+    args.where((arg) => !arg.name.startsWith('_')),
+    restArg ?? '',
+    _formatComment(callable.comment),
+  );
 }
 
 /// Extracts any documentation (triple slash) comments from [silentComment].

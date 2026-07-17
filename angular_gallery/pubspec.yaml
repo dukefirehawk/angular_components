@@ -4,13 +4,13 @@ environment:
   sdk: '>=3.12.0 <4.0.0'
 
 dependencies:
-  ngdart: ^8.0.0-dev.1
+  ngdart: ^9.0.0-dev.1
   ngcomponents: 
     path: ../ngcomponents
-  ngforms: ^5.0.0-dev.1
-  ngrouter: ^4.0.0-dev.1
-  build: ^2.1.1
+  ngforms: ^6.0.0-dev.1
+  ngrouter: ^5.0.0-dev.1
+  build: ^4.0.0
   build_config: ^1.0.0
   #mustache: ^1.0.0
   mustache_template: ^2.0.0
-  lints: ^3.0.0
+  lints: ^6.0.0
