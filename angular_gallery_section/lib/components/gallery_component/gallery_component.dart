@@ -3,17 +3,18 @@
 // BSD-style license that can be found in the LICENSE file.
 
 @JS()
-library angular_components.scaffolding.gallery_section.components.gallery_component;
+library;
 
-import 'dart:html';
+import 'dart:js_interop';
+
 import 'package:ngdart/angular.dart';
-import 'package:js/js.dart';
 import 'package:ngcomponents/button_decorator/button_decorator.dart';
 import 'package:ngcomponents/dynamic_component/dynamic_component.dart';
 import 'package:ngcomponents/laminate/popup/module.dart';
 import 'package:angular_gallery/gallery/gallery_tokens.dart';
 import 'package:angular_gallery_section/components/gallery_component/documentation_component.dart';
 import 'package:angular_gallery_section/components/gallery_component/gallery_info.dart';
+import 'package:web/web.dart';
 
 /// The gallery component details page that encompass the component's dart docs,
 /// the different demos examples and the benchmark latency.
@@ -48,7 +49,8 @@ class GalleryComponent {
 
   String getDemoId(Demo demo) => '${demo.name}Demo';
 
-  void scroll(String locator) => querySelector(locator)!.scrollIntoView();
+  void scroll(String locator) =>
+      document.querySelector(locator)!.scrollIntoView();
 
   String getTeamsLink(String ldap) => 'http://who/$ldap';
 
@@ -56,8 +58,8 @@ class GalleryComponent {
   /// CodeSearch.
   String getCodeSearchLink(String componentPath) =>
       componentPath.contains('example')
-          ? '$_sourcecodeUrl/examples/$componentPath'
-          : '$_sourcecodeUrl$componentPath';
+      ? '$_sourcecodeUrl/examples/$componentPath'
+      : '$_sourcecodeUrl$componentPath';
 }
 
 /// Applies code highlighting on `<pre><code>` elements within [htmlFragment].
@@ -67,28 +69,41 @@ class GalleryComponent {
 /// first.
 String applyHighlighting(String htmlFragment) {
   // Create a temporary document containing the fragment.
-  final fragment = DocumentFragment.html(htmlFragment,
-      treeSanitizer: _NullNodeTreeSanitizer());
+  final range = document.createRange();
+  final fragment = range.createContextualFragment(htmlFragment.toJS);
+  //final fragment = DocumentFragment.html(
+  //  htmlFragment,
+  //  treeSanitizer: _NullNodeTreeSanitizer(),
+  //);
 
   // Add syntax highlighting css classes.
   try {
-    fragment
-        .querySelectorAll('pre code')
-        .forEach((block) => highlightBlock(block));
+    var nodes = fragment.querySelectorAll('pre code');
+
+    for (int i = 0; i < nodes.length; i++) {
+      // Cast the generic Node to an Element to interact with it
+      final element = nodes.item(i) as Element;
+
+      highlightBlock(element);
+    }
   } catch (e) {
     print(e);
   }
 
-  return fragment.innerHtml ?? '';
+  //final container = document.createElement('div') as HTMLDivElement;
+  //container.appendChild(fragment.cloneNode(true));
+
+  //return container.innerHTML;
+  return fragment.textContent ?? '';
 }
 
 @JS('hljs.highlightBlock')
-external highlightBlock(block);
+external dynamic highlightBlock(dynamic block);
 
 /// A [NodeTreeSanitizer] that provides no sanitization.
-class _NullNodeTreeSanitizer implements NodeTreeSanitizer {
-  @override
-  void sanitizeTree(Node node) {
-    // Do no sanitization.
-  }
-}
+// class _NullNodeTreeSanitizer implements NodeTreeSanitizer {
+//   @override
+//   void sanitizeTree(Node node) {
+//     // Do no sanitization.
+//   }
+// }

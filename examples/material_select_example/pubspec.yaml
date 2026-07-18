@@ -14,4 +14,5 @@ dependencies:
   angular_gallery_section:
     path: ../../angular_gallery_section
   build_config: ^1.0.0
+  web: ^1.0.0
 

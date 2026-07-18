@@ -3,7 +3,6 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
 
 import 'package:ngdart/angular.dart';
 //import 'package:ngforms/ngforms.dart';
@@ -23,6 +22,7 @@ import 'package:ngcomponents/model/selection/selection_options.dart';
 import 'package:ngcomponents/model/selection/string_selection_options.dart';
 import 'package:ngcomponents/model/ui/display_name.dart';
 import 'package:ngcomponents/model/ui/has_factory.dart';
+import 'package:web/web.dart';
 
 import 'material_dropdown_select_full_demo.template.dart' as demo;
 
@@ -81,40 +81,43 @@ class MaterialDropdownSelectFullDemoComponent {
     Language('fr', 'French'),
     Language('gl', 'Galician'),
     Language('ka', 'Georgian'),
-    Language('de', 'German')
+    Language('de', 'German'),
   ];
 
   static final List<OptionGroup<Language>> _languagesGroups =
       <OptionGroup<Language>>[
-    OptionGroup<Language>.withLabel(const <Language>[
-      Language('en-US', 'US English'),
-      Language('fr-CA', 'Canadian English'),
-    ], 'North America'),
-    OptionGroup<Language>.withLabel(const <Language>[
-      Language('ny', 'Chinese (Simplified)'),
-      Language('zh', 'Chinese (Traditional)')
-    ], 'Asia'),
-    OptionGroup<Language>.withLabel(const <Language>[
-      Language('en-UK', 'UK English'),
-      Language('de', 'German')
-    ], 'Europe'),
-    OptionGroup<Language>.withLabel(
-        const <Language>[], 'Antarctica', 'No languages'),
-    // This group will not be rendered.
-    OptionGroup<Language>.withLabel(const <Language>[], 'Pangaea')
-  ];
+        OptionGroup<Language>.withLabel(const <Language>[
+          Language('en-US', 'US English'),
+          Language('fr-CA', 'Canadian English'),
+        ], 'North America'),
+        OptionGroup<Language>.withLabel(const <Language>[
+          Language('ny', 'Chinese (Simplified)'),
+          Language('zh', 'Chinese (Traditional)'),
+        ], 'Asia'),
+        OptionGroup<Language>.withLabel(const <Language>[
+          Language('en-UK', 'UK English'),
+          Language('de', 'German'),
+        ], 'Europe'),
+        OptionGroup<Language>.withLabel(
+          const <Language>[],
+          'Antarctica',
+          'No languages',
+        ),
+        // This group will not be rendered.
+        OptionGroup<Language>.withLabel(const <Language>[], 'Pangaea'),
+      ];
 
   static final List<RelativePosition> _popupPositionsAboveInput = const [
     RelativePosition.AdjacentTopLeft,
-    RelativePosition.AdjacentTopRight
+    RelativePosition.AdjacentTopRight,
   ];
   static final List<RelativePosition> _popupPositionsBelowInput = const [
     RelativePosition.AdjacentBottomLeft,
-    RelativePosition.AdjacentBottomRight
+    RelativePosition.AdjacentBottomRight,
   ];
 
-  static final ItemRenderer _displayNameRenderer =
-      (item) => (item as HasUIDisplayName).uiDisplayName;
+  static final ItemRenderer _displayNameRenderer = (item) =>
+      (item as HasUIDisplayName).uiDisplayName;
 
   // Specifying an itemRenderer avoids the selected item from knowing how to
   // display itself.
@@ -134,8 +137,9 @@ class MaterialDropdownSelectFullDemoComponent {
   String deselectLabel = 'None';
 
   /// Languages to choose from.
-  ExampleSelectionOptions languageListOptions =
-      ExampleSelectionOptions(_languagesList);
+  ExampleSelectionOptions languageListOptions = ExampleSelectionOptions(
+    _languagesList,
+  );
 
   ExampleSelectionOptions languageGroupedOptions =
       ExampleSelectionOptions.withOptionGroups(_languagesGroups);
@@ -144,22 +148,29 @@ class MaterialDropdownSelectFullDemoComponent {
       useOptionGroup ? languageGroupedOptions : languageListOptions;
 
   /// Single Selection Model
-  final SelectionModel<Language> singleSelectModel =
-      SelectionModel.single(selected: _languagesList[1]);
+  final SelectionModel<Language> singleSelectModel = SelectionModel.single(
+    selected: _languagesList[1],
+  );
 
   /// Label for the button for single selection.
   String? get singleSelectLanguageLabel =>
       singleSelectModel.selectedValues.isNotEmpty
-          ? itemRenderer(singleSelectModel.selectedValues.first)
-          : 'Select Language';
+      ? itemRenderer(singleSelectModel.selectedValues.first)
+      : 'Select Language';
 
   /// Multi Selection Model
   final SelectionModel<Language> multiSelectModel =
       SelectionModel<Language>.multi();
 
   final SelectionModel<int> widthSelection = SelectionModel<int>.multi();
-  final SelectionOptions<int> widthOptions =
-      SelectionOptions<int>.fromList([0, 1, 2, 3, 4, 5]);
+  final SelectionOptions<int> widthOptions = SelectionOptions<int>.fromList([
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+  ]);
   String get widthButtonText => widthSelection.selectedValues.isNotEmpty
       ? widthSelection.selectedValues.first.toString()
       : '0';
@@ -170,12 +181,15 @@ class MaterialDropdownSelectFullDemoComponent {
       StringSelectionOptions<String>(['Auto', 'Above', 'Below']);
   String get popupPositionButtonText =>
       popupPositionSelection.selectedValues.isNotEmpty
-          ? popupPositionSelection.selectedValues.first
-          : 'Auto';
+      ? popupPositionSelection.selectedValues.first
+      : 'Auto';
 
   final SelectionModel<String> slideSelection = SelectionModel<String>.multi();
-  final StringSelectionOptions slideOptions =
-      StringSelectionOptions<String>(['Default', 'x', 'y']);
+  final StringSelectionOptions slideOptions = StringSelectionOptions<String>([
+    'Default',
+    'x',
+    'y',
+  ]);
   String get slideButtonText => slideSelection.selectedValues.isNotEmpty
       ? slideSelection.selectedValues.first
       : 'Default';
@@ -194,15 +208,16 @@ class MaterialDropdownSelectFullDemoComponent {
     return RelativePosition.overlapAlignments;
   }
 
-  String? get slide => slideSelection.selectedValues.isNotEmpty &&
+  String? get slide =>
+      slideSelection.selectedValues.isNotEmpty &&
           slideSelection.selectedValues.first != 'Default'
       ? slideSelection.selectedValues.first
       : null;
 
   String? get singleSelectedLanguage =>
       singleSelectModel.selectedValues.isNotEmpty
-          ? singleSelectModel.selectedValues.first.uiDisplayName
-          : null;
+      ? singleSelectModel.selectedValues.first.uiDisplayName
+      : null;
 
   /// Currently selected language for the multi selection model
   String get multiSelectedLanguages =>
@@ -316,11 +331,15 @@ class ExampleLabelRendererComponent implements RendersValue<OptionGroup> {
 class ExampleSelectionOptions extends StringSelectionOptions<Language>
     implements Selectable<Language> {
   ExampleSelectionOptions(List<Language> options)
-      : super(options,
-            toFilterableString: (Language option) => option.toString());
+    : super(
+        options,
+        toFilterableString: (Language option) => option.toString(),
+      );
   ExampleSelectionOptions.withOptionGroups(List<OptionGroup> optionGroups)
-      : super.withOptionGroups(optionGroups as List<OptionGroup<Language>>,
-            toFilterableString: (Language option) => option.toString());
+    : super.withOptionGroups(
+        optionGroups as List<OptionGroup<Language>>,
+        toFilterableString: (Language option) => option.toString(),
+      );
   @override
   SelectableOption getSelectable(Language item) => item.code.contains('en')
       ? SelectableOption.Disabled

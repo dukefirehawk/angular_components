@@ -31,15 +31,14 @@ class ResolvedConfig {
 
   /// A name for a Component selector that can be used if making a Component
   /// from this GalleryConfigSection.
-  String get selectorSafeName =>
-      string.hyphenate(_cleanName(displayName)!);
+  String get selectorSafeName => string.hyphenate(_cleanName(displayName)!);
 
   /// Replaces all characters that are not letters, numbers or spaces with an
   /// underscore.
   ///
   /// Compresses contiguous whitespace down to a single space after stripping
   /// out unwanted characters.
-  String? _cleanName(input) {
+  String? _cleanName(String input) {
     var stripped = input.replaceAll(_invalidCharacters, '_');
     // Compress contiguous whitespace down to a single space in final result.
     return stripped.replaceAll(RegExp(r' {2,}'), ' ');
@@ -50,11 +49,15 @@ class ResolvedConfig {
     displayName = jsonMap['displayName'] as String? ?? '';
     group = jsonMap['group'] as String?;
 
-    docs = (jsonMap['docs'] as Iterable?)
-            ?.map((element) => DocInfo.fromJson(element)) ??
+    docs =
+        (jsonMap['docs'] as Iterable?)?.map(
+          (element) => DocInfo.fromJson(element),
+        ) ??
         [];
-    demos = (jsonMap['demos'] as Iterable?)
-            ?.map((element) => DemoInfo.fromJson(element)) ??
+    demos =
+        (jsonMap['demos'] as Iterable?)?.map(
+          (element) => DemoInfo.fromJson(element),
+        ) ??
         [];
     if (jsonMap['mainDemo'] != null) {
       mainDemo = DemoInfo.fromJson(jsonMap['mainDemo']);
@@ -68,16 +71,16 @@ class ResolvedConfig {
 
   /// Returns a json encodeable representation of this [ResolvedConfig].
   Map<String, dynamic> toJson() => {
-        'displayName': displayName,
-        'group': group,
-        'docs': docs.toList(),
-        'demos': demos.toList(),
-        'mainDemo': mainDemo,
-        'owners': owners.toList(),
-        'uxOwners': uxOwners.toList(),
-        'relatedUrls': relatedUrls,
-        'showGeneratedDocs': showGeneratedDocs,
-      };
+    'displayName': displayName,
+    'group': group,
+    'docs': docs.toList(),
+    'demos': demos.toList(),
+    'mainDemo': mainDemo,
+    'owners': owners.toList(),
+    'uxOwners': uxOwners.toList(),
+    'relatedUrls': relatedUrls,
+    'showGeneratedDocs': showGeneratedDocs,
+  };
 }
 
 /// Represents the demos listed in an @GallerySectionConfig annotation resolved
@@ -106,9 +109,9 @@ class DemoInfo {
 
   /// Returns a json encodeable representation of this [DemoInfo].
   Map<String, String> toJson() => {
-        'type': type,
-        'name': name,
-        'selector': selector,
-        'asset': asset,
-      };
+    'type': type,
+    'name': name,
+    'selector': selector,
+    'asset': asset,
+  };
 }
